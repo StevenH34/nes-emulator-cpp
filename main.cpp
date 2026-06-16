@@ -1,6 +1,7 @@
-#include <iostream>
+#include "Emulator.h"
 
 int main() {
-    std::cout << "Hello, World" << "!\n";
+    nes::Emulator emulator;
+    nes::Emulator::Run();
     return 0;
 }
