@@ -10,14 +10,14 @@ add_executable(nes_emulator_cpp
         Cpu.cpp
         Cpu.h
         Bus.cpp
-        Bus.h
-        tests/Emulator_tests.cpp)
+        Bus.h)
 
 target_include_directories(nes_emulator_cpp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 enable_testing()
 
 add_executable(nes_emulator_tests
+        tests/test_main.cpp
         tests/Bus_tests.cpp
         tests/Cpu_tests.cpp
         tests/Emulator_tests.cpp
