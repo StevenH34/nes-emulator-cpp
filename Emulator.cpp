@@ -8,18 +8,18 @@
 
 namespace nes {
 
-Emulator::Emulator() : bus_(), cpu_(bus_) {}
-Emulator::~Emulator() = default;
+Emulator::Emulator(Bus& bus, Cpu& cpu) : bus_(bus), cpu_(cpu) {}
+
 void Emulator::Run() {
     std::puts("Hello, World");
 }
 
 void Emulator::Step() {
     // Ticks the CPU forward
-    auto cycles = Cpu::Step();
+    auto cycles = cpu_.Step();
 }
 
-void Emulator::LoadProgram(const std::vector<std::uint8_t> &program, const std::uint16_t start_address) const {
+void Emulator::LoadProgram(const std::vector<std::uint8_t> &program, const std::uint16_t start_address) {
     auto address = start_address;
 
     for (const auto byte : program) {
@@ -27,4 +27,5 @@ void Emulator::LoadProgram(const std::vector<std::uint8_t> &program, const std::
         ++address;
     }
 }
+
 } // nes

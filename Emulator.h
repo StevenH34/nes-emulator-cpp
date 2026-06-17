@@ -14,17 +14,23 @@ namespace nes {
 
 class Emulator {
 public:
-    Emulator();
-    ~Emulator();
-    static void Run();
-    static void Step();
+    explicit Emulator(Bus& bus, Cpu& cpu);
+    ~Emulator() = default;
+    // Disable copy and move operations
+    Emulator(const Emulator&) = delete;
+    Emulator& operator=(const Emulator&) = delete;
+    Emulator(Emulator&&) = delete;
+    Emulator& operator=(Emulator&&) = delete;
+
+    void Run();
+    void Step();
+    
     // For loading test programs
-    void LoadProgram(const std::vector<std::uint8_t>& program,
-        const std::uint16_t start_address = Bus::RAM_START) const;
+    void LoadProgram(const std::vector<std::uint8_t>& program, std::uint16_t start_address = 0x0000);
 
 private:
-    Bus bus_;
-    Cpu cpu_;
+    Bus& bus_;
+    Cpu& cpu_;
 };
 
 } // nes

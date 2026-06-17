@@ -10,18 +10,20 @@ namespace nes {
 
 Cpu::Cpu(Bus& bus) : bus_(bus) {}
 
-void Cpu::Debugging() {
+// Not a good long-term place to put this
+void Cpu::PrintDebugging() {
     std::println("A={:02X}, X={:02X}, Y={:02X}, SP={:02X}, PC={:04X} [{}]",
     Cpu::accumulator_, Cpu::x_register_, Cpu::y_register_,
-         Cpu::stack_pointer_, Cpu::program_counter_, StatusString());
+        Cpu::stack_pointer_, Cpu::program_counter_, StatusString());
 }
 
-constexpr bool bit(const std::uint8_t value, const int n)
+// Should be static or in an anonymous namespace
+inline constexpr bool bit(const std::uint8_t value, const int n)
 {
     return (value >> n) & 1;
 }
 
-std::string Cpu::StatusString() {
+std::string Cpu::StatusString() const {
     auto s = status_register_;
     std::string output;
     output.reserve(8);
@@ -36,14 +38,6 @@ std::string Cpu::StatusString() {
     output += (bit(s, 0) ? 'C' : 'c');
 
     return output;
-}
-
-uint8_t Cpu::Read(const uint16_t address) {
-    return nes::Bus::Read(address);
-};
-
-void Cpu::Write(const uint16_t address, const uint8_t value) {
-    nes::Bus::Write(address, value);
 }
 
 int Cpu::Step() {
@@ -61,7 +55,7 @@ int Cpu::Step() {
             throw std::runtime_error("Invalid opcode");
     }
     // Return number of cycles
-    return Opcodes::CYCLES.at(opcode);
+    return Opcodes::CYCLES[opcode];
 }
 
 // Reads byte at the current Program Counter, then increments Program Counter
@@ -71,8 +65,16 @@ std::uint8_t Cpu::FetchByte() {
     return value;
 }
 
-std::uint8_t Cpu::ReadByte(const std::uint16_t address) {
-    return Bus::Read(address);
+std::uint8_t Cpu::ReadByte(const std::uint16_t address) const {
+    return bus_.ReadCpu(address);
+}
+
+void Cpu::WriteByte(std::uint16_t address, std::uint8_t value) {
+    bus_.WriteCpu(address, value);
+}
+
+std::uint8_t Cpu::XRegister() const {
+    return x_register_;
 }
 
 void Cpu::Lda(const std::uint8_t value) {
@@ -87,12 +89,13 @@ void Cpu::LdaImmediate() {
 }
 
 void Cpu::Inx() {
-    accumulator_ += 1;
-    Cpu::SetZFlag(accumulator_);
-    Cpu::SetNFlag(accumulator_);
+    x_register_ += 1;
+    Cpu::SetZFlag(x_register_);
+    Cpu::SetNFlag(x_register_);
 }
 
-void Cpu::SetFlag(const std::uint8_t mask, const bool is_on) {
+void Cpu::SetFlag(const StatusFlag flag, const bool is_on) {
+    const auto mask = static_cast<std::uint8_t>(flag);
     if (is_on) {
         // Use OR to turn the bit on.
         status_register_ |= mask;
@@ -105,14 +108,11 @@ void Cpu::SetFlag(const std::uint8_t mask, const bool is_on) {
 // Turns the Zero Flag on when the Most Significant Bit (bit 7) is 1.
 // This means the number is negative in two's complement.
 void Cpu::SetZFlag(const std::uint8_t register_value) {
-    const auto is_zero = register_value == 0;
-    SetFlag(Cpu::FLAG_Z, is_zero);
+    SetFlag(StatusFlag::Z, register_value == 0);
 }
 
 void Cpu::SetNFlag(const std::uint8_t register_value) {
-    const auto seventh_bit = (register_value >> 7) & 1; // Most Significant Bit
-    const auto is_on = seventh_bit == 1;
-    SetFlag(Cpu::FLAG_N, is_on);
+    SetFlag(StatusFlag::N, ((register_value >> 7) & 1) == 1); // Most Significant Bit
 };
 
 } // nes

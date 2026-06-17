@@ -5,15 +5,15 @@
 
 namespace {
 
-void ResetStatusRegister() {
-    nes::Cpu::SetFlag(0x01, false);
-    nes::Cpu::SetFlag(0x02, false);
-    nes::Cpu::SetFlag(0x04, true);
-    nes::Cpu::SetFlag(0x08, false);
-    nes::Cpu::SetFlag(0x10, false);
-    nes::Cpu::SetFlag(0x20, true);
-    nes::Cpu::SetFlag(0x40, false);
-    nes::Cpu::SetFlag(0x80, false);
+void ResetStatusRegister(nes::Cpu& cpu) {
+    cpu.SetFlag(nes::Cpu::StatusFlag::C, false);
+    cpu.SetFlag(nes::Cpu::StatusFlag::Z, false);
+    cpu.SetFlag(nes::Cpu::StatusFlag::I, true);
+    cpu.SetFlag(nes::Cpu::StatusFlag::D, false);
+    cpu.SetFlag(nes::Cpu::StatusFlag::B, false);
+    cpu.SetFlag(nes::Cpu::StatusFlag::U, true);
+    cpu.SetFlag(nes::Cpu::StatusFlag::V, false);
+    cpu.SetFlag(nes::Cpu::StatusFlag::N, false);
 }
 
 } // namespace
@@ -22,9 +22,9 @@ TEST_CASE("Cpu status string starts in the expected reset state") {
     nes::Bus bus;
     nes::Cpu cpu(bus);
 
-    ResetStatusRegister();
+    ResetStatusRegister(cpu);
 
-    CHECK(nes::Cpu::StatusString() == "nvUbdIzc");
+    CHECK(cpu.StatusString() == "nvUbdIzc");
     (void)cpu;
 }
 
@@ -32,18 +32,18 @@ TEST_CASE("Cpu flag helpers update the status register") {
     nes::Bus bus;
     nes::Cpu cpu(bus);
 
-    ResetStatusRegister();
+    ResetStatusRegister(cpu);
 
-    CHECK(nes::Cpu::StatusString() == "nvUbdIzc");
+    CHECK(cpu.StatusString() == "nvUbdIzc");
 
-    nes::Cpu::SetZFlag(0x00);
-    CHECK(nes::Cpu::StatusString() == "nvUbdIZc");
+    cpu.SetZFlag(0x00);
+    CHECK(cpu.StatusString() == "nvUbdIZc");
 
-    nes::Cpu::SetNFlag(0x80);
-    CHECK(nes::Cpu::StatusString() == "NvUbdIZc");
+    cpu.SetNFlag(0x80);
+    CHECK(cpu.StatusString() == "NvUbdIZc");
 
-    nes::Cpu::SetFlag(0x02, false);
-    CHECK(nes::Cpu::StatusString() == "NvUbdIzc");
+    cpu.SetFlag(nes::Cpu::StatusFlag::Z, false);
+    CHECK(cpu.StatusString() == "NvUbdIzc");
 
     (void)cpu;
 }
