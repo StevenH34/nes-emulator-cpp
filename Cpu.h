@@ -27,9 +27,25 @@ public:
     [[nodiscard]] std::uint8_t GetXRegister() const { return x_register_;};
     [[nodiscard]] std::uint8_t GetStatusRegister() const { return status_register_; }
 
-    // Addressing Modes
+    // Test helpers for driving register state directly
+    void SetXRegister(const std::uint8_t value) { x_register_ = value; }
+    void SetYRegister(const std::uint8_t value) { y_register_ = value; }
+
+    /// Addressing Modes
+    // Zero Page is an 8-bit address in the first 256 bytes of memory
     std::uint16_t AddressZeroPage();
+    std::uint16_t AddressZeroPageX();
+    std::uint16_t AddressZeroPageY();
+    // A full 16-bit address
     std::uint16_t AddressAbsolute();
+    std::uint16_t AddressAbsoluteX();
+    std::uint16_t AddressAbsoluteY();
+    std::uint16_t AddressRelative();
+    // Indirect addressing is used for JMP (Jump) instructions.
+    // It reads a 16-bit address from the instruction, this address is the final destination of the jump.
+    std::uint16_t AddressIndirect();
+    std::uint16_t AddressIndirectX();
+    std::uint16_t AddressIndirectY();
 
     // STA Instructions
     void StaZeroPage();
@@ -42,7 +58,7 @@ public:
     // Register Increment Instructions
     void Inx();
 
-    // Flag Masks (N V U B D I Z C)
+    /// Flag Masks (N V U B D I Z C)
     // Flags are bits in the Status register.
     // The flags need to flip on or off.
     // Flags are used as a mask to cover up bits we don't want.
@@ -57,7 +73,7 @@ public:
         N = 0x80  // Negative
     };
 
-    // Flag instructions
+    /// Flag instructions
     void SetFlag(StatusFlag flag, bool is_on);
     void SetZFlag(std::uint8_t register_value);
     void SetNFlag(std::uint8_t register_value);
