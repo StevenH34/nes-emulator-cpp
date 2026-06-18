@@ -13,8 +13,8 @@ Cpu::Cpu(Bus& bus) : bus_(bus) {}
 // Not a good long-term place to put this
 void Cpu::PrintDebugging() {
     std::println("A={:02X}, X={:02X}, Y={:02X}, SP={:02X}, PC={:04X} [{}]",
-    Cpu::accumulator_, Cpu::x_register_, Cpu::y_register_,
-        Cpu::stack_pointer_, Cpu::program_counter_, StatusString());
+    accumulator_, x_register_, y_register_,
+        stack_pointer_, program_counter_, StatusString());
 }
 
 // Should be static or in an anonymous namespace
@@ -42,14 +42,20 @@ std::string Cpu::StatusString() const {
 
 int Cpu::Step() {
     // Get the opcode
-    const auto opcode = Cpu::FetchByte();
+    const auto opcode = FetchByte();
     // Execute opcode
     switch (opcode) {
         case Opcodes::LDA_IMMEDIATE:
-            Cpu::LdaImmediate();
+            LdaImmediate();
+            break;
+        case Opcodes::STA_ZERO_PAGE:
+            StaZeroPage();
+            break;
+        case Opcodes::STA_ABSOLUTE:
+            StaAbsolute();
             break;
         case Opcodes::INX:
-            Cpu::Inx();
+            Inx();
             break;
         default:
             throw std::runtime_error("Invalid opcode");
@@ -69,31 +75,56 @@ std::uint8_t Cpu::ReadByte(const std::uint16_t address) const {
     return bus_.ReadCpu(address);
 }
 
-void Cpu::WriteByte(std::uint16_t address, std::uint8_t value) {
+void Cpu::WriteByte(const std::uint16_t address, const std::uint8_t value) {
     bus_.WriteCpu(address, value);
 }
 
-std::uint8_t Cpu::XRegister() const {
-    return x_register_;
+/// Addressing Modes
+// Read a byte and convert it to a 16-bit address
+std::uint16_t Cpu::AddressZeroPage() {
+    return FetchByte();
 }
 
+// Read two bytes then combine them
+std::uint16_t Cpu::AddressAbsolute() {
+    const auto low_byte = FetchByte();
+    const auto high_byte = FetchByte();
+    // Move high_byte because of little endian
+    return static_cast<uint16_t>((high_byte << 8) | low_byte);
+}
+
+/// STA Instructions
+// STA does not affect any flags
+void Cpu::StaZeroPage() {
+    const auto address = AddressZeroPage();
+    WriteByte(address, accumulator_);
+}
+
+void Cpu::StaAbsolute() {
+    const auto address = AddressAbsolute();
+    WriteByte(address, accumulator_);
+}
+
+/// LDA Instructions
 void Cpu::Lda(const std::uint8_t value) {
     accumulator_ = value;
-    Cpu::SetZFlag(accumulator_);
-    Cpu::SetNFlag(accumulator_);
+    SetZFlag(accumulator_);
+    SetNFlag(accumulator_);
 }
 
 void Cpu::LdaImmediate() {
-    const auto value = Cpu::FetchByte();
-    Cpu::Lda(value);
+    const auto value = FetchByte();
+    Lda(value);
 }
 
+/// Increment Register
 void Cpu::Inx() {
     x_register_ += 1;
-    Cpu::SetZFlag(x_register_);
-    Cpu::SetNFlag(x_register_);
+    SetZFlag(x_register_);
+    SetNFlag(x_register_);
 }
 
+/// Flag instructions
 void Cpu::SetFlag(const StatusFlag flag, const bool is_on) {
     const auto mask = static_cast<std::uint8_t>(flag);
     if (is_on) {
