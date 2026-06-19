@@ -26,6 +26,7 @@ public:
 
     [[nodiscard]] std::uint8_t GetAccumulator() const { return accumulator_; }
     [[nodiscard]] std::uint8_t GetXRegister() const { return x_register_;};
+    [[nodiscard]] std::uint8_t GetYRegister() const { return y_register_; }
     [[nodiscard]] std::uint8_t GetStatusRegister() const { return status_register_; }
 
     // Test helpers for driving register state directly
@@ -48,11 +49,11 @@ public:
     std::uint16_t AddressIndirectX();
     std::uint16_t AddressIndirectY();
 
-    // STA Instructions
+    /// STA Instructions
     void StaZeroPage();
     void StaAbsolute();
 
-    // LDA Instructions
+    /// LDA Instructions
     void Lda(std::uint8_t value);
     void LdaImmediate();
     void LdaZeroPage();
@@ -63,7 +64,7 @@ public:
     void LdaIndirectX();
     void LdaIndirectY();
 
-    // LDX Instructions
+    /// LDX Instructions
     void Ldx(std::uint8_t value);
     void LdxImmediate();
     void LdxZeroPage();
@@ -71,13 +72,13 @@ public:
     void LdxAbsolute();
     void LdxAbsoluteY();
 
-    // LDY Instructions
-    // void Ldy(std::uint8_t value);
-    // void LdyImmediate();
-    // void LdyZeroPage();
-    // void LdyZeroPageX();
-    // void LdyAbsolute();
-    // void LdyAbsoluteX();
+    /// LDY Instructions
+    void Ldy(std::uint8_t value);
+    void LdyImmediate();
+    void LdyZeroPage();
+    void LdyZeroPageX();
+    void LdyAbsolute();
+    void LdyAbsoluteX();
 
 
 

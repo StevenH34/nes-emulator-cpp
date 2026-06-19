@@ -259,6 +259,40 @@ void Cpu::LdxAbsoluteY() {
     Ldx(value);
 }
 
+/// LDY Instructions
+void Cpu::Ldy(const std::uint8_t value) {
+    y_register_ = value;
+    SetZFlag(y_register_);
+    SetNFlag(y_register_);
+}
+
+void Cpu::LdyImmediate() {
+    const auto value = FetchByte();
+    Ldy(value);
+}
+void Cpu::LdyZeroPage() {
+    const auto address = AddressZeroPage();
+    const auto value = ReadByte(address);
+    Ldy(value);
+}
+
+void Cpu::LdyZeroPageX() {
+    const auto address = AddressZeroPageX();
+    const auto value = ReadByte(address);
+    Ldy(value);
+}
+void Cpu::LdyAbsolute() {
+    const auto address = AddressAbsolute();
+    const auto value = ReadByte(address);
+    Ldy(value);
+}
+
+void Cpu::LdyAbsoluteX() {
+    const auto address = AddressAbsoluteX();
+    const auto value = ReadByte(address);
+    Ldy(value);
+}
+
 /// Increment Register
 void Cpu::Inx() {
     x_register_ += 1;
