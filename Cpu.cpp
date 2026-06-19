@@ -164,8 +164,33 @@ void Cpu::StaZeroPage() {
     WriteByte(address, accumulator_);
 }
 
+void Cpu::StaZeroPageX() {
+    const auto address = AddressZeroPageX();
+    WriteByte(address, accumulator_);
+}
+
 void Cpu::StaAbsolute() {
     const auto address = AddressAbsolute();
+    WriteByte(address, accumulator_);
+}
+
+void Cpu::StaAbsoluteX() {
+    const auto address = AddressAbsoluteX();
+    WriteByte(address, accumulator_);
+}
+
+void Cpu::StaAbsoluteY() {
+    const auto address = AddressAbsoluteY();
+    WriteByte(address, accumulator_);
+}
+
+void Cpu::StaIndirectX() {
+    const auto address = AddressIndirectX();
+    WriteByte(address, accumulator_);
+}
+
+void Cpu::StaIndirectY() {
+    const auto address = AddressIndirectY();
     WriteByte(address, accumulator_);
 }
 

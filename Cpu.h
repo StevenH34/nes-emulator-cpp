@@ -51,7 +51,12 @@ public:
 
     /// STA Instructions
     void StaZeroPage();
+    void StaZeroPageX();
     void StaAbsolute();
+    void StaAbsoluteX();
+    void StaAbsoluteY();
+    void StaIndirectX();
+    void StaIndirectY();
 
     /// LDA Instructions
     void Lda(std::uint8_t value);
