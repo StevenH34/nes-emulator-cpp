@@ -45,22 +45,113 @@ int Cpu::Step() {
     const auto opcode = FetchByte();
     // Execute opcode
     switch (opcode) {
+        // LDA
         case Opcodes::LDA_IMMEDIATE:
             LdaImmediate();
             break;
+        case Opcodes::LDA_ZERO_PAGE:
+            LdaZeroPage();
+            break;
+        case Opcodes::LDA_ZERO_PAGE_X:
+            LdaZeroPageX();
+            break;
+        case Opcodes::LDA_ABSOLUTE:
+            LdaAbsolute();
+            break;
+        case Opcodes::LDA_ABSOLUTE_X:
+            LdaAbsoluteX();
+            break;
+        case Opcodes::LDA_ABSOLUTE_Y:
+            LdaAbsoluteY();
+            break;
+        case Opcodes::LDA_INDIRECT_X:
+            LdaIndirectX();
+            break;
+        case Opcodes::LDA_INDIRECT_Y:
+            LdaIndirectY();
+            break;
+        // LDX
+        case Opcodes::LDX_IMMEDIATE:
+            LdxImmediate();
+            break;
+        case Opcodes::LDX_ZERO_PAGE:
+            LdxZeroPage();
+            break;
+        case Opcodes::LDX_ZERO_PAGE_Y:
+            LdxZeroPageY();
+            break;
+        case Opcodes::LDX_ABSOLUTE:
+            LdxAbsolute();
+            break;
+        case Opcodes::LDX_ABSOLUTE_Y:
+            LdxAbsoluteY();
+            break;
+        // LDY
+        case Opcodes::LDY_IMMEDIATE:
+            LdyImmediate();
+            break;
+        case Opcodes::LDY_ZERO_PAGE:
+            LdyZeroPage();
+            break;
+        case Opcodes::LDY_ZERO_PAGE_X:
+            LdyZeroPageX();
+            break;
+        case Opcodes::LDY_ABSOLUTE:
+            LdyAbsolute();
+            break;
+        case Opcodes::LDY_ABSOLUTE_X:
+            LdyAbsoluteX();
+            break;
+        // STA
         case Opcodes::STA_ZERO_PAGE:
             StaZeroPage();
+            break;
+        case Opcodes::STA_ZERO_PAGE_X:
+            StaZeroPageX();
             break;
         case Opcodes::STA_ABSOLUTE:
             StaAbsolute();
             break;
+        case Opcodes::STA_ABSOLUTE_X:
+            StaAbsoluteX();
+            break;
+        case Opcodes::STA_ABSOLUTE_Y:
+            StaAbsoluteY();
+            break;
+        case Opcodes::STA_INDIRECT_X:
+            StaIndirectX();
+            break;
+        case Opcodes::STA_INDIRECT_Y:
+            StaIndirectY();
+            break;
+        // STX
+        case Opcodes::STX_ZERO_PAGE:
+            StxZeroPage();
+            break;
+        case Opcodes::STX_ZERO_PAGE_Y:
+            StxZeroPageY();
+            break;
+        case Opcodes::STX_ABSOLUTE:
+            StxAbsolute();
+            break;
+        // STY
+        case Opcodes::STY_ZERO_PAGE:
+            StyZeroPage();
+            break;
+        case Opcodes::STY_ZERO_PAGE_X:
+            StyZeroPageX();
+            break;
+        case Opcodes::STY_ABSOLUTE:
+            StyAbsolute();
+            break;
+        // Register Increments
         case Opcodes::INX:
             Inx();
             break;
-        default:
+        default: //TODO: Figure out a good way to deal with unsupported Opcodes
             throw std::runtime_error("Invalid opcode");
     }
-    // Return number of cycles
+
     return Opcodes::CYCLES[opcode];
 }
 
