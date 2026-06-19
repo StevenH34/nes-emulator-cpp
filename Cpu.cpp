@@ -335,9 +335,20 @@ void Cpu::StxAbsolute() {
 }
 
 /// STY Instructions
-// void Cpu::StyZeroPage() {}
-// void Cpu::StyZeroPageX() {}
-// void Cpu::StyAbsolute() {}
+void Cpu::StyZeroPage() {
+    const auto address = AddressZeroPage();
+    WriteByte(address, y_register_);
+}
+
+void Cpu::StyZeroPageX() {
+    const auto address = AddressZeroPageX();
+    WriteByte(address, y_register_);
+}
+
+void Cpu::StyAbsolute() {
+    const auto address = AddressAbsolute();
+    WriteByte(address, y_register_);
+}
 
 /// Increment Register
 void Cpu::Inx() {

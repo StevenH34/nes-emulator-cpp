@@ -91,9 +91,9 @@ public:
     void StxAbsolute();
 
     /// STY Instructions
-    // void StyZeroPage();
-    // void StyZeroPageX();
-    // void StyAbsolute();
+    void StyZeroPage();
+    void StyZeroPageX();
+    void StyAbsolute();
 
     // Register Increment Instructions
     void Inx();
