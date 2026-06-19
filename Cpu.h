@@ -24,6 +24,7 @@ public:
     [[nodiscard]] std::uint8_t ReadByte(std::uint16_t address) const;
     void WriteByte(std::uint16_t address, std::uint8_t value);
 
+    [[nodiscard]] std::uint8_t GetAccumulator() const { return accumulator_; }
     [[nodiscard]] std::uint8_t GetXRegister() const { return x_register_;};
     [[nodiscard]] std::uint8_t GetStatusRegister() const { return status_register_; }
 
@@ -54,6 +55,31 @@ public:
     // LDA Instructions
     void Lda(std::uint8_t value);
     void LdaImmediate();
+    void LdaZeroPage();
+    void LdaZeroPageX();
+    void LdaAbsolute();
+    void LdaAbsoluteX();
+    void LdaAbsoluteY();
+    void LdaIndirectX();
+    void LdaIndirectY();
+
+    // LDX Instructions
+    // void Ldx(std::uint8_t value);
+    // void LdxImmediate();
+    // void LdxZeroPage();
+    // void LdxZeroPageY();
+    // void LdxAbsolute();
+    // void LdxAbsoluteY();
+
+    // LDY Instructions
+    // void Ldy(std::uint8_t value);
+    // void LdyImmediate();
+    // void LdyZeroPage();
+    // void LdyZeroPageX();
+    // void LdyAbsolute();
+    // void LdyAbsoluteX();
+
+
 
     // Register Increment Instructions
     void Inx();

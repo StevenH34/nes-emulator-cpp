@@ -181,6 +181,48 @@ void Cpu::LdaImmediate() {
     Lda(value);
 }
 
+void Cpu::LdaZeroPage() {
+    const auto address = AddressZeroPage();
+    const auto value = ReadByte(address);
+    Lda(value);
+}
+
+void Cpu::LdaZeroPageX() {
+    const auto address = AddressZeroPageX();
+    const auto value = ReadByte(address);
+    Lda(value);
+}
+
+void Cpu::LdaAbsolute() {
+    const auto address = AddressAbsolute();
+    const auto value = ReadByte(address);
+    Lda(value);
+}
+
+void Cpu::LdaAbsoluteX() {
+    const auto address = AddressAbsoluteX();
+    const auto value = ReadByte(address);
+    Lda(value);
+}
+
+void Cpu::LdaAbsoluteY() {
+    const auto address = AddressAbsoluteY();
+    const auto value = ReadByte(address);
+    Lda(value);
+}
+
+void Cpu::LdaIndirectX() {
+    const auto address = AddressIndirectX();
+    const auto value = ReadByte(address);
+    Lda(value);
+}
+
+void Cpu::LdaIndirectY() {
+    const auto address = AddressIndirectY();
+    const auto value = ReadByte(address);
+    Lda(value);
+}
+
 /// Increment Register
 void Cpu::Inx() {
     x_register_ += 1;
