@@ -223,6 +223,42 @@ void Cpu::LdaIndirectY() {
     Lda(value);
 }
 
+/// LDX Instructions
+void Cpu::Ldx(const std::uint8_t value) {
+    x_register_ = value;
+    SetZFlag(x_register_);
+    SetNFlag(x_register_);
+}
+
+void Cpu::LdxImmediate() {
+    const auto value = FetchByte();
+    Ldx(value);
+}
+
+void Cpu::LdxZeroPage() {
+    const auto address = AddressZeroPage();
+    const auto value = ReadByte(address);
+    Ldx(value);
+}
+
+void Cpu::LdxZeroPageY() {
+    const auto address = AddressZeroPageY();
+    const auto value = ReadByte(address);
+    Ldx(value);
+}
+
+void Cpu::LdxAbsolute() {
+    const auto address = AddressAbsolute();
+    const auto value = ReadByte(address);
+    Ldx(value);
+}
+
+void Cpu::LdxAbsoluteY() {
+    const auto address = AddressAbsoluteY();
+    const auto value = ReadByte(address);
+    Ldx(value);
+}
+
 /// Increment Register
 void Cpu::Inx() {
     x_register_ += 1;

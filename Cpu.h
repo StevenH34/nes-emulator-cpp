@@ -64,12 +64,12 @@ public:
     void LdaIndirectY();
 
     // LDX Instructions
-    // void Ldx(std::uint8_t value);
-    // void LdxImmediate();
-    // void LdxZeroPage();
-    // void LdxZeroPageY();
-    // void LdxAbsolute();
-    // void LdxAbsoluteY();
+    void Ldx(std::uint8_t value);
+    void LdxImmediate();
+    void LdxZeroPage();
+    void LdxZeroPageY();
+    void LdxAbsolute();
+    void LdxAbsoluteY();
 
     // LDY Instructions
     // void Ldy(std::uint8_t value);

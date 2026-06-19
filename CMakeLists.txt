@@ -27,7 +27,8 @@ add_executable(nes_emulator_tests
         Emulator.cpp
         tests/sta_tests.cpp
         tests/AddressingMode_tests.cpp
-        tests/lda_tests.cpp)
+        tests/lda_tests.cpp
+        tests/ldx_tests.cpp)
 
 target_include_directories(nes_emulator_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
