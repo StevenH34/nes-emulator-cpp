@@ -129,23 +129,96 @@ private:
     std::uint8_t status_register_ = 0x24; // Status Register (flags)
     std::uint16_t program_counter_ = 0;   // Program Counter
 
-    // There's probably a better way to do this
-    // CPU OpCodes
+    // Maybe I should move this
+    /// CPU OpCodes
     struct Opcodes {
-        // LDA
-        static constexpr std::uint8_t LDA_IMMEDIATE = 0xa9;
-        // STA
+        /// LDA Opcodes
+        static constexpr std::uint8_t LDA_IMMEDIATE = 0xA9;
+        static constexpr std::uint8_t LDA_ZERO_PAGE = 0xA5;
+        static constexpr std::uint8_t LDA_ZERO_PAGE_X = 0xB5;
+        static constexpr std::uint8_t LDA_ABSOLUTE = 0xAD;
+        static constexpr std::uint8_t LDA_ABSOLUTE_X = 0xBD;
+        static constexpr std::uint8_t LDA_ABSOLUTE_Y = 0xB9;
+        static constexpr std::uint8_t LDA_INDIRECT_X = 0xA1;
+        static constexpr std::uint8_t LDA_INDIRECT_Y = 0xB1;
+
+        /// LDX Opcodes
+        static constexpr std::uint8_t LDX_IMMEDIATE = 0xA2;
+        static constexpr std::uint8_t LDX_ZERO_PAGE = 0xA6;
+        static constexpr std::uint8_t LDX_ZERO_PAGE_Y = 0xB6;
+        static constexpr std::uint8_t LDX_ABSOLUTE = 0xAE;
+        static constexpr std::uint8_t LDX_ABSOLUTE_Y = 0xBE;
+
+        /// LDY Opcodes
+        static constexpr std::uint8_t LDY_IMMEDIATE = 0xA0;
+        static constexpr std::uint8_t LDY_ZERO_PAGE = 0xA4;
+        static constexpr std::uint8_t LDY_ZERO_PAGE_X = 0xB4;
+        static constexpr std::uint8_t LDY_ABSOLUTE = 0xAC;
+        static constexpr std::uint8_t LDY_ABSOLUTE_X = 0xBC;
+
+        /// STA Opcodes
         static constexpr std::uint8_t STA_ZERO_PAGE = 0x85;
-        static constexpr std::uint8_t STA_ABSOLUTE = 0x8d;
-        // Register Increments
+        static constexpr std::uint8_t STA_ZERO_PAGE_X = 0x95;
+        static constexpr std::uint8_t STA_ABSOLUTE = 0x8D;
+        static constexpr std::uint8_t STA_ABSOLUTE_X = 0x9D;
+        static constexpr std::uint8_t STA_ABSOLUTE_Y = 0x99;
+        static constexpr std::uint8_t STA_INDIRECT_X = 0x81;
+        static constexpr std::uint8_t STA_INDIRECT_Y = 0x91;
+
+        /// STX Opcodes
+        static constexpr std::uint8_t STX_ZERO_PAGE = 0x86;
+        static constexpr std::uint8_t STX_ZERO_PAGE_Y = 0x96;
+        static constexpr std::uint8_t STX_ABSOLUTE = 0x8E;
+
+        /// STY Opcodes
+        static constexpr std::uint8_t STY_ZERO_PAGE = 0x84;
+        static constexpr std::uint8_t STY_ZERO_PAGE_X = 0x94;
+        static constexpr std::uint8_t STY_ABSOLUTE = 0x8C;
+
+        /// Register Increments Opcode
         static constexpr std::uint8_t INX = 0xe8;
 
 
         inline static constexpr std::array<int, 256> CYCLES = [] {
             std::array<int, 256> cycles{};
+            // LDA Cycles
             cycles[LDA_IMMEDIATE] = 2;
+            cycles[LDA_ZERO_PAGE] = 3;
+            cycles[LDA_ZERO_PAGE_X] = 4;
+            cycles[LDA_ABSOLUTE] = 4;
+            cycles[LDA_ABSOLUTE_X] = 4;
+            cycles[LDA_ABSOLUTE_Y] = 4;
+            cycles[LDA_INDIRECT_X] = 6;
+            cycles[LDA_INDIRECT_Y] = 5;
+            // LDX Cycles
+            cycles[LDX_IMMEDIATE] = 2;
+            cycles[LDX_ZERO_PAGE] = 3;
+            cycles[LDX_ZERO_PAGE_Y] = 4;
+            cycles[LDX_ABSOLUTE] = 4;
+            cycles[LDX_ABSOLUTE_Y] = 4;
+            // LDY Cycles
+            cycles[LDY_IMMEDIATE] = 2;
+            cycles[LDY_ZERO_PAGE] = 3;
+            cycles[LDY_ZERO_PAGE_X] = 4;
+            cycles[LDY_ABSOLUTE] = 4;
+            cycles[LDY_ABSOLUTE_X] = 4;
+            // STA Cycles
             cycles[STA_ZERO_PAGE] = 3;
+            cycles[STA_ZERO_PAGE_X] = 4;
             cycles[STA_ABSOLUTE] = 4;
+            cycles[STA_ABSOLUTE_X] = 5;
+            cycles[STA_ABSOLUTE_Y] = 5;
+            cycles[STA_INDIRECT_X] = 6;
+            cycles[STA_INDIRECT_Y] = 6;
+            // STX Cycles
+            cycles[STX_ZERO_PAGE] = 3;
+            cycles[STX_ZERO_PAGE_Y] = 4;
+            cycles[STX_ABSOLUTE] = 4;
+            // STY Cycles
+            cycles[STY_ZERO_PAGE] = 3;
+            cycles[STY_ZERO_PAGE_X] = 4;
+            cycles[STY_ABSOLUTE] = 4;
+            // Register Increments Cycles
             cycles[INX] = 2;
             return cycles;
         }();
