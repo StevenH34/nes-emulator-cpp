@@ -318,6 +318,27 @@ void Cpu::LdyAbsoluteX() {
     Ldy(value);
 }
 
+/// STX Instructions
+void Cpu::StxZeroPage() {
+    const auto address = AddressZeroPage();
+    WriteByte(address, x_register_);
+}
+
+void Cpu::StxZeroPageY() {
+    const auto address = AddressZeroPageY();
+    WriteByte(address, x_register_);
+}
+
+void Cpu::StxAbsolute() {
+    const auto address = AddressAbsolute();
+    WriteByte(address, x_register_);
+}
+
+/// STY Instructions
+// void Cpu::StyZeroPage() {}
+// void Cpu::StyZeroPageX() {}
+// void Cpu::StyAbsolute() {}
+
 /// Increment Register
 void Cpu::Inx() {
     x_register_ += 1;

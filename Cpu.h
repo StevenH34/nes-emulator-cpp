@@ -85,7 +85,15 @@ public:
     void LdyAbsolute();
     void LdyAbsoluteX();
 
+    /// STX Instructions
+    void StxZeroPage();
+    void StxZeroPageY();
+    void StxAbsolute();
 
+    /// STY Instructions
+    // void StyZeroPage();
+    // void StyZeroPageX();
+    // void StyAbsolute();
 
     // Register Increment Instructions
     void Inx();
