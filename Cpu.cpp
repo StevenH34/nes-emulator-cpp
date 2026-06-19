@@ -10,17 +10,10 @@ namespace nes {
 
 Cpu::Cpu(Bus& bus) : bus_(bus) {}
 
-// Not a good long-term place to put this
 void Cpu::PrintDebugging() {
     std::println("A={:02X}, X={:02X}, Y={:02X}, SP={:02X}, PC={:04X} [{}]",
     accumulator_, x_register_, y_register_,
         stack_pointer_, program_counter_, StatusString());
-}
-
-// Should be static or in an anonymous namespace
-inline constexpr bool bit(const std::uint8_t value, const int n)
-{
-    return (value >> n) & 1;
 }
 
 std::string Cpu::StatusString() const {
@@ -28,14 +21,14 @@ std::string Cpu::StatusString() const {
     std::string output;
     output.reserve(8);
 
-    output += (bit(s, 7) ? 'N' : 'n');
-    output += (bit(s, 6) ? 'V' : 'v');
-    output += (bit(s, 5) ? 'U' : 'u');
-    output += (bit(s, 4) ? 'B' : 'b');
-    output += (bit(s, 3) ? 'D' : 'd');
-    output += (bit(s, 2) ? 'I' : 'i');
-    output += (bit(s, 1) ? 'Z' : 'z');
-    output += (bit(s, 0) ? 'C' : 'c');
+    output += s >> 7 & 1 ? 'N' : 'n';
+    output += s >> 6 & 1 ? 'V' : 'v';
+    output += s >> 5 & 1 ? 'U' : 'u';
+    output += s >> 4 & 1 ? 'B' : 'b';
+    output += s >> 3 & 1 ? 'D' : 'd';
+    output += s >> 2 & 1 ? 'I' : 'i';
+    output += s >> 1 & 1 ? 'Z' : 'z';
+    output += s >> 0 & 1 ? 'C' : 'c';
 
     return output;
 }
@@ -193,59 +186,59 @@ std::uint16_t Cpu::AddressAbsolute() {
     const auto low_byte = FetchByte();
     const auto high_byte = FetchByte();
     // Move high_byte because of little endian
-    return static_cast<uint16_t>(high_byte << 8 | low_byte);
+    return high_byte << 8 | low_byte;
 }
 
 // Absolute + X offset
 std::uint16_t Cpu::AddressAbsoluteX() {
-    return static_cast<std::uint16_t>(AddressAbsolute() + x_register_);
+    return AddressAbsolute() + x_register_;
 }
 
 // Absolute + Y offset
 std::uint16_t Cpu::AddressAbsoluteY() {
-    return static_cast<std::uint16_t>(AddressAbsolute() + y_register_);
+    return AddressAbsolute() + y_register_;
 }
 
 // Relative addressing is used for branch instructions.
 // It provides a signed offset (-128 to 127) to the current Program Counter.
 std::uint16_t Cpu::AddressRelative() {
     const auto offest  = static_cast<std::int8_t>(FetchByte());
-    return static_cast<std::uint16_t>(program_counter_ + offest);
+    return program_counter_ + offest;
 }
 
 // Indirect: JMP ($nnnn)
 // Reads a 16-bit address from the pointer location, then jumps to that address.
 std::uint16_t Cpu::AddressIndirect() {
-    const auto pointer_address = AddressAbsolute();
-    const auto low_byte = ReadByte(pointer_address);
+    const std::uint16_t pointer_address = AddressAbsolute();
+    const std::uint8_t low_byte = ReadByte(pointer_address);
 
     // Emulate the 6502-page-boundary bug
     const std::uint16_t high_byte_address = (pointer_address & 0xFF) == 0xFF
         ? pointer_address & 0xFF00 // Wrap around to the start of the page $xx00
         : pointer_address + 1;     // Normal case
 
-    const auto high_byte = ReadByte(high_byte_address);
-    return static_cast<std::uint16_t>(static_cast<uint16_t>(high_byte) << 8 | static_cast<uint16_t>(low_byte));
+    const std::uint8_t high_byte = ReadByte(high_byte_address);
+    return static_cast<uint16_t>(high_byte) << 8 | static_cast<uint16_t>(low_byte);
 }
 
 // Indexed Indirect: LDA ($nn,X)
 // Adds X to Zero-Page address, then reads a 16-bit pointer address
 std::uint16_t Cpu::AddressIndirectX() {
-    const auto base = FetchByte();
+    const std::uint8_t base = FetchByte();
     const auto pointer = static_cast<uint8_t>(base + x_register_);
-    const auto low_byte = ReadByte(pointer);
+    const std::uint8_t low_byte = ReadByte(pointer);
     // The high-byte pointer also wraps within the zero page
-    const auto high_byte = ReadByte(static_cast<std::uint8_t>(pointer + 1));
+    const std::uint8_t high_byte = ReadByte(static_cast<std::uint8_t>(pointer + 1));
     return static_cast<std::uint16_t>(high_byte << 8) | static_cast<uint16_t>(low_byte);
 }
 
 std::uint16_t Cpu::AddressIndirectY() {
-    const auto base = FetchByte();
-    const auto low_byte = ReadByte(base);
+    const std::uint8_t base = FetchByte();
+    const std::uint8_t low_byte = ReadByte(base);
     // The high-byte pointer wraps within the zero page
-    const auto high_byte = ReadByte(static_cast<std::uint8_t>(base + 1));
-    const auto addr = static_cast<std::uint16_t>(high_byte << 8) | static_cast<uint16_t>(low_byte);
-    return addr + static_cast<uint16_t>(y_register_);
+    const std::uint8_t high_byte = ReadByte(static_cast<std::uint8_t>(base + 1));
+    const std::uint16_t address = static_cast<std::uint16_t>(high_byte << 8) | static_cast<std::uint16_t>(low_byte);
+    return address + y_register_;
 }
 
 /// STA Instructions
@@ -467,7 +460,7 @@ void Cpu::SetZFlag(const std::uint8_t register_value) {
 }
 
 void Cpu::SetNFlag(const std::uint8_t register_value) {
-    SetFlag(StatusFlag::N, ((register_value >> 7) & 1) == 1); // Most Significant Bit
+    SetFlag(StatusFlag::N, (register_value >> 7 & 1) == 1); // Most Significant Bit
 };
 
 } // nes

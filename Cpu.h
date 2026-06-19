@@ -38,7 +38,6 @@ public:
     std::uint16_t AddressZeroPage();
     std::uint16_t AddressZeroPageX();
     std::uint16_t AddressZeroPageY();
-    // A full 16-bit address
     std::uint16_t AddressAbsolute();
     std::uint16_t AddressAbsoluteX();
     std::uint16_t AddressAbsoluteY();
@@ -95,7 +94,7 @@ public:
     void StyZeroPageX();
     void StyAbsolute();
 
-    // Register Increment Instructions
+    /// Register Increments Instruction
     void Inx();
 
     /// Flag Masks (N V U B D I Z C)
@@ -121,7 +120,7 @@ public:
 private:
     Bus& bus_;
 
-    // CPU Registers
+    /// CPU Registers
     std::uint8_t accumulator_ = 0;        // Accumulator
     std::uint8_t x_register_ = 0;         // X Register
     std::uint8_t y_register_ = 0;         // Y Register
@@ -129,7 +128,6 @@ private:
     std::uint8_t status_register_ = 0x24; // Status Register (flags)
     std::uint16_t program_counter_ = 0;   // Program Counter
 
-    // Maybe I should move this
     /// CPU OpCodes
     struct Opcodes {
         /// LDA Opcodes
@@ -179,7 +177,7 @@ private:
         static constexpr std::uint8_t INX = 0xe8;
 
 
-        inline static constexpr std::array<int, 256> CYCLES = [] {
+        static constexpr std::array<int, 256> CYCLES = [] {
             std::array<int, 256> cycles{};
             // LDA Cycles
             cycles[LDA_IMMEDIATE] = 2;
