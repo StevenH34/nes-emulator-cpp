@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "../Emulator.h"
+#include "../src/Emulator.h"
 
 TEST_CASE("Emulator::LoadProgram copies bytes into RAM") {
     nes::Bus bus;

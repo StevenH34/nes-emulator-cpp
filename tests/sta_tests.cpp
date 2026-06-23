@@ -2,9 +2,9 @@
 
 #include <vector>
 
-#include "../Bus.h"
-#include "../Cpu.h"
-#include "../Emulator.h"
+#include "../src/Bus.h"
+#include "../src/Cpu.h"
+#include "../src/Emulator.h"
 
 // TODO: Update tests once opcodes are implemented
 

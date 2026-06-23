@@ -1,7 +1,7 @@
 #include "../doctest.h"
 
-#include "../Bus.h"
-#include "../Cpu.h"
+#include "../src/Bus.h"
+#include "../src/Cpu.h"
 
 TEST_CASE("StyZeroPage writes the Y register to the zero page address") {
     nes::Bus bus;

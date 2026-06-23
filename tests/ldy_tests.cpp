@@ -1,7 +1,7 @@
 #include "../doctest.h"
 
-#include "../Bus.h"
-#include "../Cpu.h"
+#include "../src/Bus.h"
+#include "../src/Cpu.h"
 
 TEST_CASE("Ldy loads the Y register and updates the Zero and Negative flags") {
     nes::Bus bus;

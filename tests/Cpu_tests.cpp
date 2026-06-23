@@ -2,8 +2,8 @@
 
 #include <stdexcept>
 
-#include "../Bus.h"
-#include "../Cpu.h"
+#include "../src/Bus.h"
+#include "../src/Cpu.h"
 
 namespace {
 

@@ -1,7 +1,7 @@
 #include "../doctest.h"
 
-#include "../Bus.h"
-#include "../Cpu.h"
+#include "../src/Bus.h"
+#include "../src/Cpu.h"
 
 TEST_CASE("Beq branches when the Zero flag is set") {
     nes::Bus bus;

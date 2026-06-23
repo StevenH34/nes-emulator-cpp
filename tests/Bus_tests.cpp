@@ -1,6 +1,6 @@
 #include "../doctest.h"
 
-#include "../Bus.h"
+#include "../src/Bus.h"
 
 TEST_CASE("Bus RAM reads and writes are mirrored across the 2 KB window") {
     nes::Bus bus;
