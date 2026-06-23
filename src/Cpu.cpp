@@ -524,8 +524,21 @@ void Cpu::JmpIndirect() {
     program_counter_ = AddressIndirect();
 }
 
-/// Stack
+void Cpu::Jsr() {
+    // Read the destination address
+    const std::uint16_t target = AddressAbsolute();
+    // Push PC - 1 onto the stack
+    StackPushWord(program_counter_ - 1);
+    // Set PC to the destination address - the jump
+    program_counter_ = target;
+}
 
+void Cpu::Rts() {
+    // Pop return address from the stack and increment by 1
+    program_counter_ = StackPopWord() + 1;
+}
+
+/// Stack
 void Cpu::StackPushByte(const std::uint8_t value) {
     // Write current value at stack address then decrement stack pointer
     WriteByte(STACK_BASE_ | static_cast<std::uint16_t>(stack_pointer_), value);
@@ -546,7 +559,7 @@ void Cpu::StackPushWord(const std::uint16_t value) {
 std::uint16_t Cpu::StackPopWord() {
     const std::uint8_t low_byte = StackPopByte();
     const std::uint8_t high_byte = StackPopByte();
-    return static_cast<std::uint16_t>(high_byte << 8) | static_cast<std::uint16_t>(low_byte);
+    return high_byte << 8 | low_byte;
 }
 
 } // nes

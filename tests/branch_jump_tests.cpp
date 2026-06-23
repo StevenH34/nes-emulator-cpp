@@ -215,3 +215,42 @@ TEST_CASE("JmpIndirect reproduces the 6502 page-boundary bug") {
 
     CHECK(cpu.GetProgramCounter() == 0x0180);
 }
+
+TEST_CASE("Jsr pushes the return address and sets the Program Counter to the target") {
+    nes::Bus bus;
+    nes::Cpu cpu(bus);
+
+    bus.WriteCpu(0x00, 0x34); // low byte
+    bus.WriteCpu(0x01, 0x12); // high byte
+
+    cpu.Jsr();
+
+    CHECK(cpu.GetProgramCounter() == 0x1234);
+    CHECK(bus.ReadCpu(0x01FD) == 0x00); // high byte of PC - 1 (0x0001)
+    CHECK(bus.ReadCpu(0x01FC) == 0x01); // low byte of PC - 1 (0x0001)
+}
+
+TEST_CASE("Rts pops the return address from the stack and sets the Program Counter to address + 1") {
+    nes::Bus bus;
+    nes::Cpu cpu(bus);
+
+    cpu.StackPushWord(0x1233); // return address - 1, as Jsr would have pushed it
+
+    cpu.Rts();
+
+    CHECK(cpu.GetProgramCounter() == 0x1234);
+}
+
+TEST_CASE("Jsr followed by Rts returns to the instruction after the JSR operand") {
+    nes::Bus bus;
+    nes::Cpu cpu(bus);
+
+    bus.WriteCpu(0x00, 0x34); // low byte of subroutine address
+    bus.WriteCpu(0x01, 0x12); // high byte of subroutine address
+
+    cpu.Jsr();
+    CHECK(cpu.GetProgramCounter() == 0x1234);
+
+    cpu.Rts();
+    CHECK(cpu.GetProgramCounter() == 0x0002); // back to the instruction after JSR's operand
+}

@@ -135,6 +135,8 @@ public:
     /// Jump Instructions
     void JmpAbsolute();
     void JmpIndirect();
+    void Jsr(); // Jump to subroutine
+    void Rts(); // Return from subroutine
 
     /// Stack
     // Lives at Page 1: $0100 - $01FF
@@ -142,6 +144,8 @@ public:
     std::uint8_t StackPopByte();
     void StackPushWord(std::uint16_t value);
     std::uint16_t StackPopWord();
+
+
 
 private:
     Bus& bus_;
