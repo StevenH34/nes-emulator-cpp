@@ -524,4 +524,29 @@ void Cpu::JmpIndirect() {
     program_counter_ = AddressIndirect();
 }
 
+/// Stack
+
+void Cpu::StackPushByte(const std::uint8_t value) {
+    // Write current value at stack address then decrement stack pointer
+    WriteByte(STACK_BASE_ | static_cast<std::uint16_t>(stack_pointer_), value);
+    stack_pointer_ -= 1;
+}
+
+std::uint8_t Cpu::StackPopByte() {
+    // Decrements stack pointer then reads address
+    stack_pointer_ += 1;
+    return ReadByte(STACK_BASE_ | static_cast<std::uint16_t>(stack_pointer_));
+}
+
+void Cpu::StackPushWord(const std::uint16_t value) {
+    StackPushByte(static_cast<std::uint8_t>(value >> 8)); // High byte
+    StackPushByte(static_cast<std::uint8_t>(value & 0xFF)); // Low byte
+}
+
+std::uint16_t Cpu::StackPopWord() {
+    const std::uint8_t low_byte = StackPopByte();
+    const std::uint8_t high_byte = StackPopByte();
+    return static_cast<std::uint16_t>(high_byte << 8) | static_cast<std::uint16_t>(low_byte);
+}
+
 } // nes

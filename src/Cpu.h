@@ -136,8 +136,19 @@ public:
     void JmpAbsolute();
     void JmpIndirect();
 
+    /// Stack
+    // Lives at Page 1: $0100 - $01FF
+    void StackPushByte(std::uint8_t value);
+    std::uint8_t StackPopByte();
+    void StackPushWord(std::uint16_t value);
+    std::uint16_t StackPopWord();
+
 private:
     Bus& bus_;
+
+    /// Stack
+    std::uint16_t STACK_BASE_ = 0x0100;
+    std::uint8_t STACK_INIT_ = 0xFD;
 
     /// CPU Registers
     std::uint8_t accumulator_ = 0;        // Accumulator
