@@ -1,0 +1,217 @@
+#include "../doctest.h"
+
+#include "../Bus.h"
+#include "../Cpu.h"
+
+TEST_CASE("Beq branches when the Zero flag is set") {
+    nes::Bus bus;
+    nes::Cpu cpu(bus);
+
+    cpu.SetFlag(nes::Cpu::StatusFlag::Z, true);
+    bus.WriteCpu(0x00, 0x05); // offset = +5
+
+    cpu.Beq();
+
+    CHECK(cpu.GetProgramCounter() == 0x0006); // PC 0x0001 (after fetch) + 5
+}
+
+TEST_CASE("Beq does not branch but still consumes the offset byte when the Zero flag is clear") {
+    nes::Bus bus;
+    nes::Cpu cpu(bus);
+
+    cpu.SetFlag(nes::Cpu::StatusFlag::Z, false);
+    bus.WriteCpu(0x00, 0x05); // offset = +5, should be ignored
+
+    cpu.Beq();
+
+    CHECK(cpu.GetProgramCounter() == 0x0001); // only the offset byte was consumed
+}
+
+TEST_CASE("Bne branches when the Zero flag is clear") {
+    nes::Bus bus;
+    nes::Cpu cpu(bus);
+
+    cpu.SetFlag(nes::Cpu::StatusFlag::Z, false);
+    bus.WriteCpu(0x00, 0x05);
+
+    cpu.Bne();
+
+    CHECK(cpu.GetProgramCounter() == 0x0006);
+}
+
+TEST_CASE("Bne does not branch when the Zero flag is set") {
+    nes::Bus bus;
+    nes::Cpu cpu(bus);
+
+    cpu.SetFlag(nes::Cpu::StatusFlag::Z, true);
+    bus.WriteCpu(0x00, 0x05);
+
+    cpu.Bne();
+
+    CHECK(cpu.GetProgramCounter() == 0x0001);
+}
+
+TEST_CASE("Bcs branches when the Carry flag is set") {
+    nes::Bus bus;
+    nes::Cpu cpu(bus);
+
+    cpu.SetFlag(nes::Cpu::StatusFlag::C, true);
+    bus.WriteCpu(0x00, 0x10);
+
+    cpu.Bcs();
+
+    CHECK(cpu.GetProgramCounter() == 0x0011);
+}
+
+TEST_CASE("Bcc branches when the Carry flag is clear") {
+    nes::Bus bus;
+    nes::Cpu cpu(bus);
+
+    cpu.SetFlag(nes::Cpu::StatusFlag::C, false);
+    bus.WriteCpu(0x00, 0x10);
+
+    cpu.Bcc();
+
+    CHECK(cpu.GetProgramCounter() == 0x0011);
+}
+
+TEST_CASE("Bcc does not branch when the Carry flag is set") {
+    nes::Bus bus;
+    nes::Cpu cpu(bus);
+
+    cpu.SetFlag(nes::Cpu::StatusFlag::C, true);
+    bus.WriteCpu(0x00, 0x10);
+
+    cpu.Bcc();
+
+    CHECK(cpu.GetProgramCounter() == 0x0001);
+}
+
+TEST_CASE("Bmi branches when the Negative flag is set") {
+    nes::Bus bus;
+    nes::Cpu cpu(bus);
+
+    cpu.SetFlag(nes::Cpu::StatusFlag::N, true);
+    bus.WriteCpu(0x00, 0x20);
+
+    cpu.Bmi();
+
+    CHECK(cpu.GetProgramCounter() == 0x0021);
+}
+
+TEST_CASE("Bpl branches when the Negative flag is clear") {
+    nes::Bus bus;
+    nes::Cpu cpu(bus);
+
+    cpu.SetFlag(nes::Cpu::StatusFlag::N, false);
+    bus.WriteCpu(0x00, 0x20);
+
+    cpu.Bpl();
+
+    CHECK(cpu.GetProgramCounter() == 0x0021);
+}
+
+TEST_CASE("Bpl does not branch when the Negative flag is set") {
+    nes::Bus bus;
+    nes::Cpu cpu(bus);
+
+    cpu.SetFlag(nes::Cpu::StatusFlag::N, true);
+    bus.WriteCpu(0x00, 0x20);
+
+    cpu.Bpl();
+
+    CHECK(cpu.GetProgramCounter() == 0x0001);
+}
+
+TEST_CASE("Bvs branches when the Overflow flag is set") {
+    nes::Bus bus;
+    nes::Cpu cpu(bus);
+
+    cpu.SetFlag(nes::Cpu::StatusFlag::V, true);
+    bus.WriteCpu(0x00, 0x30);
+
+    cpu.Bvs();
+
+    CHECK(cpu.GetProgramCounter() == 0x0031);
+}
+
+TEST_CASE("Bvc branches when the Overflow flag is clear") {
+    nes::Bus bus;
+    nes::Cpu cpu(bus);
+
+    cpu.SetFlag(nes::Cpu::StatusFlag::V, false);
+    bus.WriteCpu(0x00, 0x30);
+
+    cpu.Bvc();
+
+    CHECK(cpu.GetProgramCounter() == 0x0031);
+}
+
+TEST_CASE("Bvc does not branch when the Overflow flag is set") {
+    nes::Bus bus;
+    nes::Cpu cpu(bus);
+
+    cpu.SetFlag(nes::Cpu::StatusFlag::V, true);
+    bus.WriteCpu(0x00, 0x30);
+
+    cpu.Bvc();
+
+    CHECK(cpu.GetProgramCounter() == 0x0001);
+}
+
+TEST_CASE("BranchIf supports backward branches with a negative offset") {
+    nes::Bus bus;
+    nes::Cpu cpu(bus);
+
+    bus.WriteCpu(0x00, 0xA9); // LDA Immediate
+    bus.WriteCpu(0x01, 0x10); // LDA value, advances PC to 0x0002
+    CHECK(cpu.Step() == 2);
+
+    bus.WriteCpu(0x02, 0xFE); // offset = -2
+    cpu.SetFlag(nes::Cpu::StatusFlag::Z, true);
+
+    cpu.Beq();
+
+    CHECK(cpu.GetProgramCounter() == 0x0001); // PC 0x0003 (after fetch) - 2
+}
+
+TEST_CASE("JmpAbsolute sets the Program Counter to the 16-bit operand address") {
+    nes::Bus bus;
+    nes::Cpu cpu(bus);
+
+    bus.WriteCpu(0x00, 0x34); // low byte
+    bus.WriteCpu(0x01, 0x12); // high byte
+
+    cpu.JmpAbsolute();
+
+    CHECK(cpu.GetProgramCounter() == 0x1234);
+}
+
+TEST_CASE("JmpIndirect sets the Program Counter to the address stored at the pointer") {
+    nes::Bus bus;
+    nes::Cpu cpu(bus);
+
+    bus.WriteCpu(0x00, 0x00); // pointer low byte
+    bus.WriteCpu(0x01, 0x03); // pointer high byte, pointer address = 0x0300
+    bus.WriteCpu(0x0300, 0x34); // target low byte
+    bus.WriteCpu(0x0301, 0x12); // target high byte
+
+    cpu.JmpIndirect();
+
+    CHECK(cpu.GetProgramCounter() == 0x1234);
+}
+
+TEST_CASE("JmpIndirect reproduces the 6502 page-boundary bug") {
+    nes::Bus bus;
+    nes::Cpu cpu(bus);
+
+    bus.WriteCpu(0x00, 0xFF); // pointer low byte
+    bus.WriteCpu(0x01, 0x02); // pointer high byte, pointer address = 0x02FF
+    bus.WriteCpu(0x02FF, 0x80); // target low byte
+    bus.WriteCpu(0x0200, 0x01); // target high byte read from the wrapped page start
+    bus.WriteCpu(0x0300, 0xFF); // would be (wrongly) read if the page didn't wrap
+
+    cpu.JmpIndirect();
+
+    CHECK(cpu.GetProgramCounter() == 0x0180);
+}

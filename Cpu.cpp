@@ -441,7 +441,7 @@ void Cpu::Inx() {
     SetNFlag(x_register_);
 }
 
-/// Flag instructions
+/// Flag Instructions
 void Cpu::SetFlag(const StatusFlag flag, const bool is_on) {
     const auto mask = static_cast<std::uint8_t>(flag);
     if (is_on) {
@@ -473,6 +473,55 @@ void Cpu::SetCFlag(const bool is_on) {
 
 void Cpu::SetVFlag(const bool is_on) {
     SetFlag(StatusFlag::V, is_on);
+}
+
+/// Branch Instructions
+void Cpu::BranchIf(const bool condition) {
+    const auto target = AddressRelative();
+    if (condition) program_counter_ = target;
+}
+
+void Cpu::Beq() {
+    BranchIf(IsFlagSet(static_cast<std::uint8_t>(StatusFlag::Z)));
+}
+
+void Cpu::Bne() {
+    BranchIf(!IsFlagSet(static_cast<std::uint8_t>(StatusFlag::Z)));
+}
+
+void Cpu::Bcs() {
+    BranchIf(IsFlagSet(static_cast<std::uint8_t>(StatusFlag::C)));
+}
+
+void Cpu::Bcc() {
+    BranchIf(!IsFlagSet(static_cast<std::uint8_t>(StatusFlag::C)));
+}
+
+void Cpu::Bmi() {
+    BranchIf(IsFlagSet(static_cast<std::uint8_t>(StatusFlag::N)));
+}
+
+void Cpu::Bpl() {
+    BranchIf(!IsFlagSet(static_cast<std::uint8_t>(StatusFlag::N)));
+}
+
+void Cpu::Bvs() {
+    BranchIf(IsFlagSet(static_cast<std::uint8_t>(StatusFlag::V)));
+}
+
+void Cpu::Bvc() {
+    BranchIf(!IsFlagSet(static_cast<std::uint8_t>(StatusFlag::V)));
+}
+
+/// Jump Instructions
+void Cpu::JmpAbsolute() {
+    // Reads 16-bit address and sets PC to it
+    program_counter_ = AddressAbsolute();
+}
+
+void Cpu::JmpIndirect() {
+    // Reads 16-bit address where destination is stored and sets PC to it
+    program_counter_ = AddressIndirect();
 }
 
 } // nes

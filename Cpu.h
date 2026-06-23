@@ -28,6 +28,7 @@ public:
     [[nodiscard]] std::uint8_t GetXRegister() const { return x_register_;};
     [[nodiscard]] std::uint8_t GetYRegister() const { return y_register_; }
     [[nodiscard]] std::uint8_t GetStatusRegister() const { return status_register_; }
+    [[nodiscard]] std::uint16_t GetProgramCounter() const { return program_counter_; }
 
     // Test helpers for driving register state directly
     void SetXRegister(const std::uint8_t value) { x_register_ = value; }
@@ -112,13 +113,28 @@ public:
         N = 0x80  // Negative
     };
 
-    /// Flag instructions
+    /// Flag Instructions
     void SetFlag(StatusFlag flag, bool is_on);
     bool IsFlagSet(std::uint8_t mask) const;
     void SetZFlag(std::uint8_t register_value); // Zero Flag
     void SetNFlag(std::uint8_t register_value); // Negative Flag
     void SetCFlag(bool is_on);  // Carry Flag
     void SetVFlag(bool is_on);  // Overflow Flag
+
+    /// Branch Instructions
+    void BranchIf(bool condition);
+    void Beq(); // Z == 1, branch if equal
+    void Bne(); // Z == 0, branch if not equal
+    void Bcs(); // C == 1, branch if carry set
+    void Bcc(); // C == 0, branch if carry clear
+    void Bmi(); // N == 1, branch if minus
+    void Bpl(); // N == 0, branch if plus
+    void Bvs(); // V == 1, branch if overflow set
+    void Bvc(); // V == 0, branch if overflow clear
+
+    /// Jump Instructions
+    void JmpAbsolute();
+    void JmpIndirect();
 
 private:
     Bus& bus_;
