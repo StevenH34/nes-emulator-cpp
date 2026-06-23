@@ -453,6 +453,10 @@ void Cpu::SetFlag(const StatusFlag flag, const bool is_on) {
     }
 }
 
+bool Cpu::IsFlagSet(const std::uint8_t mask) const {
+    return (status_register_ & mask) != 0;
+}
+
 // Turns the Zero Flag on when the Most Significant Bit (bit 7) is 1.
 // This means the number is negative in two's complement.
 void Cpu::SetZFlag(const std::uint8_t register_value) {
@@ -462,5 +466,13 @@ void Cpu::SetZFlag(const std::uint8_t register_value) {
 void Cpu::SetNFlag(const std::uint8_t register_value) {
     SetFlag(StatusFlag::N, (register_value >> 7 & 1) == 1); // Most Significant Bit
 };
+
+void Cpu::SetCFlag(const bool is_on) {
+    SetFlag(StatusFlag::C, is_on);
+}
+
+void Cpu::SetVFlag(const bool is_on) {
+    SetFlag(StatusFlag::V, is_on);
+}
 
 } // nes

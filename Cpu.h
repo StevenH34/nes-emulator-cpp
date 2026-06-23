@@ -114,8 +114,11 @@ public:
 
     /// Flag instructions
     void SetFlag(StatusFlag flag, bool is_on);
-    void SetZFlag(std::uint8_t register_value);
-    void SetNFlag(std::uint8_t register_value);
+    bool IsFlagSet(std::uint8_t mask) const;
+    void SetZFlag(std::uint8_t register_value); // Zero Flag
+    void SetNFlag(std::uint8_t register_value); // Negative Flag
+    void SetCFlag(bool is_on);  // Carry Flag
+    void SetVFlag(bool is_on);  // Overflow Flag
 
 private:
     Bus& bus_;
