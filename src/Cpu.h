@@ -145,6 +145,11 @@ public:
     void StackPushWord(std::uint16_t value);
     std::uint16_t StackPopWord();
 
+    /// Comparison Instructions
+    void Compare(std::uint8_t register_value, std::uint8_t operand);
+    void CmpImmediate();
+    void CpxImmediate();
+    void CpyImmediate();
 
 
 private:

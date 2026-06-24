@@ -33,7 +33,8 @@ add_executable(nes_emulator_tests
         tests/stx_tests.cpp
         tests/sty_tests.cpp
         tests/branch_jump_tests.cpp
-        tests/stack_tests.cpp)
+        tests/stack_tests.cpp
+        tests/compare_tests.cpp)
 
 target_include_directories(nes_emulator_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/src)
 

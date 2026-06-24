@@ -562,4 +562,31 @@ std::uint16_t Cpu::StackPopWord() {
     return high_byte << 8 | low_byte;
 }
 
+/// Comparison Instructions
+void Cpu::Compare(const std::uint8_t register_value, const std::uint8_t operand) {
+    const std::uint8_t result = register_value - operand;
+    // If register >= operand, not borrow, so C = 1, else C = 0
+    SetCFlag(register_value >= operand);
+    // If result = 0, Z = 1
+    SetZFlag(result);
+    // Bit 7 of the result
+    SetNFlag(result);
+}
+
+void Cpu::CmpImmediate() {
+    const auto value = FetchByte();
+    Compare(accumulator_, value);
+}
+
+void Cpu::CpxImmediate() {
+    const auto value = FetchByte();
+    Compare(x_register_, value);
+}
+
+void Cpu::CpyImmediate() {
+    const auto value = FetchByte();
+    Compare(y_register_, value);
+}
+
+
 } // nes
