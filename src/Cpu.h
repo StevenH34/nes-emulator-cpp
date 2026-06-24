@@ -151,6 +151,10 @@ public:
     void CpxImmediate();
     void CpyImmediate();
 
+    /// Shift Instructions
+    // Arithmetic Shift Left moves all bits one position to the left
+    void AslAccumulator();
+
 
 private:
     Bus& bus_;

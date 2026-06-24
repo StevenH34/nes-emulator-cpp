@@ -588,5 +588,14 @@ void Cpu::CpyImmediate() {
     Compare(y_register_, value);
 }
 
+/// Shift Instructions
+// Shifting left is the same as multiplication * 2
+void Cpu::AslAccumulator() {
+    // 7-bit falls off and goes to the C flag
+    SetCFlag((accumulator_ >> 7 & 1) == 1);
+    accumulator_ <<= 1;
+    SetZFlag(accumulator_);
+    SetNFlag(accumulator_);
+}
 
 } // nes
