@@ -155,6 +155,11 @@ public:
     // Arithmetic Shift Left moves all bits one position to the left
     void AslAccumulator();
 
+    /// Arithmetic Instructions
+    // Add with Carry
+    void Adc(std::uint8_t value);
+    void AdcImmediate();
+
 
 private:
     Bus& bus_;
@@ -170,6 +175,8 @@ private:
     std::uint8_t stack_pointer_ = 0xfd;   // Stack Pointer
     std::uint8_t status_register_ = 0x24; // Status Register (flags)
     std::uint16_t program_counter_ = 0;   // Program Counter
+
+    std::uint8_t MAX_8_BIT_UINT_ = 0xFF; // Maximum number that fits in a byte (8 bits): 255
 
     /// CPU OpCodes
     struct Opcodes {

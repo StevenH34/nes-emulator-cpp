@@ -598,4 +598,37 @@ void Cpu::AslAccumulator() {
     SetNFlag(accumulator_);
 }
 
+/// Arithmetic Instructions
+void Cpu::Adc(const std::uint8_t value) {
+    // Get current value of the carry flag
+    const std::uint16_t carry_in = IsFlagSet(static_cast<std::uint8_t>(StatusFlag::C)) ? 1 : 0;
+    const std::uint16_t sum = static_cast<std::uint16_t>(accumulator_) + static_cast<std::uint16_t>(value) + carry_in ;
+    const std::uint8_t result = static_cast<std::uint8_t>(sum);
+
+    // Check for unsigned overflow
+    SetCFlag(sum > MAX_8_BIT_UINT_);
+    // Check for signed overflow
+    // XOR both operands. If bit 7 is 0, both operands have the same sign.
+    // Else both operands have different signs
+    // ~(@a ^ value): If bit 7 is 0, inverse this to 1 for true
+    // (@a ^ result): True if both signs are different
+    // AND both to combine results
+    // & 0x80: Check only the signed bit (bit 7)
+    // If all 3 are true, inputs had the same sign, but result flipped the sign - this is overflow
+    // Two positives means it's a negative
+    // Two negatives means it's a positive
+    // If one is positive and one is negative overflow cannot happen
+    SetVFlag((~(accumulator_ ^ value) & (accumulator_ ^ result) & 0x80) != 0);
+
+    accumulator_ = result;
+    
+    SetZFlag(accumulator_);
+    SetNFlag(accumulator_);
+}
+
+void Cpu::AdcImmediate() {
+    const auto value = FetchByte();
+    Adc(value);
+}
+
 } // nes
