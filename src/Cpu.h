@@ -164,17 +164,19 @@ public:
 private:
     Bus& bus_;
 
+    std::uint8_t STATUS_INIT_ = static_cast<uint8_t>(StatusFlag::U) | static_cast<uint8_t>(StatusFlag::I);
+
     /// Stack
     std::uint16_t STACK_BASE_ = 0x0100;
     std::uint8_t STACK_INIT_ = 0xFD;
 
     /// CPU Registers
-    std::uint8_t accumulator_ = 0;        // Accumulator
-    std::uint8_t x_register_ = 0;         // X Register
-    std::uint8_t y_register_ = 0;         // Y Register
-    std::uint8_t stack_pointer_ = 0xfd;   // Stack Pointer
-    std::uint8_t status_register_ = 0x24; // Status Register (flags)
-    std::uint16_t program_counter_ = 0;   // Program Counter
+    std::uint8_t accumulator_ = 0;                  // Accumulator
+    std::uint8_t x_register_ = 0;                   // X Register
+    std::uint8_t y_register_ = 0;                   // Y Register
+    std::uint8_t stack_pointer_ = STACK_INIT_;      // Stack Pointer
+    std::uint8_t status_register_ = STATUS_INIT_;   // Status Register (flags)
+    std::uint16_t program_counter_ = 0;             // Program Counter
 
     std::uint8_t MAX_8_BIT_UINT_ = 0xFF; // Maximum number that fits in a byte (8 bits): 255
 
@@ -225,7 +227,6 @@ private:
 
         /// Register Increments Opcode
         static constexpr std::uint8_t INX = 0xe8;
-
 
         static constexpr std::array<int, 256> CYCLES = [] {
             std::array<int, 256> cycles{};
