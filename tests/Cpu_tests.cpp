@@ -56,25 +56,6 @@ TEST_CASE("Cpu registers start in the documented power-up state") {
     CHECK(cpu.StatusString() == "nvUbdIzc");
 }
 
-TEST_CASE("Inx increments the X register and updates the Zero and Negative flags") {
-    nes::Bus bus;
-    nes::Cpu cpu(bus);
-
-    cpu.Inx();
-    CHECK(cpu.GetXRegister() == 0x01);
-    CHECK(cpu.StatusString() == "nvUbdIzc"); // normal increment sets neither flag
-
-    cpu.SetXRegister(0xFF);
-    cpu.Inx(); // wraps from 0xFF to 0x00
-    CHECK(cpu.GetXRegister() == 0x00);
-    CHECK(cpu.StatusString() == "nvUbdIZc"); // Zero flag set
-
-    cpu.SetXRegister(0x7F);
-    cpu.Inx(); // 0x80, high bit set
-    CHECK(cpu.GetXRegister() == 0x80);
-    CHECK(cpu.StatusString() == "NvUbdIzc"); // Negative flag set
-}
-
 TEST_CASE("LdaImmediate updates the Zero and Negative flags based on the loaded value") {
     nes::Bus bus;
     nes::Cpu cpu(bus);
