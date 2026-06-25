@@ -311,6 +311,17 @@ private:
         static  constexpr std::uint8_t CPY_ZERO_PAGE   = 0xC4;
         static  constexpr std::uint8_t CPY_ABSOLUTE    = 0xCC;
 
+        /// Branch Opcodes
+        static constexpr std::uint8_t BEQ = 0xF0;
+        static constexpr std::uint8_t BNE = 0xD0;
+        static constexpr std::uint8_t BCS = 0xB0;
+        static constexpr std::uint8_t BCC = 0x90;
+        static constexpr std::uint8_t BMI = 0x30;
+        static constexpr std::uint8_t BPL = 0x10;
+        static constexpr std::uint8_t BVS = 0x70;
+        static constexpr std::uint8_t BVC = 0x50;
+
+
         static constexpr std::array<int, 256> CYCLES = [] {
             std::array<int, 256> cycles{};
             // LDA Cycles
@@ -422,6 +433,15 @@ private:
             cycles[CPY_IMMEDIATE] = 2;
             cycles[CPY_ZERO_PAGE] = 3;
             cycles[CPY_ABSOLUTE] = 4;
+            // Branch Cycles
+            cycles[BEQ] = 2;
+            cycles[BNE] = 2;
+            cycles[BCS] = 2;
+            cycles[BCC] = 2;
+            cycles[BMI] = 2;
+            cycles[BPL] = 2;
+            cycles[BVS] = 2;
+            cycles[BVC] = 2;
             return cycles;
         }();
     };
