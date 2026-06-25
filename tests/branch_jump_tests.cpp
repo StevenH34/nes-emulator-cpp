@@ -254,3 +254,62 @@ TEST_CASE("Jsr followed by Rts returns to the instruction after the JSR operand"
     cpu.Rts();
     CHECK(cpu.GetProgramCounter() == 0x0002); // back to the instruction after JSR's operand
 }
+
+TEST_CASE("Brk pushes the Program Counter and Status Register, sets the Interrupt flag, and jumps to the IRQ vector address") {
+    nes::Bus bus;
+    nes::Cpu cpu(bus);
+
+    cpu.SetFlag(nes::Cpu::StatusFlag::I, false);
+
+    cpu.Brk();
+
+    CHECK(bus.ReadCpu(0x01FD) == 0x00); // high byte of PC + 1 (0x0001)
+    CHECK(bus.ReadCpu(0x01FC) == 0x01); // low byte of PC + 1 (0x0001)
+    CHECK(bus.ReadCpu(0x01FB) ==
+        (static_cast<std::uint8_t>(nes::Cpu::StatusFlag::U) | static_cast<std::uint8_t>(nes::Cpu::StatusFlag::B))); // pushed status has Break and Unused set
+    CHECK(cpu.IsFlagSet(static_cast<std::uint8_t>(nes::Cpu::StatusFlag::I))); // Interrupt Disable flag set after the push
+    CHECK(cpu.GetProgramCounter() == 0x0000); // IRQ vector ($FFFE/$FFFF) is unmapped and reads as 0
+}
+
+TEST_CASE("Rti restores the Program Counter and Status Register from the stack, clearing the Break flag") {
+    nes::Bus bus;
+    nes::Cpu cpu(bus);
+
+    cpu.StackPushWord(0x1234); // Program Counter, as Brk would have pushed it
+    cpu.StackPushByte(0xFF); // Status Register, as Brk would have pushed it (all flags set, including Break)
+
+    cpu.Rti();
+
+    CHECK(cpu.GetProgramCounter() == 0x1234);
+    CHECK(cpu.GetStatusRegister() == (0xFF & ~static_cast<std::uint8_t>(nes::Cpu::StatusFlag::B))); // Break cleared, Unused stays on
+}
+
+TEST_CASE("Rti forces the Unused flag on even if it was not set on the stack") {
+    nes::Bus bus;
+    nes::Cpu cpu(bus);
+
+    cpu.StackPushWord(0x0000);
+    cpu.StackPushByte(0x00); // no flags set on the stack
+
+    cpu.Rti();
+
+    CHECK(cpu.GetStatusRegister() == static_cast<std::uint8_t>(nes::Cpu::StatusFlag::U));
+}
+
+TEST_CASE("Brk followed by Rti returns to the Program Counter and Status Register from before the interrupt") {
+    nes::Bus bus;
+    nes::Cpu cpu(bus);
+
+    bus.WriteCpu(0x00, 0xA9); // LDA Immediate
+    bus.WriteCpu(0x01, 0x42); // LDA value, advances PC to 0x0002
+    CHECK(cpu.Step() == 2);
+
+    const std::uint8_t status_before = cpu.GetStatusRegister();
+    const std::uint16_t pc_before = cpu.GetProgramCounter();
+
+    cpu.Brk();
+    cpu.Rti();
+
+    CHECK(cpu.GetProgramCounter() == pc_before + 1); // Brk pushed PC + 1, Rti restores it unchanged
+    CHECK(cpu.GetStatusRegister() == status_before); // Break never persists, Unused was already set
+}

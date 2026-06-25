@@ -115,7 +115,7 @@ public:
 
     /// Flag Instructions
     void SetFlag(StatusFlag flag, bool is_on);
-    bool IsFlagSet(std::uint8_t mask) const;
+    [[nodiscard]] bool IsFlagSet(std::uint8_t mask) const;
     void SetZFlag(std::uint8_t register_value); // Zero Flag
     void SetNFlag(std::uint8_t register_value); // Negative Flag
     void SetCFlag(bool is_on);  // Carry Flag
@@ -137,6 +137,8 @@ public:
     void JmpIndirect();
     void Jsr(); // Jump to subroutine
     void Rts(); // Return from subroutine
+    void Brk(); // Saves the full CPU state (Program Counter and flags)
+    void Rti(); // Restores Program Counter and flags from the stack
 
     /// Stack
     // Lives at Page 1: $0100 - $01FF
@@ -179,6 +181,11 @@ private:
     std::uint16_t program_counter_ = 0;             // Program Counter
 
     std::uint8_t MAX_8_BIT_UINT_ = 0xFF; // Maximum number that fits in a byte (8 bits): 255
+
+    /// Interrupt Vectors
+    std::uint16_t NMI_VECTOR_ = 0xFFFA; // The PPU finished drawing a frame (Non-Maskable Interrupt)
+    std::uint16_t RESET_VECTOR_ = 0xFFFC;
+    std::uint16_t IRQ_VECTOR_ = 0xFFFE; // Hardware interrupt
 
     /// CPU OpCodes
     struct Opcodes {
@@ -228,6 +235,14 @@ private:
         /// Register Increments Opcode
         static constexpr std::uint8_t INX = 0xe8;
 
+        /// Jump Opcodes
+        static constexpr std::uint8_t JMP_ABSOLUTE = 0x4C;
+        static constexpr std::uint8_t JMP_INDIRECT = 0x6C;
+        static constexpr std::uint8_t JMP_JSR = 0x20;
+        static constexpr std::uint8_t JMP_RTS = 0x60;
+        static constexpr std::uint8_t JMP_BRK = 0x00;
+        static constexpr std::uint8_t JMP_RTI = 0x40;
+
         static constexpr std::array<int, 256> CYCLES = [] {
             std::array<int, 256> cycles{};
             // LDA Cycles
@@ -269,6 +284,13 @@ private:
             cycles[STY_ABSOLUTE] = 4;
             // Register Increments Cycles
             cycles[INX] = 2;
+            // Jump Cycles
+            cycles[JMP_ABSOLUTE] = 3;
+            cycles[JMP_INDIRECT] = 5;
+            cycles[JMP_JSR] = 6;
+            cycles[JMP_RTS] = 6;
+            cycles[JMP_BRK] = 7;
+            cycles[JMP_RTI] = 6;
             return cycles;
         }();
     };

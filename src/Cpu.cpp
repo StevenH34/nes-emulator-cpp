@@ -141,6 +141,25 @@ int Cpu::Step() {
         case Opcodes::INX:
             Inx();
             break;
+        // Jumps
+        case Opcodes::JMP_ABSOLUTE:
+            JmpAbsolute();
+            break;
+        case Opcodes::JMP_INDIRECT:
+            JmpIndirect();
+            break;
+        case Opcodes::JMP_JSR:
+            Jsr();
+            break;
+        case Opcodes::JMP_RTS:
+            Rts();
+            break;
+        case Opcodes::JMP_BRK:
+            Brk();
+            break;
+        case Opcodes::JMP_RTI:
+            Rti();
+            break;
         default: //TODO: Figure out a good way to deal with unsupported Opcodes
             throw std::runtime_error("Invalid opcode");
     }
@@ -538,6 +557,26 @@ void Cpu::Rts() {
     program_counter_ = StackPopWord() + 1;
 }
 
+void Cpu::Brk() {
+    // Push Program Counter + 1 to the stack - the return address
+    StackPushWord(program_counter_ + 1);
+    // Save the flags - push Status Register to the stack
+    StackPushByte(status_register_ | static_cast<std::uint8_t>(StatusFlag::B) | static_cast<std::uint8_t>(StatusFlag::U));
+    // Set I Flag to disable interrupts
+    SetFlag(StatusFlag::I, true);
+    // Read address from IRQ/BRK and jump to address
+    const std::uint8_t low_byte = ReadByte(IRQ_VECTOR_);
+    const std::uint8_t high_byte = ReadByte(IRQ_VECTOR_ + 1);
+    program_counter_ = high_byte << 8 | low_byte;
+}
+
+void Cpu::Rti() {
+    // Restore flags - clear B, force U
+    status_register_ = StackPopByte() & ~static_cast<std::uint8_t>(StatusFlag::B) | static_cast<std::uint8_t>(StatusFlag::U);
+    // Restore Program Counter
+    program_counter_ = StackPopWord();
+}
+
 /// Stack
 void Cpu::StackPushByte(const std::uint8_t value) {
     // Write current value at stack address then decrement stack pointer
@@ -621,7 +660,7 @@ void Cpu::Adc(const std::uint8_t value) {
     SetVFlag((~(accumulator_ ^ value) & (accumulator_ ^ result) & 0x80) != 0);
 
     accumulator_ = result;
-    
+
     SetZFlag(accumulator_);
     SetNFlag(accumulator_);
 }
