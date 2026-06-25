@@ -95,7 +95,7 @@ public:
     void StyZeroPageX();
     void StyAbsolute();
 
-    /// Register Increments Instruction
+    /// Register Increment Instruction
     void Inx();
     void Iny();
     void Dex();
@@ -164,6 +164,14 @@ public:
     // Add with Carry
     void Adc(std::uint8_t value);
     void AdcImmediate();
+
+    /// Register Transfer Instructions
+    void Tax(); // Transfer register A to X
+    void Tay(); // Transfer register A to Y
+    void Txa(); // Transfer register X to A
+    void Tya(); // Transfer register Y to A
+    void Tsx(); // Transfer Stack Pointer to register X
+    void Txs(); // Transfer X to Stack Pointer
 
 
 private:
@@ -235,7 +243,7 @@ private:
         static constexpr std::uint8_t STY_ZERO_PAGE_X = 0x94;
         static constexpr std::uint8_t STY_ABSOLUTE    = 0x8C;
 
-        /// Register Increments Opcode
+        /// Register Increment Opcode
         static constexpr std::uint8_t INX = 0xE8;
         static constexpr std::uint8_t INY = 0xC8;
         static constexpr std::uint8_t DEX = 0xCA;
@@ -416,7 +424,7 @@ private:
             cycles[STY_ZERO_PAGE]   = 3;
             cycles[STY_ZERO_PAGE_X] = 4;
             cycles[STY_ABSOLUTE]    = 4;
-            // Register Increments Cycles
+            // Register Increment Cycles
             cycles[INX] = 2;
             cycles[INY] = 2;
             cycles[DEX] = 2;

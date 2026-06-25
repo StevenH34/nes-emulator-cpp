@@ -37,7 +37,8 @@ add_executable(nes_emulator_tests
         tests/compare_tests.cpp
         tests/shift_tests.cpp
         tests/adc_tests.cpp
-        tests/register_increments_tests.cpp)
+        tests/register_increment_tests.cpp
+        tests/register_transfer_tests.cpp)
 
 target_include_directories(nes_emulator_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/src)
 

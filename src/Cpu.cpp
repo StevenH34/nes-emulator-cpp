@@ -169,6 +169,25 @@ int Cpu::Step() {
         case Opcodes::JMP_RTI:
             Rti();
             break;
+        // Register Transfers
+        case Opcodes::TAX:
+            Tax();
+            break;
+        case Opcodes::TAY:
+            Tay();
+            break;
+        case Opcodes::TXA:
+            Txa();
+            break;
+        case Opcodes::TYA:
+            Tya();
+            break;
+        case Opcodes::TSX:
+            Tsx();
+            break;
+        case Opcodes::TXS:
+            Txs();
+            break;
         default: //TODO: Figure out a good way to deal with unsupported Opcodes
             throw std::runtime_error("Invalid opcode");
     }
@@ -462,7 +481,7 @@ void Cpu::StyAbsolute() {
     WriteByte(address, y_register_);
 }
 
-/// Register Increments Instructions
+/// Register Increment Instructions
 void Cpu::Inx() {
     x_register_ += 1;
     SetZFlag(x_register_);
@@ -696,6 +715,41 @@ void Cpu::Adc(const std::uint8_t value) {
 void Cpu::AdcImmediate() {
     const auto value = FetchByte();
     Adc(value);
+}
+
+/// Register Transfer Instructions
+void Cpu::Tax() {
+    x_register_ = accumulator_;
+    SetZFlag(x_register_);
+    SetNFlag(x_register_);
+}
+
+void Cpu::Tay() {
+    y_register_ = accumulator_;
+    SetZFlag(y_register_);
+    SetNFlag(y_register_);
+}
+
+void Cpu::Txa() {
+    accumulator_ = x_register_;
+    SetZFlag(accumulator_);
+    SetNFlag(accumulator_);
+}
+
+void Cpu::Tya() {
+    accumulator_  = y_register_;
+    SetZFlag(accumulator_);
+    SetNFlag(accumulator_);
+
+}
+void Cpu::Tsx() {
+    x_register_  = stack_pointer_;
+    SetZFlag(x_register_);
+    SetNFlag(x_register_);
+}
+
+void Cpu::Txs() {
+    stack_pointer_ = x_register_;
 }
 
 } // nes
