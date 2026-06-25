@@ -287,6 +287,14 @@ private:
         static constexpr std::uint8_t CLD = 0xD8;
         static constexpr std::uint8_t SED = 0xF8;
 
+        /// Register Transfer Opcodes
+        static constexpr std::uint8_t TAX = 0xAA;
+        static constexpr std::uint8_t TAY = 0xA8;
+        static constexpr std::uint8_t TXA = 0x8A;
+        static constexpr std::uint8_t TYA = 0x98;
+        static constexpr std::uint8_t TSX = 0xBA;
+        static constexpr std::uint8_t TXS = 0x9A;
+
         static constexpr std::array<int, 256> CYCLES = [] {
             std::array<int, 256> cycles{};
             // LDA Cycles
@@ -376,6 +384,13 @@ private:
             cycles[CLV] = 2;
             cycles[CLD] = 2;
             cycles[SED] = 2;
+            // Register Transfer Opcodes
+            cycles[TAX] = 2;
+            cycles[TAY] = 2;
+            cycles[TXA] = 2;
+            cycles[TYA] = 2;
+            cycles[TSX] = 2;
+            cycles[TXS] = 2;
             return cycles;
         }();
     };
