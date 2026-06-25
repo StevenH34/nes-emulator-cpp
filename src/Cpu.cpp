@@ -141,6 +141,15 @@ int Cpu::Step() {
         case Opcodes::INX:
             Inx();
             break;
+        case Opcodes::INY:
+            Iny();
+            break;
+        case Opcodes::DEX:
+            Dex();
+            break;
+        case Opcodes::DEY:
+            Dey();
+            break;
         // Jumps
         case Opcodes::JMP_ABSOLUTE:
             JmpAbsolute();
@@ -453,12 +462,31 @@ void Cpu::StyAbsolute() {
     WriteByte(address, y_register_);
 }
 
-/// Increment Register
+/// Register Increments Instructions
 void Cpu::Inx() {
     x_register_ += 1;
     SetZFlag(x_register_);
     SetNFlag(x_register_);
 }
+
+void Cpu::Iny() {
+    y_register_ += 1;
+    SetZFlag(y_register_);
+    SetNFlag(y_register_);
+}
+
+void Cpu::Dex() {
+    x_register_ -= 1;
+    SetZFlag(x_register_);
+    SetNFlag(x_register_);
+}
+
+void Cpu::Dey() {
+    y_register_ -= 1;
+    SetZFlag(y_register_);
+    SetNFlag(y_register_);
+}
+
 
 /// Flag Instructions
 void Cpu::SetFlag(const StatusFlag flag, const bool is_on) {

@@ -97,6 +97,9 @@ public:
 
     /// Register Increments Instruction
     void Inx();
+    void Iny();
+    void Dex();
+    void Dey();
 
     /// Flag Masks (N V U B D I Z C)
     // Flags are bits in the Status register.
