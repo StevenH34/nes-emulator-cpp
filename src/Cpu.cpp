@@ -12,8 +12,8 @@ Cpu::Cpu(Bus& bus) : bus_(bus) {}
 
 void Cpu::PrintDebugging() {
     std::println("A={:02X}, X={:02X}, Y={:02X}, SP={:02X}, PC={:04X} [{}]",
-    accumulator_, x_register_, y_register_,
-        stack_pointer_, program_counter_, StatusString());
+                 accumulator_, x_register_, y_register_,
+                 stack_pointer_, program_counter_, StatusString());
 }
 
 std::string Cpu::StatusString() const {
@@ -741,7 +741,7 @@ void Cpu::Adc(const std::uint8_t value) {
     // Get current value of the carry flag
     const std::uint16_t carry_in = IsFlagSet(static_cast<std::uint8_t>(StatusFlag::C)) ? 1 : 0;
     const std::uint16_t sum = static_cast<std::uint16_t>(accumulator_) + static_cast<std::uint16_t>(value) + carry_in ;
-    const std::uint8_t result = static_cast<std::uint8_t>(sum);
+    const auto result = static_cast<std::uint8_t>(sum);
 
     // Check for unsigned overflow
     SetCFlag(sum > MAX_8_BIT_UINT_);
