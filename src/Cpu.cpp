@@ -210,6 +210,19 @@ int Cpu::Step() {
         case Opcodes::CLV:
             Clv();
             break;
+        // Stack
+        case Opcodes::PHA:
+            Pha();
+            break;
+        case Opcodes::PLA:
+            Pla();
+            break;
+        case Opcodes::PHP:
+            Php();
+            break;
+        case Opcodes::PLP:
+            Plp();
+            break;
         default: //TODO: Figure out a good way to deal with unsupported Opcodes
             throw std::runtime_error("Invalid opcode");
     }
@@ -676,7 +689,7 @@ void Cpu::Rti() {
     program_counter_ = StackPopWord();
 }
 
-/// Stack
+/// Stack Methods
 void Cpu::StackPushByte(const std::uint8_t value) {
     // Write current value at stack address then decrement stack pointer
     WriteByte(STACK_BASE_ | static_cast<std::uint16_t>(stack_pointer_), value);
@@ -698,6 +711,25 @@ std::uint16_t Cpu::StackPopWord() {
     const std::uint8_t low_byte = StackPopByte();
     const std::uint8_t high_byte = StackPopByte();
     return high_byte << 8 | low_byte;
+}
+
+/// Stack Instructions
+void Cpu::Pha() {
+    StackPushByte(accumulator_);
+}
+
+void Cpu::Pla() {
+    accumulator_ = StackPopByte();
+    SetZFlag(accumulator_);
+    SetNFlag(accumulator_);
+}
+
+void Cpu::Php() {
+    StackPushByte(status_register_ | static_cast<std::uint8_t>(StatusFlag::B) | static_cast<std::uint8_t>(StatusFlag::U));
+}
+
+void Cpu::Plp() {
+    status_register_ = StackPopByte() & ~static_cast<std::uint8_t>(StatusFlag::B) | static_cast<std::uint8_t>(StatusFlag::U);
 }
 
 /// Comparison Instructions

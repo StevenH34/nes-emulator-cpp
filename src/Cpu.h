@@ -153,12 +153,18 @@ public:
     void Brk(); // Saves the full CPU state (Program Counter and flags)
     void Rti(); // Restores Program Counter and flags from the stack
 
-    /// Stack
+    /// Stack Methods
     // Lives at Page 1: $0100 - $01FF
     void StackPushByte(std::uint8_t value);
     std::uint8_t StackPopByte();
     void StackPushWord(std::uint16_t value);
     std::uint16_t StackPopWord();
+
+    /// Stack Instructions
+    void Pha(); // Push accumulator to the stack
+    void Pla(); // Pop from stack to accumulator
+    void Php(); // Push stats to stack
+    void Plp(); // Pop status from stack
 
     /// Comparison Instructions
     void Compare(std::uint8_t register_value, std::uint8_t operand);
