@@ -190,47 +190,47 @@ private:
     /// CPU OpCodes
     struct Opcodes {
         /// LDA Opcodes
-        static constexpr std::uint8_t LDA_IMMEDIATE = 0xA9;
-        static constexpr std::uint8_t LDA_ZERO_PAGE = 0xA5;
+        static constexpr std::uint8_t LDA_IMMEDIATE   = 0xA9;
+        static constexpr std::uint8_t LDA_ZERO_PAGE   = 0xA5;
         static constexpr std::uint8_t LDA_ZERO_PAGE_X = 0xB5;
-        static constexpr std::uint8_t LDA_ABSOLUTE = 0xAD;
-        static constexpr std::uint8_t LDA_ABSOLUTE_X = 0xBD;
-        static constexpr std::uint8_t LDA_ABSOLUTE_Y = 0xB9;
-        static constexpr std::uint8_t LDA_INDIRECT_X = 0xA1;
-        static constexpr std::uint8_t LDA_INDIRECT_Y = 0xB1;
+        static constexpr std::uint8_t LDA_ABSOLUTE    = 0xAD;
+        static constexpr std::uint8_t LDA_ABSOLUTE_X  = 0xBD;
+        static constexpr std::uint8_t LDA_ABSOLUTE_Y  = 0xB9;
+        static constexpr std::uint8_t LDA_INDIRECT_X  = 0xA1;
+        static constexpr std::uint8_t LDA_INDIRECT_Y  = 0xB1;
 
         /// LDX Opcodes
-        static constexpr std::uint8_t LDX_IMMEDIATE = 0xA2;
-        static constexpr std::uint8_t LDX_ZERO_PAGE = 0xA6;
+        static constexpr std::uint8_t LDX_IMMEDIATE   = 0xA2;
+        static constexpr std::uint8_t LDX_ZERO_PAGE   = 0xA6;
         static constexpr std::uint8_t LDX_ZERO_PAGE_Y = 0xB6;
-        static constexpr std::uint8_t LDX_ABSOLUTE = 0xAE;
-        static constexpr std::uint8_t LDX_ABSOLUTE_Y = 0xBE;
+        static constexpr std::uint8_t LDX_ABSOLUTE    = 0xAE;
+        static constexpr std::uint8_t LDX_ABSOLUTE_Y  = 0xBE;
 
         /// LDY Opcodes
-        static constexpr std::uint8_t LDY_IMMEDIATE = 0xA0;
-        static constexpr std::uint8_t LDY_ZERO_PAGE = 0xA4;
+        static constexpr std::uint8_t LDY_IMMEDIATE   = 0xA0;
+        static constexpr std::uint8_t LDY_ZERO_PAGE   = 0xA4;
         static constexpr std::uint8_t LDY_ZERO_PAGE_X = 0xB4;
-        static constexpr std::uint8_t LDY_ABSOLUTE = 0xAC;
-        static constexpr std::uint8_t LDY_ABSOLUTE_X = 0xBC;
+        static constexpr std::uint8_t LDY_ABSOLUTE    = 0xAC;
+        static constexpr std::uint8_t LDY_ABSOLUTE_X  = 0xBC;
 
         /// STA Opcodes
-        static constexpr std::uint8_t STA_ZERO_PAGE = 0x85;
+        static constexpr std::uint8_t STA_ZERO_PAGE   = 0x85;
         static constexpr std::uint8_t STA_ZERO_PAGE_X = 0x95;
-        static constexpr std::uint8_t STA_ABSOLUTE = 0x8D;
-        static constexpr std::uint8_t STA_ABSOLUTE_X = 0x9D;
-        static constexpr std::uint8_t STA_ABSOLUTE_Y = 0x99;
-        static constexpr std::uint8_t STA_INDIRECT_X = 0x81;
-        static constexpr std::uint8_t STA_INDIRECT_Y = 0x91;
+        static constexpr std::uint8_t STA_ABSOLUTE    = 0x8D;
+        static constexpr std::uint8_t STA_ABSOLUTE_X  = 0x9D;
+        static constexpr std::uint8_t STA_ABSOLUTE_Y  = 0x99;
+        static constexpr std::uint8_t STA_INDIRECT_X  = 0x81;
+        static constexpr std::uint8_t STA_INDIRECT_Y  = 0x91;
 
         /// STX Opcodes
-        static constexpr std::uint8_t STX_ZERO_PAGE = 0x86;
+        static constexpr std::uint8_t STX_ZERO_PAGE   = 0x86;
         static constexpr std::uint8_t STX_ZERO_PAGE_Y = 0x96;
-        static constexpr std::uint8_t STX_ABSOLUTE = 0x8E;
+        static constexpr std::uint8_t STX_ABSOLUTE    = 0x8E;
 
         /// STY Opcodes
-        static constexpr std::uint8_t STY_ZERO_PAGE = 0x84;
+        static constexpr std::uint8_t STY_ZERO_PAGE   = 0x84;
         static constexpr std::uint8_t STY_ZERO_PAGE_X = 0x94;
-        static constexpr std::uint8_t STY_ABSOLUTE = 0x8C;
+        static constexpr std::uint8_t STY_ABSOLUTE    = 0x8C;
 
         /// Register Increments Opcode
         static constexpr std::uint8_t INX = 0xE8;
@@ -247,30 +247,30 @@ private:
         static constexpr std::uint8_t JMP_RTI = 0x40;
 
         /// Logical Opcodes
-        static constexpr std::uint8_t AND_IMMEDIATE = 0x29;
-        static constexpr std::uint8_t AND_ZERO_PAGE = 0x25;
+        static constexpr std::uint8_t AND_IMMEDIATE   = 0x29;
+        static constexpr std::uint8_t AND_ZERO_PAGE   = 0x25;
         static constexpr std::uint8_t AND_ZERO_PAGE_X = 0x35;
-        static constexpr std::uint8_t AND_ABSOLUTE = 0x2D;
-        static constexpr std::uint8_t AND_ABSOLUTE_X = 0x3D;
-        static constexpr std::uint8_t AND_ABSOLUTE_Y = 0x39;
-        static constexpr std::uint8_t AND_INDIRECT_X = 0x21;
-        static constexpr std::uint8_t AND_INDIRECT_Y = 0x31;
-        static constexpr std::uint8_t ORA_IMMEDIATE = 0x09;
-        static constexpr std::uint8_t ORA_ZERO_PAGE = 0x05;
+        static constexpr std::uint8_t AND_ABSOLUTE    = 0x2D;
+        static constexpr std::uint8_t AND_ABSOLUTE_X  = 0x3D;
+        static constexpr std::uint8_t AND_ABSOLUTE_Y  = 0x39;
+        static constexpr std::uint8_t AND_INDIRECT_X  = 0x21;
+        static constexpr std::uint8_t AND_INDIRECT_Y  = 0x31;
+        static constexpr std::uint8_t ORA_IMMEDIATE   = 0x09;
+        static constexpr std::uint8_t ORA_ZERO_PAGE   = 0x05;
         static constexpr std::uint8_t ORA_ZERO_PAGE_X = 0x15;
-        static constexpr std::uint8_t ORA_ABSOLUTE = 0x0D;
-        static constexpr std::uint8_t ORA_ABSOLUTE_X = 0x1D;
-        static constexpr std::uint8_t ORA_ABSOLUTE_Y = 0x19;
-        static constexpr std::uint8_t ORA_INDIRECT_X = 0x01;
-        static constexpr std::uint8_t ORA_INDIRECT_Y = 0x11;
-        static constexpr std::uint8_t EOR_IMMEDIATE = 0x49;
-        static constexpr std::uint8_t EOR_ZERO_PAGE = 0x45;
+        static constexpr std::uint8_t ORA_ABSOLUTE    = 0x0D;
+        static constexpr std::uint8_t ORA_ABSOLUTE_X  = 0x1D;
+        static constexpr std::uint8_t ORA_ABSOLUTE_Y  = 0x19;
+        static constexpr std::uint8_t ORA_INDIRECT_X  = 0x01;
+        static constexpr std::uint8_t ORA_INDIRECT_Y  = 0x11;
+        static constexpr std::uint8_t EOR_IMMEDIATE   = 0x49;
+        static constexpr std::uint8_t EOR_ZERO_PAGE   = 0x45;
         static constexpr std::uint8_t EOR_ZERO_PAGE_X = 0x55;
-        static constexpr std::uint8_t EOR_ABSOLUTE = 0x4D;
-        static constexpr std::uint8_t EOR_ABSOLUTE_X = 0x5D;
-        static constexpr std::uint8_t EOR_ABSOLUTE_Y = 0x59;
-        static constexpr std::uint8_t EOR_INDIRECT_X = 0x41;
-        static constexpr std::uint8_t EOR_INDIRECT_Y = 0x51;
+        static constexpr std::uint8_t EOR_ABSOLUTE    = 0x4D;
+        static constexpr std::uint8_t EOR_ABSOLUTE_X  = 0x5D;
+        static constexpr std::uint8_t EOR_ABSOLUTE_Y  = 0x59;
+        static constexpr std::uint8_t EOR_INDIRECT_X  = 0x41;
+        static constexpr std::uint8_t EOR_INDIRECT_Y  = 0x51;
 
         /// Stack Operation Opcodes
         static constexpr std::uint8_t PHA = 0x48;
@@ -377,42 +377,42 @@ private:
         static constexpr std::array<int, 256> CYCLES = [] {
             std::array<int, 256> cycles{};
             // LDA Cycles
-            cycles[LDA_IMMEDIATE] = 2;
-            cycles[LDA_ZERO_PAGE] = 3;
+            cycles[LDA_IMMEDIATE]   = 2;
+            cycles[LDA_ZERO_PAGE]   = 3;
             cycles[LDA_ZERO_PAGE_X] = 4;
-            cycles[LDA_ABSOLUTE] = 4;
-            cycles[LDA_ABSOLUTE_X] = 4;
-            cycles[LDA_ABSOLUTE_Y] = 4;
-            cycles[LDA_INDIRECT_X] = 6;
-            cycles[LDA_INDIRECT_Y] = 5;
+            cycles[LDA_ABSOLUTE]    = 4;
+            cycles[LDA_ABSOLUTE_X]  = 4;
+            cycles[LDA_ABSOLUTE_Y]  = 4;
+            cycles[LDA_INDIRECT_X]  = 6;
+            cycles[LDA_INDIRECT_Y]  = 5;
             // LDX Cycles
-            cycles[LDX_IMMEDIATE] = 2;
-            cycles[LDX_ZERO_PAGE] = 3;
+            cycles[LDX_IMMEDIATE]   = 2;
+            cycles[LDX_ZERO_PAGE]   = 3;
             cycles[LDX_ZERO_PAGE_Y] = 4;
-            cycles[LDX_ABSOLUTE] = 4;
-            cycles[LDX_ABSOLUTE_Y] = 4;
+            cycles[LDX_ABSOLUTE]    = 4;
+            cycles[LDX_ABSOLUTE_Y]  = 4;
             // LDY Cycles
-            cycles[LDY_IMMEDIATE] = 2;
-            cycles[LDY_ZERO_PAGE] = 3;
+            cycles[LDY_IMMEDIATE]   = 2;
+            cycles[LDY_ZERO_PAGE]   = 3;
             cycles[LDY_ZERO_PAGE_X] = 4;
-            cycles[LDY_ABSOLUTE] = 4;
-            cycles[LDY_ABSOLUTE_X] = 4;
+            cycles[LDY_ABSOLUTE]    = 4;
+            cycles[LDY_ABSOLUTE_X]  = 4;
             // STA Cycles
-            cycles[STA_ZERO_PAGE] = 3;
+            cycles[STA_ZERO_PAGE]   = 3;
             cycles[STA_ZERO_PAGE_X] = 4;
-            cycles[STA_ABSOLUTE] = 4;
-            cycles[STA_ABSOLUTE_X] = 5;
-            cycles[STA_ABSOLUTE_Y] = 5;
-            cycles[STA_INDIRECT_X] = 6;
-            cycles[STA_INDIRECT_Y] = 6;
+            cycles[STA_ABSOLUTE]    = 4;
+            cycles[STA_ABSOLUTE_X]  = 5;
+            cycles[STA_ABSOLUTE_Y]  = 5;
+            cycles[STA_INDIRECT_X]  = 6;
+            cycles[STA_INDIRECT_Y]  = 6;
             // STX Cycles
-            cycles[STX_ZERO_PAGE] = 3;
+            cycles[STX_ZERO_PAGE]   = 3;
             cycles[STX_ZERO_PAGE_Y] = 4;
-            cycles[STX_ABSOLUTE] = 4;
+            cycles[STX_ABSOLUTE]    = 4;
             // STY Cycles
-            cycles[STY_ZERO_PAGE] = 3;
+            cycles[STY_ZERO_PAGE]   = 3;
             cycles[STY_ZERO_PAGE_X] = 4;
-            cycles[STY_ABSOLUTE] = 4;
+            cycles[STY_ABSOLUTE]    = 4;
             // Register Increments Cycles
             cycles[INX] = 2;
             cycles[INY] = 2;
@@ -426,30 +426,30 @@ private:
             cycles[JMP_BRK] = 7;
             cycles[JMP_RTI] = 6;
             // Logic Cycles
-            cycles[AND_IMMEDIATE] = 2;
-            cycles[AND_ZERO_PAGE] = 3;
+            cycles[AND_IMMEDIATE]   = 2;
+            cycles[AND_ZERO_PAGE]   = 3;
             cycles[AND_ZERO_PAGE_X] = 4;
-            cycles[AND_ABSOLUTE] = 4;
-            cycles[AND_ABSOLUTE_X] = 4;
-            cycles[AND_ABSOLUTE_Y] = 4;
-            cycles[AND_INDIRECT_X] = 6;
-            cycles[AND_INDIRECT_Y] = 5;
-            cycles[ORA_IMMEDIATE] = 2;
-            cycles[ORA_ZERO_PAGE] = 3;
+            cycles[AND_ABSOLUTE]    = 4;
+            cycles[AND_ABSOLUTE_X]  = 4;
+            cycles[AND_ABSOLUTE_Y]  = 4;
+            cycles[AND_INDIRECT_X]  = 6;
+            cycles[AND_INDIRECT_Y]  = 5;
+            cycles[ORA_IMMEDIATE]   = 2;
+            cycles[ORA_ZERO_PAGE]   = 3;
             cycles[ORA_ZERO_PAGE_X] = 4;
-            cycles[ORA_ABSOLUTE] = 4;
-            cycles[ORA_ABSOLUTE_X] = 4;
-            cycles[ORA_ABSOLUTE_Y] = 4;
-            cycles[ORA_INDIRECT_X] = 6;
-            cycles[ORA_INDIRECT_Y] = 5;
-            cycles[EOR_IMMEDIATE] = 2;
-            cycles[EOR_ZERO_PAGE] = 3;
+            cycles[ORA_ABSOLUTE]    = 4;
+            cycles[ORA_ABSOLUTE_X]  = 4;
+            cycles[ORA_ABSOLUTE_Y]  = 4;
+            cycles[ORA_INDIRECT_X]  = 6;
+            cycles[ORA_INDIRECT_Y]  = 5;
+            cycles[EOR_IMMEDIATE]   = 2;
+            cycles[EOR_ZERO_PAGE]   = 3;
             cycles[EOR_ZERO_PAGE_X] = 4;
-            cycles[EOR_ABSOLUTE] = 4;
-            cycles[EOR_ABSOLUTE_X] = 4;
-            cycles[EOR_ABSOLUTE_Y] = 4;
-            cycles[EOR_INDIRECT_X] = 6;
-            cycles[EOR_INDIRECT_Y] = 5;
+            cycles[EOR_ABSOLUTE]    = 4;
+            cycles[EOR_ABSOLUTE_X]  = 4;
+            cycles[EOR_ABSOLUTE_Y]  = 4;
+            cycles[EOR_INDIRECT_X]  = 6;
+            cycles[EOR_INDIRECT_Y]  = 5;
             // Stack Operation Cycles
             cycles[PHA] = 3;
             cycles[PHP] = 3;
@@ -471,20 +471,20 @@ private:
             cycles[TSX] = 2;
             cycles[TXS] = 2;
             // Comparison Cycles
-            cycles[CMP_IMMEDIATE] = 2;
-            cycles[CMP_ZERO_PAGE] = 3;
+            cycles[CMP_IMMEDIATE]   = 2;
+            cycles[CMP_ZERO_PAGE]   = 3;
             cycles[CMP_ZERO_PAGE_X] = 4;
-            cycles[CMP_ABSOLUTE] = 4;
-            cycles[CMP_ABSOLUTE_X] = 4;
-            cycles[CMP_ABSOLUTE_Y] = 4;
-            cycles[CMP_INDIRECT_X] = 6;
-            cycles[CMP_INDIRECT_Y] = 5;
-            cycles[CPX_IMMEDIATE] = 2;
-            cycles[CPX_ZERO_PAGE] = 3;
-            cycles[CPX_ABSOLUTE] = 4;
-            cycles[CPY_IMMEDIATE] = 2;
-            cycles[CPY_ZERO_PAGE] = 3;
-            cycles[CPY_ABSOLUTE] = 4;
+            cycles[CMP_ABSOLUTE]    = 4;
+            cycles[CMP_ABSOLUTE_X]  = 4;
+            cycles[CMP_ABSOLUTE_Y]  = 4;
+            cycles[CMP_INDIRECT_X]  = 6;
+            cycles[CMP_INDIRECT_Y]  = 5;
+            cycles[CPX_IMMEDIATE]   = 2;
+            cycles[CPX_ZERO_PAGE]   = 3;
+            cycles[CPX_ABSOLUTE]    = 4;
+            cycles[CPY_IMMEDIATE]   = 2;
+            cycles[CPY_ZERO_PAGE]   = 3;
+            cycles[CPY_ABSOLUTE]    = 4;
             // Branch Cycles
             cycles[BEQ] = 2;
             cycles[BNE] = 2;
@@ -496,25 +496,25 @@ private:
             cycles[BVC] = 2;
             // Shift Cycles
             cycles[ASL_ACCUMULATOR] = 2;
-            cycles[ASL_ZERO_PAGE] = 5;
+            cycles[ASL_ZERO_PAGE]   = 5;
             cycles[ASL_ZERO_PAGE_X] = 6;
-            cycles[ASL_ABSOLUTE] = 6;
-            cycles[ASL_ABSOLUTE_X] = 7;
+            cycles[ASL_ABSOLUTE]    = 6;
+            cycles[ASL_ABSOLUTE_X]  = 7;
             cycles[LSR_ACCUMULATOR] = 2;
-            cycles[LSR_ZERO_PAGE] = 5;
+            cycles[LSR_ZERO_PAGE]   = 5;
             cycles[LSR_ZERO_PAGE_X] = 6;
-            cycles[LSR_ABSOLUTE] = 6;
-            cycles[LSR_ABSOLUTE_X] = 7;
+            cycles[LSR_ABSOLUTE]    = 6;
+            cycles[LSR_ABSOLUTE_X]  = 7;
             cycles[ROL_ACCUMULATOR] = 2;
-            cycles[ROL_ZERO_PAGE] = 5;
+            cycles[ROL_ZERO_PAGE]   = 5;
             cycles[ROL_ZERO_PAGE_X] = 6;
-            cycles[ROL_ABSOLUTE] = 6;
-            cycles[ROL_ABSOLUTE_X] = 7;
+            cycles[ROL_ABSOLUTE]    = 6;
+            cycles[ROL_ABSOLUTE_X]  = 7;
             cycles[ROR_ACCUMULATOR] = 2;
-            cycles[ROR_ZERO_PAGE] = 5;
+            cycles[ROR_ZERO_PAGE]   = 5;
             cycles[ROR_ZERO_PAGE_X] = 6;
-            cycles[ROR_ABSOLUTE] = 6;
-            cycles[ROR_ABSOLUTE_X] = 7;
+            cycles[ROR_ABSOLUTE]    = 6;
+            cycles[ROR_ABSOLUTE_X]  = 7;
             // Arithmetic Cycles
             cycles[ADC_IMMEDIATE]   = 2;
             cycles[ADC_ZERO_PAGE]   = 3;
