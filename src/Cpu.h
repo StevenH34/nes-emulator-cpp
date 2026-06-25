@@ -233,7 +233,10 @@ private:
         static constexpr std::uint8_t STY_ABSOLUTE = 0x8C;
 
         /// Register Increments Opcode
-        static constexpr std::uint8_t INX = 0xe8;
+        static constexpr std::uint8_t INX = 0xE8;
+        static constexpr std::uint8_t INY = 0xC8;
+        static constexpr std::uint8_t DEX = 0xCA;
+        static constexpr std::uint8_t DEY = 0x88;
 
         /// Jump Opcodes
         static constexpr std::uint8_t JMP_ABSOLUTE = 0x4C;
@@ -284,6 +287,9 @@ private:
             cycles[STY_ABSOLUTE] = 4;
             // Register Increments Cycles
             cycles[INX] = 2;
+            cycles[INY] = 2;
+            cycles[DEX] = 2;
+            cycles[DEY] = 2;
             // Jump Cycles
             cycles[JMP_ABSOLUTE] = 3;
             cycles[JMP_INDIRECT] = 5;
