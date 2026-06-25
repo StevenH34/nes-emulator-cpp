@@ -189,6 +189,16 @@ public:
     void Tsx(); // Transfer Stack Pointer to register X
     void Txs(); // Transfer X to Stack Pointer
 
+    /// AND Logic Instructions
+    void AndImmediate();
+    void AndZeroPage();
+    void AndZeroPageX();
+    void AndAbsolute();
+    void AndAbsoluteX();
+    void AndAbsoluteY();
+    void AndIndirectX();
+    void AndIndirectY();
+
 
 private:
     Bus& bus_;

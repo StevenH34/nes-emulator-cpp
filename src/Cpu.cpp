@@ -223,6 +223,31 @@ int Cpu::Step() {
         case Opcodes::PLP:
             Plp();
             break;
+        // AND
+        case Opcodes::AND_IMMEDIATE:
+            AndImmediate();
+            break;
+        case Opcodes::AND_ZERO_PAGE:
+            AndZeroPage();
+            break;
+        case Opcodes::AND_ZERO_PAGE_X:
+            AndZeroPageX();
+            break;
+        case Opcodes::AND_ABSOLUTE:
+            AndAbsolute();
+            break;
+        case Opcodes::AND_ABSOLUTE_X:
+            AndAbsoluteX();
+            break;
+        case Opcodes::AND_ABSOLUTE_Y:
+            AndAbsoluteY();
+            break;
+        case Opcodes::AND_INDIRECT_X:
+            AndIndirectX();
+            break;
+        case Opcodes::AND_INDIRECT_Y:
+            AndIndirectY();
+            break;
         default: //TODO: Figure out a good way to deal with unsupported Opcodes
             throw std::runtime_error("Invalid opcode");
     }
@@ -836,4 +861,53 @@ void Cpu::Txs() {
     stack_pointer_ = x_register_;
 }
 
+/// AND Logic Instructions
+
+void Cpu::AndImmediate() {
+    accumulator_ &= FetchByte();
+    SetZFlag(accumulator_);
+    SetNFlag(accumulator_);
+}
+
+void Cpu::AndZeroPage() {
+    accumulator_ &= ReadByte(AddressZeroPage());
+    SetZFlag(accumulator_);
+    SetNFlag(accumulator_);
+}
+
+void Cpu::AndZeroPageX() {
+    accumulator_ &= ReadByte(AddressZeroPageX());
+    SetZFlag(accumulator_);
+    SetNFlag(accumulator_);
+}
+
+void Cpu::AndAbsolute() {
+    accumulator_ &= ReadByte(AddressAbsolute());
+    SetZFlag(accumulator_);
+    SetNFlag(accumulator_);
+}
+
+void Cpu::AndAbsoluteX() {
+    accumulator_ &= ReadByte(AddressAbsoluteX());
+    SetZFlag(accumulator_);
+    SetNFlag(accumulator_);
+}
+
+void Cpu::AndAbsoluteY() {
+    accumulator_ &= ReadByte(AddressAbsoluteY());
+    SetZFlag(accumulator_);
+    SetNFlag(accumulator_);
+}
+
+void Cpu::AndIndirectX() {
+    accumulator_ &= ReadByte(AddressIndirectX());
+    SetZFlag(accumulator_);
+    SetNFlag(accumulator_);
+}
+
+void Cpu::AndIndirectY() {
+    accumulator_ &= ReadByte(AddressIndirectY());
+    SetZFlag(accumulator_);
+    SetNFlag(accumulator_);
+}
 } // nes

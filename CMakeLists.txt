@@ -37,6 +37,7 @@ add_executable(nes_emulator_tests
         tests/compare_tests.cpp
         tests/shift_tests.cpp
         tests/adc_tests.cpp
+        tests/and_tests.cpp
         tests/register_increment_tests.cpp
         tests/register_transfer_tests.cpp
         tests/flag_instruction_tests.cpp)
