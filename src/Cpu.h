@@ -295,6 +295,22 @@ private:
         static constexpr std::uint8_t TSX = 0xBA;
         static constexpr std::uint8_t TXS = 0x9A;
 
+        /// Comparison Opcodes
+        static  constexpr std::uint8_t CMP_IMMEDIATE   = 0xC9;
+        static  constexpr std::uint8_t CMP_ZERO_PAGE   = 0xC5;
+        static  constexpr std::uint8_t CMP_ZERO_PAGE_X = 0xD5;
+        static  constexpr std::uint8_t CMP_ABSOLUTE    = 0xCD;
+        static  constexpr std::uint8_t CMP_ABSOLUTE_X  = 0xDD;
+        static  constexpr std::uint8_t CMP_ABSOLUTE_Y  = 0xD9;
+        static  constexpr std::uint8_t CMP_INDIRECT_X  = 0xC1;
+        static  constexpr std::uint8_t CMP_INDIRECT_Y  = 0xD1;
+        static  constexpr std::uint8_t CPX_IMMEDIATE   = 0xE0;
+        static  constexpr std::uint8_t CPX_ZERO_PAGE   = 0xE4;
+        static  constexpr std::uint8_t CPX_ABSOLUTE    = 0xEC;
+        static  constexpr std::uint8_t CPY_IMMEDIATE   = 0xC0;
+        static  constexpr std::uint8_t CPY_ZERO_PAGE   = 0xC4;
+        static  constexpr std::uint8_t CPY_ABSOLUTE    = 0xCC;
+
         static constexpr std::array<int, 256> CYCLES = [] {
             std::array<int, 256> cycles{};
             // LDA Cycles
@@ -384,13 +400,28 @@ private:
             cycles[CLV] = 2;
             cycles[CLD] = 2;
             cycles[SED] = 2;
-            // Register Transfer Opcodes
+            // Register Transfer Cycles
             cycles[TAX] = 2;
             cycles[TAY] = 2;
             cycles[TXA] = 2;
             cycles[TYA] = 2;
             cycles[TSX] = 2;
             cycles[TXS] = 2;
+            // Comparison Cycles
+            cycles[CMP_IMMEDIATE] = 2;
+            cycles[CMP_ZERO_PAGE] = 3;
+            cycles[CMP_ZERO_PAGE_X] = 4;
+            cycles[CMP_ABSOLUTE] = 4;
+            cycles[CMP_ABSOLUTE_X] = 4;
+            cycles[CMP_ABSOLUTE_Y] = 4;
+            cycles[CMP_INDIRECT_X] = 6;
+            cycles[CMP_INDIRECT_Y] = 5;
+            cycles[CPX_IMMEDIATE] = 2;
+            cycles[CPX_ZERO_PAGE] = 3;
+            cycles[CPX_ABSOLUTE] = 4;
+            cycles[CPY_IMMEDIATE] = 2;
+            cycles[CPY_ZERO_PAGE] = 3;
+            cycles[CPY_ABSOLUTE] = 4;
             return cycles;
         }();
     };
