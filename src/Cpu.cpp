@@ -188,6 +188,28 @@ int Cpu::Step() {
         case Opcodes::TXS:
             Txs();
             break;
+        // Flags
+        case Opcodes::CLC:
+            Clc();
+            break;
+        case Opcodes::SEC:
+            Sec();
+            break;
+        case Opcodes::CLI:
+            Cli();
+            break;
+        case Opcodes::SEI:
+            Sei();
+            break;
+        case Opcodes::CLD:
+            Cld();
+            break;
+        case Opcodes::SED:
+            Sed();
+            break;
+        case Opcodes::CLV:
+            Clv();
+            break;
         default: //TODO: Figure out a good way to deal with unsupported Opcodes
             throw std::runtime_error("Invalid opcode");
     }
@@ -507,7 +529,7 @@ void Cpu::Dey() {
 }
 
 
-/// Flag Instructions
+/// Flag Methods
 void Cpu::SetFlag(const StatusFlag flag, const bool is_on) {
     const auto mask = static_cast<std::uint8_t>(flag);
     if (is_on) {
@@ -539,6 +561,36 @@ void Cpu::SetCFlag(const bool is_on) {
 
 void Cpu::SetVFlag(const bool is_on) {
     SetFlag(StatusFlag::V, is_on);
+}
+
+/// Flag Instructions
+
+void Cpu::Clc() {
+    SetFlag(StatusFlag::C, false);
+}
+
+void Cpu::Sec() {
+    SetFlag(StatusFlag::C, true);
+}
+
+void Cpu::Cli() {
+    SetFlag(StatusFlag::I, false);
+}
+
+void Cpu::Sei() {
+    SetFlag(StatusFlag::I, true);
+}
+
+void Cpu::Cld() {
+    SetFlag(StatusFlag::D, false);
+}
+
+void Cpu::Sed() {
+    SetFlag(StatusFlag::D, true);
+}
+
+void Cpu::Clv() {
+    SetFlag(StatusFlag::V, false);
 }
 
 /// Branch Instructions

@@ -45,6 +45,57 @@ TEST_CASE("Cpu flag helpers update the status register") {
 
     cpu.SetFlag(nes::Cpu::StatusFlag::Z, false);
     CHECK(cpu.StatusString() == "NvUbdIzc");
+
+    cpu.SetZFlag(0x01); // non-zero clears the Zero flag
+    CHECK(cpu.StatusString() == "NvUbdIzc");
+
+    cpu.SetNFlag(0x01); // most significant bit clear clears the Negative flag
+    CHECK(cpu.StatusString() == "nvUbdIzc");
+}
+
+TEST_CASE("IsFlagSet reports whether a given status bit is set") {
+    nes::Bus bus;
+    nes::Cpu cpu(bus);
+
+    ResetStatusRegister(cpu);
+
+    CHECK_FALSE(cpu.IsFlagSet(static_cast<std::uint8_t>(nes::Cpu::StatusFlag::C)));
+    CHECK_FALSE(cpu.IsFlagSet(static_cast<std::uint8_t>(nes::Cpu::StatusFlag::V)));
+
+    cpu.SetFlag(nes::Cpu::StatusFlag::C, true);
+    CHECK(cpu.IsFlagSet(static_cast<std::uint8_t>(nes::Cpu::StatusFlag::C)));
+    CHECK_FALSE(cpu.IsFlagSet(static_cast<std::uint8_t>(nes::Cpu::StatusFlag::V)));
+
+    cpu.SetFlag(nes::Cpu::StatusFlag::V, true);
+    CHECK(cpu.IsFlagSet(static_cast<std::uint8_t>(nes::Cpu::StatusFlag::V)));
+}
+
+TEST_CASE("SetCFlag updates only the Carry flag") {
+    nes::Bus bus;
+    nes::Cpu cpu(bus);
+
+    ResetStatusRegister(cpu);
+    CHECK(cpu.StatusString() == "nvUbdIzc");
+
+    cpu.SetCFlag(true);
+    CHECK(cpu.StatusString() == "nvUbdIzC");
+
+    cpu.SetCFlag(false);
+    CHECK(cpu.StatusString() == "nvUbdIzc");
+}
+
+TEST_CASE("SetVFlag updates only the Overflow flag") {
+    nes::Bus bus;
+    nes::Cpu cpu(bus);
+
+    ResetStatusRegister(cpu);
+    CHECK(cpu.StatusString() == "nvUbdIzc");
+
+    cpu.SetVFlag(true);
+    CHECK(cpu.StatusString() == "nVUbdIzc");
+
+    cpu.SetVFlag(false);
+    CHECK(cpu.StatusString() == "nvUbdIzc");
 }
 
 TEST_CASE("Cpu registers start in the documented power-up state") {

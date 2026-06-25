@@ -116,13 +116,23 @@ public:
         N = 0x80  // Negative
     };
 
-    /// Flag Instructions
+    /// Flag Methods
     void SetFlag(StatusFlag flag, bool is_on);
     [[nodiscard]] bool IsFlagSet(std::uint8_t mask) const;
     void SetZFlag(std::uint8_t register_value); // Zero Flag
     void SetNFlag(std::uint8_t register_value); // Negative Flag
     void SetCFlag(bool is_on);  // Carry Flag
     void SetVFlag(bool is_on);  // Overflow Flag
+
+    /// Flag Instructions
+    void Clc();
+    void Sec();
+    void Cli();
+    void Sei();
+    void Cld();
+    void Sed();
+    void Clv();
+
 
     /// Branch Instructions
     void BranchIf(bool condition);
@@ -283,13 +293,13 @@ private:
         static constexpr std::uint8_t EOR_INDIRECT_X  = 0x41;
         static constexpr std::uint8_t EOR_INDIRECT_Y  = 0x51;
 
-        /// Stack Operation Opcodes
+        /// Stack Opcodes
         static constexpr std::uint8_t PHA = 0x48;
         static constexpr std::uint8_t PHP = 0x08;
         static constexpr std::uint8_t PLA = 0x68;
         static constexpr std::uint8_t PLP = 0x28;
 
-        /// Flag Operation Opcodes
+        /// Flag Opcodes
         static constexpr std::uint8_t CLC = 0x18;
         static constexpr std::uint8_t SEC = 0x38;
         static constexpr std::uint8_t CLI = 0x58;
@@ -461,12 +471,12 @@ private:
             cycles[EOR_ABSOLUTE_Y]  = 4;
             cycles[EOR_INDIRECT_X]  = 6;
             cycles[EOR_INDIRECT_Y]  = 5;
-            // Stack Operation Cycles
+            // Stack Cycles
             cycles[PHA] = 3;
             cycles[PHP] = 3;
             cycles[PLA] = 4;
             cycles[PLP] = 4;
-            // Flag Operation Cycles
+            // Flag Cycles
             cycles[CLC] = 2;
             cycles[SEC] = 2;
             cycles[CLI] = 2;
