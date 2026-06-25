@@ -272,6 +272,12 @@ private:
         static constexpr std::uint8_t EOR_INDIRECT_X = 0x41;
         static constexpr std::uint8_t EOR_INDIRECT_Y = 0x51;
 
+        /// Stack Operation Opcodes
+        static constexpr std::uint8_t PHA = 0x48;
+        static constexpr std::uint8_t PHP = 0x08;
+        static constexpr std::uint8_t PLA = 0x68;
+        static constexpr std::uint8_t PLP = 0x28;
+
         static constexpr std::array<int, 256> CYCLES = [] {
             std::array<int, 256> cycles{};
             // LDA Cycles
@@ -348,6 +354,11 @@ private:
             cycles[EOR_ABSOLUTE_Y] = 4;
             cycles[EOR_INDIRECT_X] = 6;
             cycles[EOR_INDIRECT_Y] = 5;
+            // Stack Operation Cycles
+            cycles[PHA] = 3;
+            cycles[PHP] = 3;
+            cycles[PLA] = 4;
+            cycles[PLP] = 4;
             return cycles;
         }();
     };
