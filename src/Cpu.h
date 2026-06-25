@@ -321,6 +321,27 @@ private:
         static constexpr std::uint8_t BVS = 0x70;
         static constexpr std::uint8_t BVC = 0x50;
 
+        /// Shift Opcodes
+        static constexpr std::uint8_t ASL_ACCUMULATOR = 0x0A;
+        static constexpr std::uint8_t ASL_ZERO_PAGE   = 0x06;
+        static constexpr std::uint8_t ASL_ZERO_PAGE_X = 0x16;
+        static constexpr std::uint8_t ASL_ABSOLUTE    = 0x0E;
+        static constexpr std::uint8_t ASL_ABSOLUTE_X  = 0x1E;
+        static constexpr std::uint8_t LSR_ACCUMULATOR = 0x4A;
+        static constexpr std::uint8_t LSR_ZERO_PAGE   = 0x46;
+        static constexpr std::uint8_t LSR_ZERO_PAGE_X = 0x56;
+        static constexpr std::uint8_t LSR_ABSOLUTE    = 0x4E;
+        static constexpr std::uint8_t LSR_ABSOLUTE_X  = 0x5E;
+        static constexpr std::uint8_t ROL_ACCUMULATOR = 0x2A;
+        static constexpr std::uint8_t ROL_ZERO_PAGE   = 0x26;
+        static constexpr std::uint8_t ROL_ZERO_PAGE_X = 0x36;
+        static constexpr std::uint8_t ROL_ABSOLUTE    = 0x2E;
+        static constexpr std::uint8_t ROL_ABSOLUTE_X  = 0x3E;
+        static constexpr std::uint8_t ROR_ACCUMULATOR = 0x6A;
+        static constexpr std::uint8_t ROR_ZERO_PAGE   = 0x66;
+        static constexpr std::uint8_t ROR_ZERO_PAGE_X = 0x76;
+        static constexpr std::uint8_t ROR_ABSOLUTE    = 0x6E;
+        static constexpr std::uint8_t ROR_ABSOLUTE_X  = 0x7E;
 
         static constexpr std::array<int, 256> CYCLES = [] {
             std::array<int, 256> cycles{};
@@ -442,6 +463,27 @@ private:
             cycles[BPL] = 2;
             cycles[BVS] = 2;
             cycles[BVC] = 2;
+            // Shift Cycles
+            cycles[ASL_ACCUMULATOR] = 2;
+            cycles[ASL_ZERO_PAGE] = 5;
+            cycles[ASL_ZERO_PAGE_X] = 6;
+            cycles[ASL_ABSOLUTE] = 6;
+            cycles[ASL_ABSOLUTE_X] = 7;
+            cycles[LSR_ACCUMULATOR] = 2;
+            cycles[LSR_ZERO_PAGE] = 5;
+            cycles[LSR_ZERO_PAGE_X] = 6;
+            cycles[LSR_ABSOLUTE] = 6;
+            cycles[LSR_ABSOLUTE_X] = 7;
+            cycles[ROL_ACCUMULATOR] = 2;
+            cycles[ROL_ZERO_PAGE] = 5;
+            cycles[ROL_ZERO_PAGE_X] = 6;
+            cycles[ROL_ABSOLUTE] = 6;
+            cycles[ROL_ABSOLUTE_X] = 7;
+            cycles[ROR_ACCUMULATOR] = 2;
+            cycles[ROR_ZERO_PAGE] = 5;
+            cycles[ROR_ZERO_PAGE_X] = 6;
+            cycles[ROR_ABSOLUTE] = 6;
+            cycles[ROR_ABSOLUTE_X] = 7;
             return cycles;
         }();
     };
