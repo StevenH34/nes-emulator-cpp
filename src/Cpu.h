@@ -361,6 +361,19 @@ private:
         static constexpr std::uint8_t SBC_INDIRECT_X  = 0xE1;
         static constexpr std::uint8_t SBC_INDIRECT_Y  = 0xF1;
 
+        /// Misc Opcodes
+        static constexpr std::uint8_t INC_ZERO_PAGE   = 0xE6;
+        static constexpr std::uint8_t INC_ZERO_PAGE_X = 0xF6;
+        static constexpr std::uint8_t INC_ABSOLUTE    = 0xEE;
+        static constexpr std::uint8_t INC_ABSOLUTE_X  = 0xFE;
+        static constexpr std::uint8_t DEC_ZERO_PAGE   = 0xC6;
+        static constexpr std::uint8_t DEC_ZERO_PAGE_X = 0xD6;
+        static constexpr std::uint8_t DEC_ABSOLUTE    = 0xCE;
+        static constexpr std::uint8_t DEC_ABSOLUTE_X  = 0xDE;
+        static constexpr std::uint8_t BIT_ZERO_PAGE   = 0x24;
+        static constexpr std::uint8_t BIT_ABSOLUTE    = 0x2C;
+        static constexpr std::uint8_t NOP             = 0xEA;
+
         static constexpr std::array<int, 256> CYCLES = [] {
             std::array<int, 256> cycles{};
             // LDA Cycles
@@ -502,7 +515,7 @@ private:
             cycles[ROR_ZERO_PAGE_X] = 6;
             cycles[ROR_ABSOLUTE] = 6;
             cycles[ROR_ABSOLUTE_X] = 7;
-            /// Arithmetic Cycles
+            // Arithmetic Cycles
             cycles[ADC_IMMEDIATE]   = 2;
             cycles[ADC_ZERO_PAGE]   = 3;
             cycles[ADC_ZERO_PAGE_X] = 4;
@@ -519,6 +532,18 @@ private:
             cycles[SBC_ABSOLUTE_Y]  = 4;
             cycles[SBC_INDIRECT_X]  = 6;
             cycles[SBC_INDIRECT_Y]  = 5;
+            // Misc cycles
+            cycles[INC_ZERO_PAGE]   = 5;
+            cycles[INC_ZERO_PAGE_X] = 6;
+            cycles[INC_ABSOLUTE]    = 6;
+            cycles[INC_ABSOLUTE_X]  = 7;
+            cycles[DEC_ZERO_PAGE]   = 5;
+            cycles[DEC_ZERO_PAGE_X] = 6;
+            cycles[DEC_ABSOLUTE]    = 6;
+            cycles[DEC_ABSOLUTE_X]  = 7;
+            cycles[BIT_ZERO_PAGE]   = 3;
+            cycles[BIT_ABSOLUTE]    = 4;
+            cycles[NOP]             = 2;
             return cycles;
         }();
     };
