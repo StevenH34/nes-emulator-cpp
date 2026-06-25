@@ -246,6 +246,32 @@ private:
         static constexpr std::uint8_t JMP_BRK = 0x00;
         static constexpr std::uint8_t JMP_RTI = 0x40;
 
+        /// Logical Opcodes
+        static constexpr std::uint8_t AND_IMMEDIATE = 0x29;
+        static constexpr std::uint8_t AND_ZERO_PAGE = 0x25;
+        static constexpr std::uint8_t AND_ZERO_PAGE_X = 0x35;
+        static constexpr std::uint8_t AND_ABSOLUTE = 0x2D;
+        static constexpr std::uint8_t AND_ABSOLUTE_X = 0x3D;
+        static constexpr std::uint8_t AND_ABSOLUTE_Y = 0x39;
+        static constexpr std::uint8_t AND_INDIRECT_X = 0x21;
+        static constexpr std::uint8_t AND_INDIRECT_Y = 0x31;
+        static constexpr std::uint8_t ORA_IMMEDIATE = 0x09;
+        static constexpr std::uint8_t ORA_ZERO_PAGE = 0x05;
+        static constexpr std::uint8_t ORA_ZERO_PAGE_X = 0x15;
+        static constexpr std::uint8_t ORA_ABSOLUTE = 0x0D;
+        static constexpr std::uint8_t ORA_ABSOLUTE_X = 0x1D;
+        static constexpr std::uint8_t ORA_ABSOLUTE_Y = 0x19;
+        static constexpr std::uint8_t ORA_INDIRECT_X = 0x01;
+        static constexpr std::uint8_t ORA_INDIRECT_Y = 0x11;
+        static constexpr std::uint8_t EOR_IMMEDIATE = 0x49;
+        static constexpr std::uint8_t EOR_ZERO_PAGE = 0x45;
+        static constexpr std::uint8_t EOR_ZERO_PAGE_X = 0x55;
+        static constexpr std::uint8_t EOR_ABSOLUTE = 0x4D;
+        static constexpr std::uint8_t EOR_ABSOLUTE_X = 0x5D;
+        static constexpr std::uint8_t EOR_ABSOLUTE_Y = 0x59;
+        static constexpr std::uint8_t EOR_INDIRECT_X = 0x41;
+        static constexpr std::uint8_t EOR_INDIRECT_Y = 0x51;
+
         static constexpr std::array<int, 256> CYCLES = [] {
             std::array<int, 256> cycles{};
             // LDA Cycles
@@ -297,6 +323,31 @@ private:
             cycles[JMP_RTS] = 6;
             cycles[JMP_BRK] = 7;
             cycles[JMP_RTI] = 6;
+            // Logic Cycles
+            cycles[AND_IMMEDIATE] = 2;
+            cycles[AND_ZERO_PAGE] = 3;
+            cycles[AND_ZERO_PAGE_X] = 4;
+            cycles[AND_ABSOLUTE] = 4;
+            cycles[AND_ABSOLUTE_X] = 4;
+            cycles[AND_ABSOLUTE_Y] = 4;
+            cycles[AND_INDIRECT_X] = 6;
+            cycles[AND_INDIRECT_Y] = 5;
+            cycles[ORA_IMMEDIATE] = 2;
+            cycles[ORA_ZERO_PAGE] = 3;
+            cycles[ORA_ZERO_PAGE_X] = 4;
+            cycles[ORA_ABSOLUTE] = 4;
+            cycles[ORA_ABSOLUTE_X] = 4;
+            cycles[ORA_ABSOLUTE_Y] = 4;
+            cycles[ORA_INDIRECT_X] = 6;
+            cycles[ORA_INDIRECT_Y] = 5;
+            cycles[EOR_IMMEDIATE] = 2;
+            cycles[EOR_ZERO_PAGE] = 3;
+            cycles[EOR_ZERO_PAGE_X] = 4;
+            cycles[EOR_ABSOLUTE] = 4;
+            cycles[EOR_ABSOLUTE_X] = 4;
+            cycles[EOR_ABSOLUTE_Y] = 4;
+            cycles[EOR_INDIRECT_X] = 6;
+            cycles[EOR_INDIRECT_Y] = 5;
             return cycles;
         }();
     };
