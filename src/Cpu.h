@@ -278,6 +278,15 @@ private:
         static constexpr std::uint8_t PLA = 0x68;
         static constexpr std::uint8_t PLP = 0x28;
 
+        /// Flag Operation Opcodes
+        static constexpr std::uint8_t CLC = 0x18;
+        static constexpr std::uint8_t SEC = 0x38;
+        static constexpr std::uint8_t CLI = 0x58;
+        static constexpr std::uint8_t SEI = 0x78;
+        static constexpr std::uint8_t CLV = 0xB8;
+        static constexpr std::uint8_t CLD = 0xD8;
+        static constexpr std::uint8_t SED = 0xF8;
+
         static constexpr std::array<int, 256> CYCLES = [] {
             std::array<int, 256> cycles{};
             // LDA Cycles
@@ -359,6 +368,14 @@ private:
             cycles[PHP] = 3;
             cycles[PLA] = 4;
             cycles[PLP] = 4;
+            // Flag Operation Cycles
+            cycles[CLC] = 2;
+            cycles[SEC] = 2;
+            cycles[CLI] = 2;
+            cycles[SEI] = 2;
+            cycles[CLV] = 2;
+            cycles[CLD] = 2;
+            cycles[SED] = 2;
             return cycles;
         }();
     };
