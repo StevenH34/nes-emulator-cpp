@@ -343,6 +343,24 @@ private:
         static constexpr std::uint8_t ROR_ABSOLUTE    = 0x6E;
         static constexpr std::uint8_t ROR_ABSOLUTE_X  = 0x7E;
 
+        /// Arithmetic Opcodes
+        static constexpr std::uint8_t ADC_IMMEDIATE   = 0x69;
+        static constexpr std::uint8_t ADC_ZERO_PAGE   = 0x65;
+        static constexpr std::uint8_t ADC_ZERO_PAGE_X = 0x75;
+        static constexpr std::uint8_t ADC_ABSOLUTE    = 0x6D;
+        static constexpr std::uint8_t ADC_ABSOLUTE_X  = 0x7D;
+        static constexpr std::uint8_t ADC_ABSOLUTE_Y  = 0x79;
+        static constexpr std::uint8_t ADC_INDIRECT_X  = 0x61;
+        static constexpr std::uint8_t ADC_INDIRECT_Y  = 0x71;
+        static constexpr std::uint8_t SBC_IMMEDIATE   = 0xE9;
+        static constexpr std::uint8_t SBC_ZERO_PAGE   = 0xE5;
+        static constexpr std::uint8_t SBC_ZERO_PAGE_X = 0xF5;
+        static constexpr std::uint8_t SBC_ABSOLUTE    = 0xED;
+        static constexpr std::uint8_t SBC_ABSOLUTE_X  = 0xFD;
+        static constexpr std::uint8_t SBC_ABSOLUTE_Y  = 0xF9;
+        static constexpr std::uint8_t SBC_INDIRECT_X  = 0xE1;
+        static constexpr std::uint8_t SBC_INDIRECT_Y  = 0xF1;
+
         static constexpr std::array<int, 256> CYCLES = [] {
             std::array<int, 256> cycles{};
             // LDA Cycles
@@ -484,6 +502,23 @@ private:
             cycles[ROR_ZERO_PAGE_X] = 6;
             cycles[ROR_ABSOLUTE] = 6;
             cycles[ROR_ABSOLUTE_X] = 7;
+            /// Arithmetic Cycles
+            cycles[ADC_IMMEDIATE]   = 2;
+            cycles[ADC_ZERO_PAGE]   = 3;
+            cycles[ADC_ZERO_PAGE_X] = 4;
+            cycles[ADC_ABSOLUTE]    = 4;
+            cycles[ADC_ABSOLUTE_X]  = 4;
+            cycles[ADC_ABSOLUTE_Y]  = 4;
+            cycles[ADC_INDIRECT_X]  = 6;
+            cycles[ADC_INDIRECT_Y]  = 5;
+            cycles[SBC_IMMEDIATE]   = 2;
+            cycles[SBC_ZERO_PAGE]   = 3;
+            cycles[SBC_ZERO_PAGE_X] = 4;
+            cycles[SBC_ABSOLUTE]    = 4;
+            cycles[SBC_ABSOLUTE_X]  = 4;
+            cycles[SBC_ABSOLUTE_Y]  = 4;
+            cycles[SBC_INDIRECT_X]  = 6;
+            cycles[SBC_INDIRECT_Y]  = 5;
             return cycles;
         }();
     };
