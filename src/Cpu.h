@@ -234,6 +234,16 @@ public:
     void OraIndirectX();
     void OraIndirectY();
 
+    /// EOR (bitwise Exclusive OR)
+    void EorImmediate();
+    void EorZeroPage();
+    void EorZeroPageX();
+    void EorAbsolute();
+    void EorAbsoluteX();
+    void EorAbsoluteY();
+    void EorIndirectX();
+    void EorIndirectY();
+
 
 
 private:
