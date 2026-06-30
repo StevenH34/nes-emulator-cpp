@@ -182,7 +182,18 @@ public:
 
     /// Comparison Instructions
     void Compare(std::uint8_t register_value, std::uint8_t operand);
+
+    /// CMP (CoMPare accumulator)
+    /// Affects Flags: N Z C
     void CmpImmediate();
+    void CmpZeroPage();
+    void CmpZeroPageX();
+    void CmpAbsolute();
+    void CmpAbsoluteX();
+    void CmpAbsoluteY();
+    void CmpIndirectX();
+    void CmpIndirectY();
+
     void CpxImmediate();
     void CpyImmediate();
 
@@ -382,7 +393,7 @@ private:
         static constexpr std::uint8_t TSX = 0xBA;
         static constexpr std::uint8_t TXS = 0x9A;
 
-        /// Comparison Opcodes
+        /// CMP Opcodes
         static  constexpr std::uint8_t CMP_IMMEDIATE   = 0xC9;
         static  constexpr std::uint8_t CMP_ZERO_PAGE   = 0xC5;
         static  constexpr std::uint8_t CMP_ZERO_PAGE_X = 0xD5;
@@ -391,9 +402,11 @@ private:
         static  constexpr std::uint8_t CMP_ABSOLUTE_Y  = 0xD9;
         static  constexpr std::uint8_t CMP_INDIRECT_X  = 0xC1;
         static  constexpr std::uint8_t CMP_INDIRECT_Y  = 0xD1;
+        /// CPX Opcodes
         static  constexpr std::uint8_t CPX_IMMEDIATE   = 0xE0;
         static  constexpr std::uint8_t CPX_ZERO_PAGE   = 0xE4;
         static  constexpr std::uint8_t CPX_ABSOLUTE    = 0xEC;
+        /// CPY Opcodes
         static  constexpr std::uint8_t CPY_IMMEDIATE   = 0xC0;
         static  constexpr std::uint8_t CPY_ZERO_PAGE   = 0xC4;
         static  constexpr std::uint8_t CPY_ABSOLUTE    = 0xCC;
@@ -558,7 +571,7 @@ private:
             cycles[TYA] = 2;
             cycles[TSX] = 2;
             cycles[TXS] = 2;
-            // Comparison Cycles
+            // CPM Cycles
             cycles[CMP_IMMEDIATE]   = 2;
             cycles[CMP_ZERO_PAGE]   = 3;
             cycles[CMP_ZERO_PAGE_X] = 4;
@@ -567,9 +580,11 @@ private:
             cycles[CMP_ABSOLUTE_Y]  = 4;
             cycles[CMP_INDIRECT_X]  = 6;
             cycles[CMP_INDIRECT_Y]  = 5;
+            // CPX Cycles
             cycles[CPX_IMMEDIATE]   = 2;
             cycles[CPX_ZERO_PAGE]   = 3;
             cycles[CPX_ABSOLUTE]    = 4;
+            // CPY Cycles
             cycles[CPY_IMMEDIATE]   = 2;
             cycles[CPY_ZERO_PAGE]   = 3;
             cycles[CPY_ABSOLUTE]    = 4;

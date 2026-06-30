@@ -298,6 +298,31 @@ int Cpu::Step() {
         case Opcodes::EOR_INDIRECT_Y:
             EorIndirectY();
             break;
+        // CMP
+        case Opcodes::CMP_IMMEDIATE:
+            CmpImmediate();
+            break;
+        case Opcodes::CMP_ZERO_PAGE:
+            CmpZeroPage();
+            break;
+        case Opcodes::CMP_ZERO_PAGE_X:
+            CmpZeroPageX();
+            break;
+        case Opcodes::CMP_ABSOLUTE:
+            CmpAbsolute();
+            break;
+        case Opcodes::CMP_ABSOLUTE_X:
+            CmpAbsoluteX();
+            break;
+        case Opcodes::CMP_ABSOLUTE_Y:
+            CmpAbsoluteY();
+            break;
+        case Opcodes::CMP_INDIRECT_X:
+            CmpIndirectX();
+            break;
+        case Opcodes::CMP_INDIRECT_Y:
+            CmpIndirectY();
+            break;
         default: //TODO: Figure out a good way to deal with unsupported Opcodes
             throw std::runtime_error("Invalid opcode");
     }
@@ -817,8 +842,44 @@ void Cpu::Compare(const std::uint8_t register_value, const std::uint8_t operand)
     SetNFlag(result);
 }
 
+/// CMP
 void Cpu::CmpImmediate() {
     const auto value = FetchByte();
+    Compare(accumulator_, value);
+}
+
+void Cpu::CmpZeroPage() {
+    const auto value = ReadByte(AddressZeroPage());
+    Compare(accumulator_, value);
+}
+
+void Cpu::CmpZeroPageX() {
+    const auto value = ReadByte(AddressZeroPageX());
+    Compare(accumulator_, value);
+}
+
+void Cpu::CmpAbsolute() {
+    const auto value = ReadByte(AddressAbsolute());
+    Compare(accumulator_, value);
+}
+
+void Cpu::CmpAbsoluteX() {
+    const auto value = ReadByte(AddressAbsoluteX());
+    Compare(accumulator_, value);
+}
+
+void Cpu::CmpAbsoluteY() {
+    const auto value = ReadByte(AddressAbsoluteY());
+    Compare(accumulator_, value);
+}
+
+void Cpu::CmpIndirectX() {
+    const auto value = ReadByte(AddressIndirectX());
+    Compare(accumulator_, value);
+}
+
+void Cpu::CmpIndirectY() {
+    const auto value = ReadByte(AddressIndirectY());
     Compare(accumulator_, value);
 }
 
