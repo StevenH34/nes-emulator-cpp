@@ -97,6 +97,64 @@ TEST_CASE("CpxImmediate clears Carry when the X register is less than the operan
     CHECK(cpu.StatusString() == "NvUbdIzc"); // Carry clear, Zero clear, Negative set
 }
 
+TEST_CASE("CpxZeroPage compares the X register with the value at the zero page address") {
+    nes::Bus bus;
+    nes::Cpu cpu(bus);
+
+    cpu.SetXRegister(0x50);
+    bus.WriteCpu(0x00, 0x30); // zero page address
+    bus.WriteCpu(0x30, 0x20); // value, 0x50 > 0x20
+
+    cpu.CpxZeroPage();
+
+    CHECK(cpu.GetProgramCounter() == 0x0001);
+    CHECK(cpu.GetXRegister() == 0x50); // X register left unchanged
+    CHECK(cpu.StatusString() == "nvUbdIzC"); // Carry set, Zero and Negative clear
+}
+
+TEST_CASE("CpxZeroPage clears Carry when the X register is less than the zero page value") {
+    nes::Bus bus;
+    nes::Cpu cpu(bus);
+
+    cpu.SetXRegister(0x10);
+    bus.WriteCpu(0x00, 0x40); // zero page address
+    bus.WriteCpu(0x40, 0x80); // value, 0x10 < 0x80
+
+    cpu.CpxZeroPage();
+
+    CHECK(cpu.StatusString() == "NvUbdIzc"); // Carry clear, Zero clear, Negative set
+}
+
+TEST_CASE("CpxAbsolute compares the X register with the value at a 16-bit address") {
+    nes::Bus bus;
+    nes::Cpu cpu(bus);
+
+    cpu.SetXRegister(0x50);
+    bus.WriteCpu(0x00, 0x00); // low byte of address
+    bus.WriteCpu(0x01, 0x03); // high byte of address, target = 0x0300
+    bus.WriteCpu(0x0300, 0x01); // value, 0x50 - 0x01 = 0x4F (bit 7 clear)
+
+    cpu.CpxAbsolute();
+
+    CHECK(cpu.GetProgramCounter() == 0x0002);
+    CHECK(cpu.GetXRegister() == 0x50); // X register left unchanged
+    CHECK(cpu.StatusString() == "nvUbdIzC"); // Carry set, Zero and Negative clear
+}
+
+TEST_CASE("CpxAbsolute clears Carry when the X register is less than the absolute value") {
+    nes::Bus bus;
+    nes::Cpu cpu(bus);
+
+    cpu.SetXRegister(0x05);
+    bus.WriteCpu(0x00, 0x00); // low byte of address
+    bus.WriteCpu(0x01, 0x04); // high byte of address, target = 0x0400
+    bus.WriteCpu(0x0400, 0x10); // value, 0x05 - 0x10 = 0xF5 (bit 7 set)
+
+    cpu.CpxAbsolute();
+
+    CHECK(cpu.StatusString() == "NvUbdIzc"); // Carry clear, Zero clear, Negative set
+}
+
 TEST_CASE("CpyImmediate compares the Y register with the value following the opcode") {
     nes::Bus bus;
     nes::Cpu cpu(bus);

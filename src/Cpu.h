@@ -194,7 +194,13 @@ public:
     void CmpIndirectX();
     void CmpIndirectY();
 
+    /// CPX (ComPare X register)
+    /// Affects Flags: N Z C
     void CpxImmediate();
+    void CpxZeroPage();
+    void CpxAbsolute();
+
+    /// CPY
     void CpyImmediate();
 
     /// Shift Instructions

@@ -323,6 +323,17 @@ int Cpu::Step() {
         case Opcodes::CMP_INDIRECT_Y:
             CmpIndirectY();
             break;
+        // CPX
+        case Opcodes::CPX_IMMEDIATE:
+            CpxImmediate();
+            break;
+        case Opcodes::CPX_ZERO_PAGE:
+            CpxZeroPage();
+            break;
+        case Opcodes::CPX_ABSOLUTE:
+            CpxAbsolute();
+            break;
+        // CPY
         default: //TODO: Figure out a good way to deal with unsupported Opcodes
             throw std::runtime_error("Invalid opcode");
     }
@@ -883,10 +894,22 @@ void Cpu::CmpIndirectY() {
     Compare(accumulator_, value);
 }
 
+/// CPX
 void Cpu::CpxImmediate() {
     const auto value = FetchByte();
     Compare(x_register_, value);
 }
+
+void Cpu::CpxZeroPage() {
+    const auto value = ReadByte(AddressZeroPage());
+    Compare(x_register_, value);
+}
+
+void Cpu::CpxAbsolute() {
+    const auto value = ReadByte(AddressAbsolute());
+    Compare(x_register_, value);
+}
+
 
 void Cpu::CpyImmediate() {
     const auto value = FetchByte();
