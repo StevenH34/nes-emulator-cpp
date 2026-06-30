@@ -1,7 +1,3 @@
-//
-// Created by Steven Hedges on 6/3/26.
-//
-
 #ifndef NES_EMULATOR_CPP_CPU_H
 #define NES_EMULATOR_CPP_CPU_H
 
@@ -49,7 +45,8 @@ public:
     std::uint16_t AddressIndirectX();
     std::uint16_t AddressIndirectY();
 
-    /// STA Instructions
+    /// STA (STore Accumulator)
+    /// Affects flags: none
     void StaZeroPage();
     void StaZeroPageX();
     void StaAbsolute();
@@ -58,7 +55,8 @@ public:
     void StaIndirectX();
     void StaIndirectY();
 
-    /// LDA Instructions
+    /// LDA (LoaD Accumulator)
+    /// Affects flags: N Z
     void Lda(std::uint8_t value);
     void LdaImmediate();
     void LdaZeroPage();
@@ -69,7 +67,7 @@ public:
     void LdaIndirectX();
     void LdaIndirectY();
 
-    /// LDX Instructions
+    /// LDX (LoaD X register)
     void Ldx(std::uint8_t value);
     void LdxImmediate();
     void LdxZeroPage();
@@ -77,7 +75,7 @@ public:
     void LdxAbsolute();
     void LdxAbsoluteY();
 
-    /// LDY Instructions
+    /// LDY (LoaD Y register)
     void Ldy(std::uint8_t value);
     void LdyImmediate();
     void LdyZeroPage();
@@ -85,12 +83,12 @@ public:
     void LdyAbsolute();
     void LdyAbsoluteX();
 
-    /// STX Instructions
+    /// STX (STore X register)
     void StxZeroPage();
     void StxZeroPageY();
     void StxAbsolute();
 
-    /// STY Instructions
+    /// STY (STore Y register)
     void StyZeroPage();
     void StyZeroPageX();
     void StyAbsolute();
@@ -124,7 +122,17 @@ public:
     void SetCFlag(bool is_on);  // Carry Flag
     void SetVFlag(bool is_on);  // Overflow Flag
 
-    /// Flag Instructions
+    /**
+     * Flag (Processor Status) Instructions
+     *
+     * CLC (CLear Carry)
+     * SEC (SEt Carry)
+     * CLI (CLear Interrupt)
+     * SEI (SEt Interrupt)
+     * CLV (CLear oVerflow)
+     * CLD (CLear Decimal)
+     * SED (SEt Decimal)
+     */
     void Clc();
     void Sec();
     void Cli();
@@ -132,8 +140,7 @@ public:
     void Cld();
     void Sed();
     void Clv();
-
-
+    
     /// Branch Instructions
     void BranchIf(bool condition);
     void Beq(); // Z == 1, branch if equal
@@ -160,11 +167,18 @@ public:
     void StackPushWord(std::uint16_t value);
     std::uint16_t StackPopWord();
 
-    /// Stack Instructions
-    void Pha(); // Push accumulator to the stack
-    void Pla(); // Pop from stack to accumulator
-    void Php(); // Push stats to stack
-    void Plp(); // Pop status from stack
+    /**
+     * Stack Instructions
+     *
+     * PHA (PusH Accumulator) - Push accumulator to the stack
+     * PLA (PuLl Accumulator) - Pop from stack to accumulator
+     * PHP (PusH Processor status) - Push status register to the stack
+     * PLP (PuLl Processor status) - Pop from stack to status register
+     */
+    void Pha();
+    void Pla();
+    void Php();
+    void Plp();
 
     /// Comparison Instructions
     void Compare(std::uint8_t register_value, std::uint8_t operand);
@@ -176,12 +190,21 @@ public:
     // Arithmetic Shift Left moves all bits one position to the left
     void AslAccumulator();
 
-    /// Arithmetic Instructions
-    // Add with Carry
+    /// ADC (Add with Carry)
+    /// Affects flags: N V Z C
     void Adc(std::uint8_t value);
     void AdcImmediate();
+    // void AdcZeroPage();
+    // void AdcZeroPageX();
+    // void AdcAbsolute();
+    // void AdcAbsoluteX();
+    // void AdcAbsoluteY();
+    // void AdcIndirectX();
+    // void AdcIndirectY();
 
-    /// Register Transfer Instructions
+    /// Register Instructions
+    /// Affect Flags: N Z
+    /// These instructions are implied mode, have a length of 1 byte, and require 2 cycles
     void Tax(); // Transfer register A to X
     void Tay(); // Transfer register A to Y
     void Txa(); // Transfer register X to A
@@ -189,7 +212,8 @@ public:
     void Tsx(); // Transfer Stack Pointer to register X
     void Txs(); // Transfer X to Stack Pointer
 
-    /// AND Logic Instructions
+    /// AND (bitwise AND with Accumulator)
+    /// Affects flags: N Z
     void AndImmediate();
     void AndZeroPage();
     void AndZeroPageX();
@@ -198,6 +222,10 @@ public:
     void AndAbsoluteY();
     void AndIndirectX();
     void AndIndirectY();
+
+    /// ORA (bitwise OR with Accumulator)
+
+
 
 
 private:
@@ -283,7 +311,7 @@ private:
         static constexpr std::uint8_t JMP_BRK = 0x00;
         static constexpr std::uint8_t JMP_RTI = 0x40;
 
-        /// Logical Opcodes
+        /// AND (bitwise AND with Accumulator)
         static constexpr std::uint8_t AND_IMMEDIATE   = 0x29;
         static constexpr std::uint8_t AND_ZERO_PAGE   = 0x25;
         static constexpr std::uint8_t AND_ZERO_PAGE_X = 0x35;
@@ -292,6 +320,8 @@ private:
         static constexpr std::uint8_t AND_ABSOLUTE_Y  = 0x39;
         static constexpr std::uint8_t AND_INDIRECT_X  = 0x21;
         static constexpr std::uint8_t AND_INDIRECT_Y  = 0x31;
+
+        /// ORA (bitwise OR with Accumulator)
         static constexpr std::uint8_t ORA_IMMEDIATE   = 0x09;
         static constexpr std::uint8_t ORA_ZERO_PAGE   = 0x05;
         static constexpr std::uint8_t ORA_ZERO_PAGE_X = 0x15;
@@ -462,7 +492,7 @@ private:
             cycles[JMP_RTS] = 6;
             cycles[JMP_BRK] = 7;
             cycles[JMP_RTI] = 6;
-            // Logic Cycles
+            // AND Cycles
             cycles[AND_IMMEDIATE]   = 2;
             cycles[AND_ZERO_PAGE]   = 3;
             cycles[AND_ZERO_PAGE_X] = 4;
@@ -471,6 +501,7 @@ private:
             cycles[AND_ABSOLUTE_Y]  = 4;
             cycles[AND_INDIRECT_X]  = 6;
             cycles[AND_INDIRECT_Y]  = 5;
+            // ORA Cycles
             cycles[ORA_IMMEDIATE]   = 2;
             cycles[ORA_ZERO_PAGE]   = 3;
             cycles[ORA_ZERO_PAGE_X] = 4;

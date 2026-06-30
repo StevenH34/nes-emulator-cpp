@@ -602,7 +602,6 @@ void Cpu::SetVFlag(const bool is_on) {
 }
 
 /// Flag Instructions
-
 void Cpu::Clc() {
     SetFlag(StatusFlag::C, false);
 }
@@ -826,7 +825,7 @@ void Cpu::AdcImmediate() {
     Adc(value);
 }
 
-/// Register Transfer Instructions
+/// Register Instructions
 void Cpu::Tax() {
     x_register_ = accumulator_;
     SetZFlag(x_register_);
@@ -861,8 +860,7 @@ void Cpu::Txs() {
     stack_pointer_ = x_register_;
 }
 
-/// AND Logic Instructions
-
+/// AND
 void Cpu::AndImmediate() {
     accumulator_ &= FetchByte();
     SetZFlag(accumulator_);
