@@ -689,8 +689,8 @@ void Cpu::Jsr() {
 }
 
 void Cpu::Rts() {
-    // Pop return address from the stack and increment by 1
-    program_counter_ = StackPopWord() + 1;
+    // Pull return address from the stack and increment by 1
+    program_counter_ = StackPullWord() + 1;
 }
 
 void Cpu::Brk() {
@@ -708,9 +708,9 @@ void Cpu::Brk() {
 
 void Cpu::Rti() {
     // Restore flags - clear B, force U
-    status_register_ = StackPopByte() & ~static_cast<std::uint8_t>(StatusFlag::B) | static_cast<std::uint8_t>(StatusFlag::U);
+    status_register_ = StackPullByte() & ~static_cast<std::uint8_t>(StatusFlag::B) | static_cast<std::uint8_t>(StatusFlag::U);
     // Restore Program Counter
-    program_counter_ = StackPopWord();
+    program_counter_ = StackPullWord();
 }
 
 /// Stack Methods
@@ -720,7 +720,7 @@ void Cpu::StackPushByte(const std::uint8_t value) {
     stack_pointer_ -= 1;
 }
 
-std::uint8_t Cpu::StackPopByte() {
+std::uint8_t Cpu::StackPullByte() {
     // Decrements stack pointer then reads address
     stack_pointer_ += 1;
     return ReadByte(STACK_BASE_ | static_cast<std::uint16_t>(stack_pointer_));
@@ -731,9 +731,9 @@ void Cpu::StackPushWord(const std::uint16_t value) {
     StackPushByte(static_cast<std::uint8_t>(value & 0xFF)); // Low byte
 }
 
-std::uint16_t Cpu::StackPopWord() {
-    const std::uint8_t low_byte = StackPopByte();
-    const std::uint8_t high_byte = StackPopByte();
+std::uint16_t Cpu::StackPullWord() {
+    const std::uint8_t low_byte = StackPullByte();
+    const std::uint8_t high_byte = StackPullByte();
     return high_byte << 8 | low_byte;
 }
 
@@ -743,7 +743,7 @@ void Cpu::Pha() {
 }
 
 void Cpu::Pla() {
-    accumulator_ = StackPopByte();
+    accumulator_ = StackPullByte();
     SetZFlag(accumulator_);
     SetNFlag(accumulator_);
 }
@@ -753,7 +753,7 @@ void Cpu::Php() {
 }
 
 void Cpu::Plp() {
-    status_register_ = StackPopByte() & ~static_cast<std::uint8_t>(StatusFlag::B) | static_cast<std::uint8_t>(StatusFlag::U);
+    status_register_ = StackPullByte() & ~static_cast<std::uint8_t>(StatusFlag::B) | static_cast<std::uint8_t>(StatusFlag::U);
 }
 
 /// Comparison Instructions

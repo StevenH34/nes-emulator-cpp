@@ -163,17 +163,17 @@ public:
     /// Stack Methods
     // Lives at Page 1: $0100 - $01FF
     void StackPushByte(std::uint8_t value);
-    std::uint8_t StackPopByte();
+    std::uint8_t StackPullByte();
     void StackPushWord(std::uint16_t value);
-    std::uint16_t StackPopWord();
+    std::uint16_t StackPullWord();
 
     /**
      * Stack Instructions
      *
      * PHA (PusH Accumulator) - Push accumulator to the stack
-     * PLA (PuLl Accumulator) - Pop from stack to accumulator
+     * PLA (PuLl Accumulator) - Pull from stack to accumulator
      * PHP (PusH Processor status) - Push status register to the stack
-     * PLP (PuLl Processor status) - Pop from stack to status register
+     * PLP (PuLl Processor status) - Pull from stack to status register
      */
     void Pha();
     void Pla();

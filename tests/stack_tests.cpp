@@ -12,15 +12,15 @@ TEST_CASE("StackPushByte writes the value to the stack page and decrements the s
     CHECK(bus.ReadCpu(0x01FD) == 0x42); // stack pointer starts at 0xFD
 }
 
-TEST_CASE("StackPopByte reads the value back and increments the stack pointer") {
+TEST_CASE("StackPullByte reads the value back and increments the stack pointer") {
     nes::Bus bus;
     nes::Cpu cpu(bus);
 
     cpu.StackPushByte(0x42);
-    CHECK(cpu.StackPopByte() == 0x42);
+    CHECK(cpu.StackPullByte() == 0x42);
 }
 
-TEST_CASE("StackPushByte and StackPopByte round trip multiple values in LIFO order") {
+TEST_CASE("StackPushByte and StackPullByte round trip multiple values in LIFO order") {
     nes::Bus bus;
     nes::Cpu cpu(bus);
 
@@ -28,9 +28,9 @@ TEST_CASE("StackPushByte and StackPopByte round trip multiple values in LIFO ord
     cpu.StackPushByte(0x22);
     cpu.StackPushByte(0x33);
 
-    CHECK(cpu.StackPopByte() == 0x33);
-    CHECK(cpu.StackPopByte() == 0x22);
-    CHECK(cpu.StackPopByte() == 0x11);
+    CHECK(cpu.StackPullByte() == 0x33);
+    CHECK(cpu.StackPullByte() == 0x22);
+    CHECK(cpu.StackPullByte() == 0x11);
 }
 
 TEST_CASE("StackPushWord writes the high byte then the low byte, decrementing the stack pointer twice") {
@@ -43,24 +43,24 @@ TEST_CASE("StackPushWord writes the high byte then the low byte, decrementing th
     CHECK(bus.ReadCpu(0x01FC) == 0x34); // low byte pushed second
 }
 
-TEST_CASE("StackPopWord reconstructs the 16-bit value pushed by StackPushWord") {
+TEST_CASE("StackPullWord reconstructs the 16-bit value pushed by StackPushWord") {
     nes::Bus bus;
     nes::Cpu cpu(bus);
 
     cpu.StackPushWord(0x1234);
 
-    CHECK(cpu.StackPopWord() == 0x1234);
+    CHECK(cpu.StackPullWord() == 0x1234);
 }
 
-TEST_CASE("StackPushWord and StackPopWord round trip multiple values in LIFO order") {
+TEST_CASE("StackPushWord and StackPullWord round trip multiple values in LIFO order") {
     nes::Bus bus;
     nes::Cpu cpu(bus);
 
     cpu.StackPushWord(0xABCD);
     cpu.StackPushWord(0x0102);
 
-    CHECK(cpu.StackPopWord() == 0x0102);
-    CHECK(cpu.StackPopWord() == 0xABCD);
+    CHECK(cpu.StackPullWord() == 0x0102);
+    CHECK(cpu.StackPullWord() == 0xABCD);
 }
 
 TEST_CASE("Stack pointer wraps from 0x00 to 0xFF when pushing past the bottom of the stack") {
@@ -83,10 +83,10 @@ TEST_CASE("Stack pointer wraps from 0xFF to 0x00 when popping past the top of th
 
     bus.WriteCpu(0x0100, 0x77); // value at the wrapped-to address
 
-    cpu.StackPopByte(); // stack pointer 0xFD -> 0xFE
-    cpu.StackPopByte(); // stack pointer 0xFE -> 0xFF
+    cpu.StackPullByte(); // stack pointer 0xFD -> 0xFE
+    cpu.StackPullByte(); // stack pointer 0xFE -> 0xFF
 
-    CHECK(cpu.StackPopByte() == 0x77); // stack pointer wraps from 0xFF to 0x00
+    CHECK(cpu.StackPullByte() == 0x77); // stack pointer wraps from 0xFF to 0x00
 }
 
 TEST_CASE("Pha pushes the accumulator onto the stack and decrements the stack pointer") {
