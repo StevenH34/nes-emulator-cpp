@@ -202,6 +202,8 @@ public:
 
     /// CPY
     void CpyImmediate();
+    void CpyZeroPage();
+    void CpyAbsolute();
 
     /// Shift Instructions
     // Arithmetic Shift Left moves all bits one position to the left

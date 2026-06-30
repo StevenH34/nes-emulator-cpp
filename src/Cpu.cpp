@@ -334,6 +334,15 @@ int Cpu::Step() {
             CpxAbsolute();
             break;
         // CPY
+        case Opcodes::CPY_IMMEDIATE:
+            CpyImmediate();
+            break;
+        case Opcodes::CPY_ZERO_PAGE:
+            CpyZeroPage();
+            break;
+        case Opcodes::CPY_ABSOLUTE:
+            CpyAbsolute();
+            break;
         default: //TODO: Figure out a good way to deal with unsupported Opcodes
             throw std::runtime_error("Invalid opcode");
     }
@@ -910,9 +919,19 @@ void Cpu::CpxAbsolute() {
     Compare(x_register_, value);
 }
 
-
+/// CPY
 void Cpu::CpyImmediate() {
     const auto value = FetchByte();
+    Compare(y_register_, value);
+}
+
+void Cpu::CpyZeroPage() {
+    const auto value = ReadByte(AddressZeroPage());
+    Compare(y_register_, value);
+}
+
+void Cpu::CpyAbsolute() {
+    const auto value = ReadByte(AddressAbsolute());
     Compare(y_register_, value);
 }
 
