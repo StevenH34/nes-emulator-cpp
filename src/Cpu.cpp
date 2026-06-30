@@ -343,6 +343,31 @@ int Cpu::Step() {
         case Opcodes::CPY_ABSOLUTE:
             CpyAbsolute();
             break;
+        // ADC
+        case Opcodes::ADC_IMMEDIATE:
+            AdcImmediate();
+            break;
+        case Opcodes::ADC_ZERO_PAGE:
+            AdcZeroPage();
+            break;
+        case Opcodes::ADC_ZERO_PAGE_X:
+            AdcZeroPageX();
+            break;
+        case Opcodes::ADC_ABSOLUTE:
+            AdcAbsolute();
+            break;
+        case Opcodes::ADC_ABSOLUTE_X:
+            AdcAbsoluteX();
+            break;
+        case Opcodes::ADC_ABSOLUTE_Y:
+            AdcAbsoluteY();
+            break;
+        case Opcodes::ADC_INDIRECT_X:
+            AdcIndirectX();
+            break;
+        case Opcodes::ADC_INDIRECT_Y:
+            AdcIndirectY();
+            break;
         default: //TODO: Figure out a good way to deal with unsupported Opcodes
             throw std::runtime_error("Invalid opcode");
     }
@@ -945,7 +970,7 @@ void Cpu::AslAccumulator() {
     SetNFlag(accumulator_);
 }
 
-/// Arithmetic Instructions
+/// ADC (Add with Carry)
 void Cpu::Adc(const std::uint8_t value) {
     // Get current value of the carry flag
     const std::uint16_t carry_in = IsFlagSet(static_cast<std::uint8_t>(StatusFlag::C)) ? 1 : 0;
@@ -975,6 +1000,41 @@ void Cpu::Adc(const std::uint8_t value) {
 
 void Cpu::AdcImmediate() {
     const auto value = FetchByte();
+    Adc(value);
+}
+
+void Cpu::AdcZeroPage() {
+    const auto value = ReadByte(AddressZeroPage());
+    Adc(value);
+}
+
+void Cpu::AdcZeroPageX() {
+    const auto value = ReadByte(AddressZeroPageX());
+    Adc(value);
+}
+
+void Cpu::AdcAbsolute() {
+    const auto value = ReadByte(AddressAbsolute());
+    Adc(value);
+}
+
+void Cpu::AdcAbsoluteX() {
+    const auto value = ReadByte(AddressAbsoluteX());
+    Adc(value);
+}
+
+void Cpu::AdcAbsoluteY() {
+    const auto value = ReadByte(AddressAbsoluteY());
+    Adc(value);
+}
+
+void Cpu::AdcIndirectX() {
+    const auto value = ReadByte(AddressIndirectX());
+    Adc(value);
+}
+
+void Cpu::AdcIndirectY() {
+    const auto value = ReadByte(AddressIndirectY());
     Adc(value);
 }
 

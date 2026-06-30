@@ -213,13 +213,13 @@ public:
     /// Affects flags: N V Z C
     void Adc(std::uint8_t value);
     void AdcImmediate();
-    // void AdcZeroPage();
-    // void AdcZeroPageX();
-    // void AdcAbsolute();
-    // void AdcAbsoluteX();
-    // void AdcAbsoluteY();
-    // void AdcIndirectX();
-    // void AdcIndirectY();
+    void AdcZeroPage();
+    void AdcZeroPageX();
+    void AdcAbsolute();
+    void AdcAbsoluteX();
+    void AdcAbsoluteY();
+    void AdcIndirectX();
+    void AdcIndirectY();
 
     /// Register Instructions
     /// Affect Flags: N Z
