@@ -224,7 +224,15 @@ public:
     void AndIndirectY();
 
     /// ORA (bitwise OR with Accumulator)
-
+    /// Affects flags: N Z
+    void OraImmediate();
+    void OraZeroPage();
+    void OraZeroPageX();
+    void OraAbsolute();
+    void OraAbsoluteX();
+    void OraAbsoluteY();
+    void OraIndirectX();
+    void OraIndirectY();
 
 
 
@@ -330,6 +338,8 @@ private:
         static constexpr std::uint8_t ORA_ABSOLUTE_Y  = 0x19;
         static constexpr std::uint8_t ORA_INDIRECT_X  = 0x01;
         static constexpr std::uint8_t ORA_INDIRECT_Y  = 0x11;
+
+        /// EOR
         static constexpr std::uint8_t EOR_IMMEDIATE   = 0x49;
         static constexpr std::uint8_t EOR_ZERO_PAGE   = 0x45;
         static constexpr std::uint8_t EOR_ZERO_PAGE_X = 0x55;

@@ -248,6 +248,31 @@ int Cpu::Step() {
         case Opcodes::AND_INDIRECT_Y:
             AndIndirectY();
             break;
+        // ORA
+        case Opcodes::ORA_IMMEDIATE:
+            OraImmediate();
+            break;
+        case Opcodes::ORA_ZERO_PAGE:
+            OraZeroPage();
+            break;
+        case Opcodes::ORA_ZERO_PAGE_X:
+            OraZeroPageX();
+            break;
+        case Opcodes::ORA_ABSOLUTE:
+            OraAbsolute();
+            break;
+        case Opcodes::ORA_ABSOLUTE_X:
+            OraAbsoluteX();
+            break;
+        case Opcodes::ORA_ABSOLUTE_Y:
+            OraAbsoluteY();
+            break;
+        case Opcodes::ORA_INDIRECT_X:
+            OraIndirectX();
+            break;
+        case Opcodes::ORA_INDIRECT_Y:
+            OraIndirectY();
+            break;
         default: //TODO: Figure out a good way to deal with unsupported Opcodes
             throw std::runtime_error("Invalid opcode");
     }
@@ -905,6 +930,55 @@ void Cpu::AndIndirectX() {
 
 void Cpu::AndIndirectY() {
     accumulator_ &= ReadByte(AddressIndirectY());
+    SetZFlag(accumulator_);
+    SetNFlag(accumulator_);
+}
+
+/// ORA
+void Cpu::OraImmediate() {
+    accumulator_ |= FetchByte();
+    SetZFlag(accumulator_);
+    SetNFlag(accumulator_);
+}
+
+void Cpu::OraZeroPage() {
+    accumulator_ |= ReadByte(AddressZeroPage());
+    SetZFlag(accumulator_);
+    SetNFlag(accumulator_);
+}
+
+void Cpu::OraZeroPageX() {
+    accumulator_ |= ReadByte(AddressZeroPageX());
+    SetZFlag(accumulator_);
+    SetNFlag(accumulator_);
+}
+
+void Cpu::OraAbsolute() {
+    accumulator_ |= ReadByte(AddressAbsolute());
+    SetZFlag(accumulator_);
+    SetNFlag(accumulator_);
+}
+
+void Cpu::OraAbsoluteX() {
+    accumulator_ |= ReadByte(AddressAbsoluteX());
+    SetZFlag(accumulator_);
+    SetNFlag(accumulator_);
+}
+
+void Cpu::OraAbsoluteY() {
+    accumulator_ |= ReadByte(AddressAbsoluteY());
+    SetZFlag(accumulator_);
+    SetNFlag(accumulator_);
+}
+
+void Cpu::OraIndirectX() {
+    accumulator_ |= ReadByte(AddressIndirectX());
+    SetZFlag(accumulator_);
+    SetNFlag(accumulator_);
+}
+
+void Cpu::OraIndirectY() {
+    accumulator_ |= ReadByte(AddressIndirectY());
     SetZFlag(accumulator_);
     SetNFlag(accumulator_);
 }
