@@ -221,6 +221,18 @@ public:
     void AdcIndirectX();
     void AdcIndirectY();
 
+    /// SBC (Subtract with Carry)
+    /// Affects Flags: N V Z C
+    void Sbc(std::uint8_t value);
+    void SbcImmediate();
+    void SbcZeroPage();
+    void SbcZeroPageX();
+    void SbcAbsolute();
+    void SbcAbsoluteX();
+    void SbcAbsoluteY();
+    void SbcIndirectX();
+    void SbcIndirectY();
+
     /// Register Instructions
     /// Affect Flags: N Z
     /// These instructions are implied mode, have a length of 1 byte, and require 2 cycles
@@ -451,7 +463,7 @@ private:
         static constexpr std::uint8_t ROR_ABSOLUTE    = 0x6E;
         static constexpr std::uint8_t ROR_ABSOLUTE_X  = 0x7E;
 
-        /// Arithmetic Opcodes
+        /// ADC
         static constexpr std::uint8_t ADC_IMMEDIATE   = 0x69;
         static constexpr std::uint8_t ADC_ZERO_PAGE   = 0x65;
         static constexpr std::uint8_t ADC_ZERO_PAGE_X = 0x75;
@@ -460,6 +472,8 @@ private:
         static constexpr std::uint8_t ADC_ABSOLUTE_Y  = 0x79;
         static constexpr std::uint8_t ADC_INDIRECT_X  = 0x61;
         static constexpr std::uint8_t ADC_INDIRECT_Y  = 0x71;
+
+        /// SBC
         static constexpr std::uint8_t SBC_IMMEDIATE   = 0xE9;
         static constexpr std::uint8_t SBC_ZERO_PAGE   = 0xE5;
         static constexpr std::uint8_t SBC_ZERO_PAGE_X = 0xF5;

@@ -368,6 +368,31 @@ int Cpu::Step() {
         case Opcodes::ADC_INDIRECT_Y:
             AdcIndirectY();
             break;
+        // SBC
+        case Opcodes::SBC_IMMEDIATE:
+            SbcImmediate();
+            break;
+        case Opcodes::SBC_ZERO_PAGE:
+            SbcZeroPage();
+            break;
+        case Opcodes::SBC_ZERO_PAGE_X:
+            SbcZeroPageX();
+            break;
+        case Opcodes::SBC_ABSOLUTE:
+            SbcAbsolute();
+            break;
+        case Opcodes::SBC_ABSOLUTE_X:
+            SbcAbsoluteX();
+            break;
+        case Opcodes::SBC_ABSOLUTE_Y:
+            SbcAbsoluteY();
+            break;
+        case Opcodes::SBC_INDIRECT_X:
+            SbcIndirectX();
+            break;
+        case Opcodes::SBC_INDIRECT_Y:
+            SbcIndirectY();
+            break;
         default: //TODO: Figure out a good way to deal with unsupported Opcodes
             throw std::runtime_error("Invalid opcode");
     }
@@ -1037,6 +1062,52 @@ void Cpu::AdcIndirectY() {
     const auto value = ReadByte(AddressIndirectY());
     Adc(value);
 }
+
+/// SBC (Subtract with Carry)
+void Cpu::Sbc(const std::uint8_t value) {
+    Adc(~value); // Subtracting is the same as adding the one's complement
+}
+
+void Cpu::SbcImmediate() {
+    const auto value = FetchByte();
+    Sbc(value);
+}
+
+void Cpu::SbcZeroPage() {
+    const auto value = ReadByte(AddressZeroPage());
+    Sbc(value);
+}
+
+void Cpu::SbcZeroPageX() {
+    const auto value = ReadByte(AddressZeroPageX());
+    Sbc(value);
+}
+
+void Cpu::SbcAbsolute() {
+    const auto value = ReadByte(AddressAbsolute());
+    Sbc(value);
+}
+
+void Cpu::SbcAbsoluteX() {
+    const auto value = ReadByte(AddressAbsoluteX());
+    Sbc(value);
+}
+
+void Cpu::SbcAbsoluteY() {
+    const auto value = ReadByte(AddressAbsoluteY());
+    Sbc(value);
+}
+
+void Cpu::SbcIndirectX() {
+    const auto value = ReadByte(AddressIndirectX());
+    Sbc(value);
+}
+
+void Cpu::SbcIndirectY() {
+    const auto value = ReadByte(AddressIndirectY());
+    Sbc(value);
+}
+
 
 /// Register Instructions
 void Cpu::Tax() {
