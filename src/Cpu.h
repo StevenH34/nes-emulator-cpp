@@ -215,6 +215,15 @@ public:
     void AslAbsolute();
     void AslAbsoluteX();
 
+    /// LSR (Logical Shift Right)
+    /// Affects Flags: N Z C
+    std::uint8_t Lsr(std::uint8_t value);
+    void LsrAccumulator();
+    void LsrZeroPage();
+    void LsrZeroPageX();
+    void LsrAbsolute();
+    void LsrAbsoluteX();
+
     /// ADC (Add with Carry)
     /// Affects flags: N V Z C
     void Adc(std::uint8_t value);

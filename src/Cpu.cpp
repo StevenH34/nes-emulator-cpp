@@ -409,6 +409,22 @@ int Cpu::Step() {
         case Opcodes::ASL_ABSOLUTE_X:
             AslAbsoluteX();
             break;
+        // LSR
+        case Opcodes::LSR_ACCUMULATOR:
+            LsrAccumulator();
+            break;
+        case Opcodes::LSR_ZERO_PAGE:
+            LsrZeroPage();
+            break;
+        case Opcodes::LSR_ZERO_PAGE_X:
+            LsrZeroPageX();
+            break;
+        case Opcodes::LSR_ABSOLUTE:
+            LsrAbsolute();
+            break;
+        case Opcodes::LSR_ABSOLUTE_X:
+            LsrAbsoluteX();
+            break;
         default: //TODO: Figure out a good way to deal with unsupported Opcodes
             throw std::runtime_error("Invalid opcode");
     }
@@ -1042,6 +1058,47 @@ void Cpu::AslAbsoluteX() {
     WriteByte(address, Asl(value));
 }
 
+/**
+ * LSR (Logical Shift Right), moves all bits one position to the right.
+ * Bit 0 goes to the Carry flag
+ */
+
+std::uint8_t Cpu::Lsr(const std::uint8_t value) {
+    SetCFlag((value & 1) == 1); // 0-bit falls off and goes to the C flag
+    const std::uint8_t result = value >> 1;
+    SetZFlag(result);
+    SetNFlag(result);
+    return result;
+}
+
+void Cpu::LsrAccumulator() {
+    accumulator_ = Lsr(accumulator_);
+}
+
+void Cpu::LsrZeroPage() {
+    const std::uint16_t address = AddressZeroPage();
+    const std::uint8_t value = ReadByte(address);
+    WriteByte(address, Lsr(value));
+
+}
+
+void Cpu::LsrZeroPageX() {
+    const std::uint16_t address = AddressZeroPageX();
+    const std::uint8_t value = ReadByte(address);
+    WriteByte(address, Lsr(value));
+}
+
+void Cpu::LsrAbsolute() {
+    const std::uint16_t address = AddressAbsolute();
+    const std::uint8_t value = ReadByte(address);
+    WriteByte(address, Lsr(value));
+}
+
+void Cpu::LsrAbsoluteX() {
+    const std::uint16_t address = AddressAbsoluteX();
+    const std::uint8_t value = ReadByte(address);
+    WriteByte(address, Lsr(value));
+}
 
 /// ADC (Add with Carry)
 void Cpu::Adc(const std::uint8_t value) {
@@ -1290,7 +1347,7 @@ void Cpu::OraIndirectY() {
     SetNFlag(accumulator_);
 }
 
-    /// EOR
+/// EOR
 void Cpu::EorImmediate() {
     accumulator_ ^= FetchByte();
     SetZFlag(accumulator_);
