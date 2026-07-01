@@ -441,6 +441,19 @@ int Cpu::Step() {
         case Opcodes::ROL_ABSOLUTE_X:
             RolAbsoluteX();
             break;
+        // INC
+        case Opcodes::INC_ZERO_PAGE:
+            IncZeroPage();
+            break;
+        case Opcodes::INC_ZERO_PAGE_X:
+            IncZeroPageX();
+            break;
+        case Opcodes::INC_ABSOLUTE:
+            IncAbsolute();
+            break;
+        case Opcodes::INC_ABSOLUTE_X:
+            IncAbsoluteX();
+            break;
         default: //TODO: Figure out a good way to deal with unsupported Opcodes
             throw std::runtime_error("Invalid opcode");
     }
@@ -1450,4 +1463,42 @@ void Cpu::EorIndirectY() {
     SetZFlag(accumulator_);
     SetNFlag(accumulator_);
 }
+
+/// Misc Instructions
+/**
+ * INC (INCrement memory)
+ * Adds one to the value held at a specified memory location setting the zero and negative flags as appropriate.
+ */
+void Cpu::IncZeroPage() {
+    const std::uint16_t address = AddressZeroPage();
+    const std::uint8_t value = ReadByte(address) + 1;
+    WriteByte(address, value);
+    SetZFlag(value);
+    SetNFlag(value);
+}
+
+void Cpu::IncZeroPageX() {
+    const std::uint16_t address = AddressZeroPageX();
+    const std::uint8_t value = ReadByte(address) + 1;
+    WriteByte(address, value);
+    SetZFlag(value);
+    SetNFlag(value);
+}
+
+void Cpu::IncAbsolute() {
+    const std::uint16_t address = AddressAbsolute();
+    const std::uint8_t value = ReadByte(address) + 1;
+    WriteByte(address, value);
+    SetZFlag(value);
+    SetNFlag(value);
+}
+
+void Cpu::IncAbsoluteX() {
+    const std::uint16_t address = AddressAbsoluteX();
+    const std::uint8_t value = ReadByte(address) + 1;
+    WriteByte(address, value);
+    SetZFlag(value);
+    SetNFlag(value);
+}
+
 } // nes

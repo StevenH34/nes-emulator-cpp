@@ -299,6 +299,13 @@ public:
     void EorIndirectX();
     void EorIndirectY();
 
+    /// Misc Instructions
+    /// INC (INCrement memory)
+    /// Affects Flags: N Z
+    void IncZeroPage();
+    void IncZeroPageX();
+    void IncAbsolute();
+    void IncAbsoluteX();
 
 
 private:
@@ -466,21 +473,25 @@ private:
         static constexpr std::uint8_t BVC = 0x50;
 
         /// Shift Opcodes
+        /// ASL
         static constexpr std::uint8_t ASL_ACCUMULATOR = 0x0A;
         static constexpr std::uint8_t ASL_ZERO_PAGE   = 0x06;
         static constexpr std::uint8_t ASL_ZERO_PAGE_X = 0x16;
         static constexpr std::uint8_t ASL_ABSOLUTE    = 0x0E;
         static constexpr std::uint8_t ASL_ABSOLUTE_X  = 0x1E;
+        /// LSR
         static constexpr std::uint8_t LSR_ACCUMULATOR = 0x4A;
         static constexpr std::uint8_t LSR_ZERO_PAGE   = 0x46;
         static constexpr std::uint8_t LSR_ZERO_PAGE_X = 0x56;
         static constexpr std::uint8_t LSR_ABSOLUTE    = 0x4E;
         static constexpr std::uint8_t LSR_ABSOLUTE_X  = 0x5E;
+        /// ROL
         static constexpr std::uint8_t ROL_ACCUMULATOR = 0x2A;
         static constexpr std::uint8_t ROL_ZERO_PAGE   = 0x26;
         static constexpr std::uint8_t ROL_ZERO_PAGE_X = 0x36;
         static constexpr std::uint8_t ROL_ABSOLUTE    = 0x2E;
         static constexpr std::uint8_t ROL_ABSOLUTE_X  = 0x3E;
+        /// ROR
         static constexpr std::uint8_t ROR_ACCUMULATOR = 0x6A;
         static constexpr std::uint8_t ROR_ZERO_PAGE   = 0x66;
         static constexpr std::uint8_t ROR_ZERO_PAGE_X = 0x76;
@@ -508,16 +519,20 @@ private:
         static constexpr std::uint8_t SBC_INDIRECT_Y  = 0xF1;
 
         /// Misc Opcodes
+        /// INC
         static constexpr std::uint8_t INC_ZERO_PAGE   = 0xE6;
         static constexpr std::uint8_t INC_ZERO_PAGE_X = 0xF6;
         static constexpr std::uint8_t INC_ABSOLUTE    = 0xEE;
         static constexpr std::uint8_t INC_ABSOLUTE_X  = 0xFE;
+        /// DEC
         static constexpr std::uint8_t DEC_ZERO_PAGE   = 0xC6;
         static constexpr std::uint8_t DEC_ZERO_PAGE_X = 0xD6;
         static constexpr std::uint8_t DEC_ABSOLUTE    = 0xCE;
         static constexpr std::uint8_t DEC_ABSOLUTE_X  = 0xDE;
+        /// BIT
         static constexpr std::uint8_t BIT_ZERO_PAGE   = 0x24;
         static constexpr std::uint8_t BIT_ABSOLUTE    = 0x2C;
+        /// NOP
         static constexpr std::uint8_t NOP             = 0xEA;
 
         static constexpr std::array<int, 256> CYCLES = [] {
