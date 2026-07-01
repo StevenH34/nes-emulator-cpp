@@ -307,6 +307,13 @@ public:
     void IncAbsolute();
     void IncAbsoluteX();
 
+    /// DEC (DECrement memory)
+    /// Affects Flags: N Z
+    void DecZeroPage();
+    void DecZeroPageX();
+    void DecAbsolute();
+    void DecAbsoluteX();
+
 
 private:
     Bus& bus_;

@@ -454,6 +454,19 @@ int Cpu::Step() {
         case Opcodes::INC_ABSOLUTE_X:
             IncAbsoluteX();
             break;
+        // DEC
+        case Opcodes::DEC_ZERO_PAGE:
+            DecZeroPage();
+            break;
+        case Opcodes::DEC_ZERO_PAGE_X:
+            DecZeroPageX();
+            break;
+        case Opcodes::DEC_ABSOLUTE:
+            DecAbsolute();
+            break;
+        case Opcodes::DEC_ABSOLUTE_X:
+            DecAbsoluteX();
+            break;
         default: //TODO: Figure out a good way to deal with unsupported Opcodes
             throw std::runtime_error("Invalid opcode");
     }
@@ -1496,6 +1509,42 @@ void Cpu::IncAbsolute() {
 void Cpu::IncAbsoluteX() {
     const std::uint16_t address = AddressAbsoluteX();
     const std::uint8_t value = ReadByte(address) + 1;
+    WriteByte(address, value);
+    SetZFlag(value);
+    SetNFlag(value);
+}
+
+/**
+ * DEC (DECrement memory)
+ * Subtracts one from the value held at a specified memory location setting the zero and negative flags as appropriate.
+ */
+void Cpu::DecZeroPage() {
+    const std::uint16_t address = AddressZeroPage();
+    const std::uint8_t value = ReadByte(address) - 1;
+    WriteByte(address, value);
+    SetZFlag(value);
+    SetNFlag(value);
+}
+
+void Cpu::DecZeroPageX() {
+    const std::uint16_t address = AddressZeroPageX();
+    const std::uint8_t value = ReadByte(address) - 1;
+    WriteByte(address, value);
+    SetZFlag(value);
+    SetNFlag(value);
+}
+
+void Cpu::DecAbsolute() {
+    const std::uint16_t address = AddressAbsolute();
+    const std::uint8_t value = ReadByte(address) - 1;
+    WriteByte(address, value);
+    SetZFlag(value);
+    SetNFlag(value);
+}
+
+void Cpu::DecAbsoluteX() {
+    const std::uint16_t address = AddressAbsoluteX();
+    const std::uint8_t value = ReadByte(address) - 1;
     WriteByte(address, value);
     SetZFlag(value);
     SetNFlag(value);
