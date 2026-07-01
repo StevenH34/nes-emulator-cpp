@@ -314,6 +314,19 @@ public:
     void DecAbsolute();
     void DecAbsoluteX();
 
+    /**
+     * BIT (test BITs)
+     * Affects Flags: N V Z
+     * Used to test if one or more bits are set in a target memory location.
+     * The mask pattern in A is ANDed with the value in memory to set or clear the zero flag,
+     * but the result is not kept.
+     * Bits 7 and 6 of the value from memory are copied into the N and V flags.
+     */
+    void BitZeroPage();
+    void BitAbsolute();
+
+    /// NOP (No OPeration)
+    void Nop();
 
 private:
     Bus& bus_;

@@ -45,7 +45,9 @@ add_executable(nes_emulator_tests
         tests/flag_instruction_tests.cpp
         tests/sbc_tests.cpp
         tests/inc_tests.cpp
-        tests/dec_tests.cpp)
+        tests/dec_tests.cpp
+        tests/bit_tests.cpp
+        tests/nop_tests.cpp)
 
 target_include_directories(nes_emulator_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/src)
 

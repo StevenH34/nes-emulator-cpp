@@ -467,6 +467,17 @@ int Cpu::Step() {
         case Opcodes::DEC_ABSOLUTE_X:
             DecAbsoluteX();
             break;
+        // BIT
+        case Opcodes::BIT_ABSOLUTE:
+            BitAbsolute();
+            break;
+        case Opcodes::BIT_ZERO_PAGE:
+            BitZeroPage();
+            break;
+        // NOP
+        case Opcodes::NOP:
+            Nop();
+            break;
         default: //TODO: Figure out a good way to deal with unsupported Opcodes
             throw std::runtime_error("Invalid opcode");
     }
@@ -1549,5 +1560,26 @@ void Cpu::DecAbsoluteX() {
     SetZFlag(value);
     SetNFlag(value);
 }
+
+/// BIT
+void Cpu::BitZeroPage() {
+    const std::uint8_t value = ReadByte(AddressZeroPage());
+    SetZFlag(accumulator_ & value);
+    SetNFlag(value);
+    SetVFlag((value >> 6 & 1) == 1); // Bit 6 goes to V flag
+}
+
+void Cpu::BitAbsolute() {
+    const std::uint8_t value = ReadByte(AddressAbsolute());
+    SetZFlag(accumulator_ & value);
+    SetNFlag(value);
+    SetVFlag((value >> 6 & 1) == 1);
+}
+
+/// NOP
+void Cpu::Nop() {
+    // Do nothing
+}
+
 
 } // nes
