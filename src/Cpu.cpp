@@ -393,6 +393,22 @@ int Cpu::Step() {
         case Opcodes::SBC_INDIRECT_Y:
             SbcIndirectY();
             break;
+        // ASL
+        case Opcodes::ASL_ACCUMULATOR:
+            AslAccumulator();
+            break;
+        case Opcodes::ASL_ZERO_PAGE:
+            AslZeroPage();
+            break;
+        case Opcodes::ASL_ZERO_PAGE_X:
+            AslZeroPageX();
+            break;
+        case Opcodes::ASL_ABSOLUTE:
+            AslAbsolute();
+            break;
+        case Opcodes::ASL_ABSOLUTE_X:
+            AslAbsoluteX();
+            break;
         default: //TODO: Figure out a good way to deal with unsupported Opcodes
             throw std::runtime_error("Invalid opcode");
     }
@@ -986,14 +1002,46 @@ void Cpu::CpyAbsolute() {
 }
 
 /// Shift Instructions
-// Shifting left is the same as multiplication * 2
-void Cpu::AslAccumulator() {
-    // 7-bit falls off and goes to the C flag
-    SetCFlag((accumulator_ >> 7 & 1) == 1);
-    accumulator_ <<= 1;
-    SetZFlag(accumulator_);
-    SetNFlag(accumulator_);
+/**
+ * ASL (Arithmetic Shift Left), moves all bits one position to the left.
+ * Bit 7 goes to Carry flag
+ */
+std::uint8_t Cpu::Asl(const std::uint8_t value) {
+    SetCFlag((value >> 7 & 1) == 1); // 7-bit falls off and goes to the C flag
+    const std::uint8_t result = value << 1;
+    SetZFlag(result);
+    SetNFlag(result);
+    return result;
 }
+
+void Cpu::AslAccumulator() {
+    accumulator_ = Asl(accumulator_);
+}
+
+void Cpu::AslZeroPage() {
+    const std::uint16_t address = AddressZeroPage();
+    const std::uint8_t value = ReadByte(address);
+    WriteByte(address, Asl(value));
+}
+
+void Cpu::AslZeroPageX() {
+    const std::uint16_t address = AddressZeroPageX();
+    const std::uint8_t value = ReadByte(address);
+    WriteByte(address, Asl(value));
+}
+
+void Cpu::AslAbsolute() {
+    const std::uint16_t address = AddressAbsolute();
+    const std::uint8_t value = ReadByte(address);
+    WriteByte(address, Asl(value));
+}
+
+void Cpu::AslAbsoluteX() {
+    const std::uint16_t address = AddressAbsoluteX();
+    const std::uint8_t value = ReadByte(address);
+    WriteByte(address, Asl(value));
+}
+
 
 /// ADC (Add with Carry)
 void Cpu::Adc(const std::uint8_t value) {

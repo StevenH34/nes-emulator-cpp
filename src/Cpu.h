@@ -206,8 +206,14 @@ public:
     void CpyAbsolute();
 
     /// Shift Instructions
-    // Arithmetic Shift Left moves all bits one position to the left
+    /// ASL (Arithmetic Shift Left)
+    /// Affects Flags: N Z C
+    std::uint8_t Asl(std::uint8_t value);
     void AslAccumulator();
+    void AslZeroPage();
+    void AslZeroPageX();
+    void AslAbsolute();
+    void AslAbsoluteX();
 
     /// ADC (Add with Carry)
     /// Affects flags: N V Z C
