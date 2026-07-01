@@ -425,6 +425,22 @@ int Cpu::Step() {
         case Opcodes::LSR_ABSOLUTE_X:
             LsrAbsoluteX();
             break;
+        // ROL
+        case Opcodes::ROL_ACCUMULATOR:
+            RolAccumulator();
+            break;
+        case Opcodes::ROL_ZERO_PAGE:
+            RolZeroPage();
+            break;
+        case Opcodes::ROL_ZERO_PAGE_X:
+            RolZeroPageX();
+            break;
+        case Opcodes::ROL_ABSOLUTE:
+            RolAbsolute();
+            break;
+        case Opcodes::ROL_ABSOLUTE_X:
+            RolAbsoluteX();
+            break;
         default: //TODO: Figure out a good way to deal with unsupported Opcodes
             throw std::runtime_error("Invalid opcode");
     }
@@ -1062,7 +1078,6 @@ void Cpu::AslAbsoluteX() {
  * LSR (Logical Shift Right), moves all bits one position to the right.
  * Bit 0 goes to the Carry flag
  */
-
 std::uint8_t Cpu::Lsr(const std::uint8_t value) {
     SetCFlag((value & 1) == 1); // 0-bit falls off and goes to the C flag
     const std::uint8_t result = value >> 1;
@@ -1079,7 +1094,6 @@ void Cpu::LsrZeroPage() {
     const std::uint16_t address = AddressZeroPage();
     const std::uint8_t value = ReadByte(address);
     WriteByte(address, Lsr(value));
-
 }
 
 void Cpu::LsrZeroPageX() {
@@ -1098,6 +1112,47 @@ void Cpu::LsrAbsoluteX() {
     const std::uint16_t address = AddressAbsoluteX();
     const std::uint8_t value = ReadByte(address);
     WriteByte(address, Lsr(value));
+}
+
+/**
+ * ROL (ROtate Left)
+ * Bit 7 goes to Carry, old Carry goes to bit 0
+ */
+std::uint8_t Cpu::Rol(std::uint8_t value) {
+    const std::uint8_t carry_in = IsFlagSet(static_cast<std::uint8_t>(StatusFlag::C)) ? 1 : 0;
+    SetCFlag((value >> 7 & 1) == 1); // 7-bit falls off and goes to the C flag
+    const std::uint8_t result = value << 1 | carry_in;
+    SetZFlag(result);
+    SetNFlag(result);
+    return result;
+}
+
+void Cpu::RolAccumulator() {
+    accumulator_ = Rol(accumulator_);
+}
+
+void Cpu::RolZeroPage() {
+    const std::uint16_t address = AddressZeroPage();
+    const std::uint8_t value = ReadByte(address);
+    WriteByte(address, Rol(value));
+}
+
+void Cpu::RolZeroPageX() {
+    const std::uint16_t address = AddressZeroPageX();
+    const std::uint8_t value = ReadByte(address);
+    WriteByte(address, Rol(value));
+}
+
+void Cpu::RolAbsolute() {
+    const std::uint16_t address = AddressAbsolute();
+    const std::uint8_t value = ReadByte(address);
+    WriteByte(address, Rol(value));
+}
+
+void Cpu::RolAbsoluteX() {
+    const std::uint16_t address = AddressAbsoluteX();
+    const std::uint8_t value = ReadByte(address);
+    WriteByte(address, Rol(value));
 }
 
 /// ADC (Add with Carry)
