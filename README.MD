@@ -1,3 +1,10 @@
-NES Emulator in C++.
+### NES Emulator (in C++)
 
-Currently working on implementing the CPU.
+- Added all 151 official opcodes with instructions.
+- Now adding Cartridge support.
+
+### Testing
+
+Using `doctest.h`.
+
+`cmake --build cmake-build-debug --target run_tests`
