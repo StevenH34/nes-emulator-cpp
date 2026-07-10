@@ -3,6 +3,7 @@ project(nes_emulator_cpp)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_executable(nes_emulator_cpp
         src/main.cpp
@@ -11,7 +12,9 @@ add_executable(nes_emulator_cpp
         src/Cpu.cpp
         src/Cpu.h
         src/Bus.cpp
-        src/Bus.h)
+        src/Bus.h
+        src/Cartridge.cpp
+        src/Cartridge.h)
 
 target_include_directories(nes_emulator_cpp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
@@ -25,6 +28,8 @@ add_executable(nes_emulator_tests
         src/Bus.cpp
         src/Cpu.cpp
         src/Emulator.cpp
+        src/Cartridge.cpp
+        tests/Cartridge_tests.cpp
         tests/sta_tests.cpp
         tests/addressing_mode_tests.cpp
         tests/lda_tests.cpp
