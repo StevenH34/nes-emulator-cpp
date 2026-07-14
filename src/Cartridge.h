@@ -9,7 +9,7 @@
 #include <string>
 #include <span>
 
-#include "Mapper.h"
+#include "mappers/Mapper.h"
 
 namespace nes {
 

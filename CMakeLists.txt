@@ -15,10 +15,10 @@ add_executable(nes_emulator_cpp
         src/Bus.h
         src/Cartridge.cpp
         src/Cartridge.h
-        src/Mapper.h
-        src/Mapper.cpp
-        src/Mapper000.cpp
-        src/Mapper000.h)
+        src/mappers/Mapper.h
+        src/mappers/Mapper.cpp
+        src/mappers/Mapper000.cpp
+        src/mappers/Mapper000.h)
 
 target_include_directories(nes_emulator_cpp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
@@ -33,8 +33,8 @@ add_executable(nes_emulator_tests
         src/Cpu.cpp
         src/Emulator.cpp
         src/Cartridge.cpp
-        src/Mapper.cpp
-        src/Mapper000.cpp
+        src/mappers/Mapper.cpp
+        src/mappers/Mapper000.cpp
         tests/Cartridge_tests.cpp
         tests/Mapper000_tests.cpp
         tests/sta_tests.cpp
@@ -61,7 +61,7 @@ add_executable(nes_emulator_tests
         tests/bit_tests.cpp
         tests/nop_tests.cpp)
 
-target_include_directories(nes_emulator_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_include_directories(nes_emulator_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/external)
 
 add_test(NAME nes_emulator_tests COMMAND nes_emulator_tests)
 

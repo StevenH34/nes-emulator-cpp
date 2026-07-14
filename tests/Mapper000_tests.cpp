@@ -1,6 +1,6 @@
-#include "../doctest.h"
+#include "doctest.h"
 
-#include "../src/Mapper000.h"
+#include "../src/mappers/Mapper000.h"
 #include "../src/Cartridge.h"
 
 #include <vector>
