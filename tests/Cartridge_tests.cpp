@@ -174,15 +174,27 @@ TEST_CASE("Cartridge reports battery-backed RAM when the battery flag is set") {
     CHECK(cart.HasBatteryBackedRam());
 }
 
-TEST_CASE("Cartridge parses the mapper id from both flags bytes") {
-    // flags_6 top nibble = 0xA, flags_7 top nibble = 0x5 -> mapper 0x5A (90)
+TEST_CASE("Cartridge constructor throws when the mapper id is unsupported") {
+    // flags_6 top nibble = 0xA, flags_7 top nibble = 0x5 -> mapper 0x5A (90), which has no Mapper implementation
     auto data = MakeHeader(1, 1, 0xA0, 0x50);
     data.resize(data.size() + nes::Cartridge::PRG_BLOCK_SIZE + nes::Cartridge::CHR_BLOCK_SIZE, 0);
     const TempRomFile rom(data);
 
+    CHECK_THROWS_AS(nes::Cartridge(rom.path()), std::runtime_error);
+}
+
+TEST_CASE("Cartridge constructs a mapper wired to the parsed PRG-ROM and CHR-ROM data") {
+    auto data = MakeHeader(1, 1, 0, 0); // mapper id 0 (NROM)
+    data.resize(data.size() + nes::Cartridge::PRG_BLOCK_SIZE + nes::Cartridge::CHR_BLOCK_SIZE, 0);
+    data[16] = 0x11;                                                     // first PRG-ROM byte
+    data[16 + nes::Cartridge::PRG_BLOCK_SIZE] = 0x22;                    // first CHR-ROM byte
+    const TempRomFile rom(data);
+
     const nes::Cartridge cart(rom.path());
 
-    CHECK(cart.GetMapperId() == 0x5A);
+    CHECK(cart.GetMapperId() == 0);
+    CHECK(cart.GetMapper().ReadPrg(0x8000) == 0x11);
+    CHECK(cart.GetMapper().ReadChr(0x0000) == 0x22);
 }
 
 TEST_CASE("Cartridge parses vertical mirroring from flags_6") {

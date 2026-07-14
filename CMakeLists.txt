@@ -14,7 +14,11 @@ add_executable(nes_emulator_cpp
         src/Bus.cpp
         src/Bus.h
         src/Cartridge.cpp
-        src/Cartridge.h)
+        src/Cartridge.h
+        src/Mapper.h
+        src/Mapper.cpp
+        src/Mapper000.cpp
+        src/Mapper000.h)
 
 target_include_directories(nes_emulator_cpp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
@@ -29,7 +33,10 @@ add_executable(nes_emulator_tests
         src/Cpu.cpp
         src/Emulator.cpp
         src/Cartridge.cpp
+        src/Mapper.cpp
+        src/Mapper000.cpp
         tests/Cartridge_tests.cpp
+        tests/Mapper000_tests.cpp
         tests/sta_tests.cpp
         tests/addressing_mode_tests.cpp
         tests/lda_tests.cpp

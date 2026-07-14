@@ -4,9 +4,12 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 #include <vector>
 #include <string>
 #include <span>
+
+#include "Mapper.h"
 
 namespace nes {
 
@@ -59,7 +62,7 @@ public:
     [[nodiscard]] Mirroring GetMirroring() const { return mirroring_; }
     [[nodiscard]] std::uint8_t GetMapperId() const { return mapper_id_; }
     [[nodiscard]] bool HasBatteryBackedRam() const { return battery_; }
-
+    [[nodiscard]] Mapper& GetMapper() const { return *mapper_; }
 
     static std::vector<std::uint8_t> ReadFileBytes(const std::string& path);
     static void ValidateHeader(std::span<const std::uint8_t> data);
@@ -74,6 +77,7 @@ private:
     Mirroring mirroring_{Mirroring::Horizontal};
     bool battery_{false};
     std::uint8_t mapper_id_{0};
+    std::unique_ptr<Mapper> mapper_;
 };
 
 }

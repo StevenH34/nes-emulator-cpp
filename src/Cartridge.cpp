@@ -111,7 +111,8 @@ void Cartridge::Parse(std::span<const std::uint8_t> data) {
     } else {
         chr_rom_.assign(CHR_BLOCK_SIZE, 0u);
     }
-    // TODO: add Mapper
+
+    mapper_ = Mapper::Create(mapper_id_, prg_rom_, chr_rom_);
 }
 
 }
