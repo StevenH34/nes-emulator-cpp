@@ -1,7 +1,7 @@
 ### NES Emulator (in C++)
 
 - Added all 151 official opcodes with instructions.
-- Now adding Cartridge support.
+- Now adding the Cartridge and Mapper000 
 
 ### Testing
 
