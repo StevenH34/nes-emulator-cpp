@@ -15,6 +15,7 @@ public:
 
     void PrintDebugging();
     [[nodiscard]] std::string StatusString() const;
+    void Reset();
     [[nodiscard]] int Step();
     [[nodiscard]] std::uint8_t FetchByte();
     [[nodiscard]] std::uint8_t ReadByte(std::uint16_t address) const;
