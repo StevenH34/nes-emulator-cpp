@@ -1,10 +1,11 @@
 #include "doctest.h"
 
 #include "../src/Bus.h"
+#include "TestBus.h"
 #include "../src/Cpu.h"
 
 TEST_CASE("Inx increments the X register and updates the Zero and Negative flags") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.SetXRegister(0x09);
@@ -24,7 +25,7 @@ TEST_CASE("Inx increments the X register and updates the Zero and Negative flags
 }
 
 TEST_CASE("Iny increments the Y register and updates the Zero and Negative flags") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.SetYRegister(0x09);
@@ -44,7 +45,7 @@ TEST_CASE("Iny increments the Y register and updates the Zero and Negative flags
 }
 
 TEST_CASE("Dex decrements the X register and updates the Zero and Negative flags") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.SetXRegister(0x09);
@@ -64,7 +65,7 @@ TEST_CASE("Dex decrements the X register and updates the Zero and Negative flags
 }
 
 TEST_CASE("Dey decrements the Y register and updates the Zero and Negative flags") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.SetYRegister(0x09);

@@ -1,10 +1,11 @@
 #include "doctest.h"
 
 #include "../src/Bus.h"
+#include "TestBus.h"
 #include "../src/Cpu.h"
 
 TEST_CASE("Ldx loads the X register and updates the Zero and Negative flags") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Ldx(0x00);
@@ -21,7 +22,7 @@ TEST_CASE("Ldx loads the X register and updates the Zero and Negative flags") {
 }
 
 TEST_CASE("LdxImmediate loads the value following the opcode") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x42); // value
@@ -33,7 +34,7 @@ TEST_CASE("LdxImmediate loads the value following the opcode") {
 }
 
 TEST_CASE("LdxZeroPage loads the value at the zero page address") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x10); // zero page address
@@ -46,7 +47,7 @@ TEST_CASE("LdxZeroPage loads the value at the zero page address") {
 }
 
 TEST_CASE("LdxZeroPageY loads the value at the zero page address plus Y") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x10); // base operand
@@ -60,7 +61,7 @@ TEST_CASE("LdxZeroPageY loads the value at the zero page address plus Y") {
 }
 
 TEST_CASE("LdxAbsolute loads the value at a 16-bit address") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x00); // low byte
@@ -74,7 +75,7 @@ TEST_CASE("LdxAbsolute loads the value at a 16-bit address") {
 }
 
 TEST_CASE("LdxAbsoluteY loads the value at a 16-bit address plus Y") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x00); // low byte

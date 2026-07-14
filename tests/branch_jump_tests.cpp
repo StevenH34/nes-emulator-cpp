@@ -1,10 +1,11 @@
 #include "doctest.h"
 
 #include "../src/Bus.h"
+#include "TestBus.h"
 #include "../src/Cpu.h"
 
 TEST_CASE("Beq branches when the Zero flag is set") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.SetFlag(nes::Cpu::StatusFlag::Z, true);
@@ -16,7 +17,7 @@ TEST_CASE("Beq branches when the Zero flag is set") {
 }
 
 TEST_CASE("Beq does not branch but still consumes the offset byte when the Zero flag is clear") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.SetFlag(nes::Cpu::StatusFlag::Z, false);
@@ -28,7 +29,7 @@ TEST_CASE("Beq does not branch but still consumes the offset byte when the Zero 
 }
 
 TEST_CASE("Bne branches when the Zero flag is clear") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.SetFlag(nes::Cpu::StatusFlag::Z, false);
@@ -40,7 +41,7 @@ TEST_CASE("Bne branches when the Zero flag is clear") {
 }
 
 TEST_CASE("Bne does not branch when the Zero flag is set") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.SetFlag(nes::Cpu::StatusFlag::Z, true);
@@ -52,7 +53,7 @@ TEST_CASE("Bne does not branch when the Zero flag is set") {
 }
 
 TEST_CASE("Bcs branches when the Carry flag is set") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.SetFlag(nes::Cpu::StatusFlag::C, true);
@@ -64,7 +65,7 @@ TEST_CASE("Bcs branches when the Carry flag is set") {
 }
 
 TEST_CASE("Bcc branches when the Carry flag is clear") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.SetFlag(nes::Cpu::StatusFlag::C, false);
@@ -76,7 +77,7 @@ TEST_CASE("Bcc branches when the Carry flag is clear") {
 }
 
 TEST_CASE("Bcc does not branch when the Carry flag is set") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.SetFlag(nes::Cpu::StatusFlag::C, true);
@@ -88,7 +89,7 @@ TEST_CASE("Bcc does not branch when the Carry flag is set") {
 }
 
 TEST_CASE("Bmi branches when the Negative flag is set") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.SetFlag(nes::Cpu::StatusFlag::N, true);
@@ -100,7 +101,7 @@ TEST_CASE("Bmi branches when the Negative flag is set") {
 }
 
 TEST_CASE("Bpl branches when the Negative flag is clear") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.SetFlag(nes::Cpu::StatusFlag::N, false);
@@ -112,7 +113,7 @@ TEST_CASE("Bpl branches when the Negative flag is clear") {
 }
 
 TEST_CASE("Bpl does not branch when the Negative flag is set") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.SetFlag(nes::Cpu::StatusFlag::N, true);
@@ -124,7 +125,7 @@ TEST_CASE("Bpl does not branch when the Negative flag is set") {
 }
 
 TEST_CASE("Bvs branches when the Overflow flag is set") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.SetFlag(nes::Cpu::StatusFlag::V, true);
@@ -136,7 +137,7 @@ TEST_CASE("Bvs branches when the Overflow flag is set") {
 }
 
 TEST_CASE("Bvc branches when the Overflow flag is clear") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.SetFlag(nes::Cpu::StatusFlag::V, false);
@@ -148,7 +149,7 @@ TEST_CASE("Bvc branches when the Overflow flag is clear") {
 }
 
 TEST_CASE("Bvc does not branch when the Overflow flag is set") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.SetFlag(nes::Cpu::StatusFlag::V, true);
@@ -160,7 +161,7 @@ TEST_CASE("Bvc does not branch when the Overflow flag is set") {
 }
 
 TEST_CASE("BranchIf supports backward branches with a negative offset") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0xA9); // LDA Immediate
@@ -176,7 +177,7 @@ TEST_CASE("BranchIf supports backward branches with a negative offset") {
 }
 
 TEST_CASE("JmpAbsolute sets the Program Counter to the 16-bit operand address") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x34); // low byte
@@ -188,7 +189,7 @@ TEST_CASE("JmpAbsolute sets the Program Counter to the 16-bit operand address") 
 }
 
 TEST_CASE("JmpIndirect sets the Program Counter to the address stored at the pointer") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x00); // pointer low byte
@@ -202,7 +203,7 @@ TEST_CASE("JmpIndirect sets the Program Counter to the address stored at the poi
 }
 
 TEST_CASE("JmpIndirect reproduces the 6502 page-boundary bug") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0xFF); // pointer low byte
@@ -217,7 +218,7 @@ TEST_CASE("JmpIndirect reproduces the 6502 page-boundary bug") {
 }
 
 TEST_CASE("Jsr pushes the return address and sets the Program Counter to the target") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x34); // low byte
@@ -231,7 +232,7 @@ TEST_CASE("Jsr pushes the return address and sets the Program Counter to the tar
 }
 
 TEST_CASE("Rts pops the return address from the stack and sets the Program Counter to address + 1") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.StackPushWord(0x1233); // return address - 1, as Jsr would have pushed it
@@ -242,7 +243,7 @@ TEST_CASE("Rts pops the return address from the stack and sets the Program Count
 }
 
 TEST_CASE("Jsr followed by Rts returns to the instruction after the JSR operand") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x34); // low byte of subroutine address
@@ -256,7 +257,7 @@ TEST_CASE("Jsr followed by Rts returns to the instruction after the JSR operand"
 }
 
 TEST_CASE("Brk pushes the Program Counter and Status Register, sets the Interrupt flag, and jumps to the IRQ vector address") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.SetFlag(nes::Cpu::StatusFlag::I, false);
@@ -272,7 +273,7 @@ TEST_CASE("Brk pushes the Program Counter and Status Register, sets the Interrup
 }
 
 TEST_CASE("Rti restores the Program Counter and Status Register from the stack, clearing the Break flag") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.StackPushWord(0x1234); // Program Counter, as Brk would have pushed it
@@ -285,7 +286,7 @@ TEST_CASE("Rti restores the Program Counter and Status Register from the stack, 
 }
 
 TEST_CASE("Rti forces the Unused flag on even if it was not set on the stack") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.StackPushWord(0x0000);
@@ -297,7 +298,7 @@ TEST_CASE("Rti forces the Unused flag on even if it was not set on the stack") {
 }
 
 TEST_CASE("Brk followed by Rti returns to the Program Counter and Status Register from before the interrupt") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0xA9); // LDA Immediate

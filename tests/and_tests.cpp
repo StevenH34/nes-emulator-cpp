@@ -1,10 +1,11 @@
 #include "doctest.h"
 
 #include "../src/Bus.h"
+#include "TestBus.h"
 #include "../src/Cpu.h"
 
 TEST_CASE("AndImmediate ANDs the value following the opcode with the accumulator") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0xF0);
@@ -17,7 +18,7 @@ TEST_CASE("AndImmediate ANDs the value following the opcode with the accumulator
 }
 
 TEST_CASE("AndImmediate sets the Negative flag when the high bit is retained") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0xFF);
@@ -30,7 +31,7 @@ TEST_CASE("AndImmediate sets the Negative flag when the high bit is retained") {
 }
 
 TEST_CASE("AndZeroPage ANDs the value at the zero page address with the accumulator") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x3C);
@@ -44,7 +45,7 @@ TEST_CASE("AndZeroPage ANDs the value at the zero page address with the accumula
 }
 
 TEST_CASE("AndZeroPageX ANDs the value at the zero page address plus X with the accumulator") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0xFF);
@@ -59,7 +60,7 @@ TEST_CASE("AndZeroPageX ANDs the value at the zero page address plus X with the 
 }
 
 TEST_CASE("AndAbsolute ANDs the value at a 16-bit address with the accumulator") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0xFF);
@@ -74,7 +75,7 @@ TEST_CASE("AndAbsolute ANDs the value at a 16-bit address with the accumulator")
 }
 
 TEST_CASE("AndAbsoluteX ANDs the value at a 16-bit address plus X with the accumulator") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x0F);
@@ -90,7 +91,7 @@ TEST_CASE("AndAbsoluteX ANDs the value at a 16-bit address plus X with the accum
 }
 
 TEST_CASE("AndAbsoluteY ANDs the value at a 16-bit address plus Y with the accumulator") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x0F);
@@ -106,7 +107,7 @@ TEST_CASE("AndAbsoluteY ANDs the value at a 16-bit address plus Y with the accum
 }
 
 TEST_CASE("AndIndirectX adds X to the zero page base, reads a pointer, then ANDs the value") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0xFF);
@@ -123,7 +124,7 @@ TEST_CASE("AndIndirectX adds X to the zero page base, reads a pointer, then ANDs
 }
 
 TEST_CASE("AndIndirectY reads a zero page pointer, adds Y, then ANDs the value") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0xFF);

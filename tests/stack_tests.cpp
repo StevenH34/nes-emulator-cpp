@@ -1,10 +1,11 @@
 #include "doctest.h"
 
 #include "../src/Bus.h"
+#include "TestBus.h"
 #include "../src/Cpu.h"
 
 TEST_CASE("StackPushByte writes the value to the stack page and decrements the stack pointer") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.StackPushByte(0x42);
@@ -13,7 +14,7 @@ TEST_CASE("StackPushByte writes the value to the stack page and decrements the s
 }
 
 TEST_CASE("StackPullByte reads the value back and increments the stack pointer") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.StackPushByte(0x42);
@@ -21,7 +22,7 @@ TEST_CASE("StackPullByte reads the value back and increments the stack pointer")
 }
 
 TEST_CASE("StackPushByte and StackPullByte round trip multiple values in LIFO order") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.StackPushByte(0x11);
@@ -34,7 +35,7 @@ TEST_CASE("StackPushByte and StackPullByte round trip multiple values in LIFO or
 }
 
 TEST_CASE("StackPushWord writes the high byte then the low byte, decrementing the stack pointer twice") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.StackPushWord(0x1234);
@@ -44,7 +45,7 @@ TEST_CASE("StackPushWord writes the high byte then the low byte, decrementing th
 }
 
 TEST_CASE("StackPullWord reconstructs the 16-bit value pushed by StackPushWord") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.StackPushWord(0x1234);
@@ -53,7 +54,7 @@ TEST_CASE("StackPullWord reconstructs the 16-bit value pushed by StackPushWord")
 }
 
 TEST_CASE("StackPushWord and StackPullWord round trip multiple values in LIFO order") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.StackPushWord(0xABCD);
@@ -64,7 +65,7 @@ TEST_CASE("StackPushWord and StackPullWord round trip multiple values in LIFO or
 }
 
 TEST_CASE("Stack pointer wraps from 0x00 to 0xFF when pushing past the bottom of the stack") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     // Drive the stack pointer down to 0x00 by pushing 0xFD bytes (starts at 0xFD).
@@ -78,7 +79,7 @@ TEST_CASE("Stack pointer wraps from 0x00 to 0xFF when pushing past the bottom of
 }
 
 TEST_CASE("Stack pointer wraps from 0xFF to 0x00 when popping past the top of the stack") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x0100, 0x77); // value at the wrapped-to address
@@ -90,7 +91,7 @@ TEST_CASE("Stack pointer wraps from 0xFF to 0x00 when popping past the top of th
 }
 
 TEST_CASE("Pha pushes the accumulator onto the stack and decrements the stack pointer") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0xA9); // LDA Immediate
@@ -107,7 +108,7 @@ TEST_CASE("Pha pushes the accumulator onto the stack and decrements the stack po
 }
 
 TEST_CASE("Pla pops a value from the stack into the accumulator and updates the Negative flag") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0xA9); // LDA #$80
@@ -134,7 +135,7 @@ TEST_CASE("Pla pops a value from the stack into the accumulator and updates the 
 }
 
 TEST_CASE("Pla sets the Zero flag when popping a zero value") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0xA9); // LDA #$00
@@ -156,7 +157,7 @@ TEST_CASE("Pla sets the Zero flag when popping a zero value") {
 }
 
 TEST_CASE("Php pushes the status register with the Break and Unused flags forced on") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.SetFlag(nes::Cpu::StatusFlag::C, true);
@@ -179,7 +180,7 @@ TEST_CASE("Php pushes the status register with the Break and Unused flags forced
 }
 
 TEST_CASE("Plp restores flags from the stack while forcing Unused on and Break off") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.SetFlag(nes::Cpu::StatusFlag::C, true);

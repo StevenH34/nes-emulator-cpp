@@ -1,10 +1,11 @@
 #include "doctest.h"
 
 #include "../src/Bus.h"
+#include "TestBus.h"
 #include "../src/Cpu.h"
 
 TEST_CASE("StyZeroPage writes the Y register to the zero page address") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x10); // zero page address
@@ -16,7 +17,7 @@ TEST_CASE("StyZeroPage writes the Y register to the zero page address") {
 }
 
 TEST_CASE("StyZeroPageX writes the Y register to the zero page address plus X") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x10); // base operand
@@ -29,7 +30,7 @@ TEST_CASE("StyZeroPageX writes the Y register to the zero page address plus X") 
 }
 
 TEST_CASE("StyAbsolute writes the Y register to a 16-bit address") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x00); // low byte

@@ -1,10 +1,11 @@
 #include "doctest.h"
 
 #include "../src/Bus.h"
+#include "TestBus.h"
 #include "../src/Cpu.h"
 
 TEST_CASE("OraImmediate ORs the value following the opcode with the accumulator") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x00);
@@ -17,7 +18,7 @@ TEST_CASE("OraImmediate ORs the value following the opcode with the accumulator"
 }
 
 TEST_CASE("OraImmediate sets the Negative flag when the result has bit 7 set") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x0F);
@@ -30,7 +31,7 @@ TEST_CASE("OraImmediate sets the Negative flag when the result has bit 7 set") {
 }
 
 TEST_CASE("OraZeroPage ORs the value at the zero page address with the accumulator") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x3C);
@@ -44,7 +45,7 @@ TEST_CASE("OraZeroPage ORs the value at the zero page address with the accumulat
 }
 
 TEST_CASE("OraZeroPageX ORs the value at the zero page address plus X with the accumulator") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x00);
@@ -59,7 +60,7 @@ TEST_CASE("OraZeroPageX ORs the value at the zero page address plus X with the a
 }
 
 TEST_CASE("OraAbsolute ORs the value at a 16-bit address with the accumulator") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x00);
@@ -74,7 +75,7 @@ TEST_CASE("OraAbsolute ORs the value at a 16-bit address with the accumulator") 
 }
 
 TEST_CASE("OraAbsoluteX ORs the value at a 16-bit address plus X with the accumulator") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x0F);
@@ -90,7 +91,7 @@ TEST_CASE("OraAbsoluteX ORs the value at a 16-bit address plus X with the accumu
 }
 
 TEST_CASE("OraAbsoluteY ORs the value at a 16-bit address plus Y with the accumulator") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x00);
@@ -106,7 +107,7 @@ TEST_CASE("OraAbsoluteY ORs the value at a 16-bit address plus Y with the accumu
 }
 
 TEST_CASE("OraIndirectX adds X to the zero page base, reads a pointer, then ORs the value") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x70);
@@ -123,7 +124,7 @@ TEST_CASE("OraIndirectX adds X to the zero page base, reads a pointer, then ORs 
 }
 
 TEST_CASE("OraIndirectY reads a zero page pointer, adds Y, then ORs the value") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x00);

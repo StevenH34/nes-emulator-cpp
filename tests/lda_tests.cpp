@@ -1,10 +1,11 @@
 #include "doctest.h"
 
 #include "../src/Bus.h"
+#include "TestBus.h"
 #include "../src/Cpu.h"
 
 TEST_CASE("Lda loads the accumulator and updates the Zero and Negative flags") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x00);
@@ -21,7 +22,7 @@ TEST_CASE("Lda loads the accumulator and updates the Zero and Negative flags") {
 }
 
 TEST_CASE("LdaImmediate loads the value following the opcode") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x42); // value
@@ -33,7 +34,7 @@ TEST_CASE("LdaImmediate loads the value following the opcode") {
 }
 
 TEST_CASE("LdaZeroPage loads the value at the zero page address") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x10); // zero page address
@@ -46,7 +47,7 @@ TEST_CASE("LdaZeroPage loads the value at the zero page address") {
 }
 
 TEST_CASE("LdaZeroPageX loads the value at the zero page address plus X") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x10); // base operand
@@ -60,7 +61,7 @@ TEST_CASE("LdaZeroPageX loads the value at the zero page address plus X") {
 }
 
 TEST_CASE("LdaAbsolute loads the value at a 16-bit address") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x00); // low byte
@@ -74,7 +75,7 @@ TEST_CASE("LdaAbsolute loads the value at a 16-bit address") {
 }
 
 TEST_CASE("LdaAbsoluteX loads the value at a 16-bit address plus X") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x00); // low byte
@@ -89,7 +90,7 @@ TEST_CASE("LdaAbsoluteX loads the value at a 16-bit address plus X") {
 }
 
 TEST_CASE("LdaAbsoluteY loads the value at a 16-bit address plus Y") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x00); // low byte
@@ -104,7 +105,7 @@ TEST_CASE("LdaAbsoluteY loads the value at a 16-bit address plus Y") {
 }
 
 TEST_CASE("LdaIndirectX adds X to the zero page base, reads a pointer, then loads the value") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x10); // base operand
@@ -120,7 +121,7 @@ TEST_CASE("LdaIndirectX adds X to the zero page base, reads a pointer, then load
 }
 
 TEST_CASE("LdaIndirectY reads a zero page pointer, adds Y, then loads the value") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x20); // zero page pointer location

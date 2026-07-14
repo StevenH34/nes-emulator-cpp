@@ -1,10 +1,11 @@
 #include "doctest.h"
 
 #include "../src/Bus.h"
+#include "TestBus.h"
 #include "../src/Cpu.h"
 
 TEST_CASE("Sbc subtracts the value from the accumulator") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x50);
@@ -17,7 +18,7 @@ TEST_CASE("Sbc subtracts the value from the accumulator") {
 }
 
 TEST_CASE("Sbc includes the Carry flag as inverted borrow") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x50);
@@ -30,7 +31,7 @@ TEST_CASE("Sbc includes the Carry flag as inverted borrow") {
 }
 
 TEST_CASE("Sbc clears Carry when a borrow occurs") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x20);
@@ -43,7 +44,7 @@ TEST_CASE("Sbc clears Carry when a borrow occurs") {
 }
 
 TEST_CASE("Sbc sets Zero when the result is 0x00") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x50);
@@ -56,7 +57,7 @@ TEST_CASE("Sbc sets Zero when the result is 0x00") {
 }
 
 TEST_CASE("Sbc sets Negative when bit 7 of the result is set") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x50);
@@ -69,7 +70,7 @@ TEST_CASE("Sbc sets Negative when bit 7 of the result is set") {
 }
 
 TEST_CASE("Sbc sets Overflow when positive minus negative produces a negative result") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x50); // +80
@@ -82,7 +83,7 @@ TEST_CASE("Sbc sets Overflow when positive minus negative produces a negative re
 }
 
 TEST_CASE("Sbc sets Overflow when negative minus positive produces a positive result") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0xD0); // -48
@@ -95,7 +96,7 @@ TEST_CASE("Sbc sets Overflow when negative minus positive produces a positive re
 }
 
 TEST_CASE("Sbc does not set Overflow when operands have the same sign") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x50); // +80
@@ -108,7 +109,7 @@ TEST_CASE("Sbc does not set Overflow when operands have the same sign") {
 }
 
 TEST_CASE("SbcImmediate subtracts the value following the opcode from the accumulator") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x50);
@@ -123,7 +124,7 @@ TEST_CASE("SbcImmediate subtracts the value following the opcode from the accumu
 }
 
 TEST_CASE("SbcImmediate clears Carry and sets Zero when result wraps to 0x00 with borrow") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x01);
@@ -137,7 +138,7 @@ TEST_CASE("SbcImmediate clears Carry and sets Zero when result wraps to 0x00 wit
 }
 
 TEST_CASE("SbcZeroPage subtracts the value at the zero page address from the accumulator") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x50);
@@ -153,7 +154,7 @@ TEST_CASE("SbcZeroPage subtracts the value at the zero page address from the acc
 }
 
 TEST_CASE("SbcZeroPageX subtracts the value at the zero page address plus X from the accumulator") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x50);
@@ -170,7 +171,7 @@ TEST_CASE("SbcZeroPageX subtracts the value at the zero page address plus X from
 }
 
 TEST_CASE("SbcAbsolute subtracts the value at a 16-bit address from the accumulator") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x50);
@@ -187,7 +188,7 @@ TEST_CASE("SbcAbsolute subtracts the value at a 16-bit address from the accumula
 }
 
 TEST_CASE("SbcAbsoluteX subtracts the value at a 16-bit address plus X from the accumulator") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x50);
@@ -205,7 +206,7 @@ TEST_CASE("SbcAbsoluteX subtracts the value at a 16-bit address plus X from the 
 }
 
 TEST_CASE("SbcAbsoluteY subtracts the value at a 16-bit address plus Y from the accumulator") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x50);
@@ -223,7 +224,7 @@ TEST_CASE("SbcAbsoluteY subtracts the value at a 16-bit address plus Y from the 
 }
 
 TEST_CASE("SbcIndirectX adds X to the zero page base, reads a pointer, then subtracts the value") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x50);
@@ -242,7 +243,7 @@ TEST_CASE("SbcIndirectX adds X to the zero page base, reads a pointer, then subt
 }
 
 TEST_CASE("SbcIndirectY reads a zero page pointer, adds Y, then subtracts the value") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x50);

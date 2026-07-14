@@ -8,7 +8,10 @@
 
 namespace nes {
 
-Emulator::Emulator(Bus& bus, Cpu& cpu) : bus_(bus), cpu_(cpu) {}
+Emulator::Emulator(std::string path)
+    : cartridge_(std::move(path)), bus_(cartridge_), cpu_(bus_) {
+    cpu_.Reset();
+}
 
 void Emulator::Run() {
     std::puts("Hello, World");

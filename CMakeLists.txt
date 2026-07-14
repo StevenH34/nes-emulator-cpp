@@ -29,6 +29,10 @@ enable_testing()
 
 add_executable(nes_emulator_tests
         tests/test_main.cpp
+        tests/TestRom.h
+        tests/TestRom.cpp
+        tests/TestBus.h
+        tests/TestBus.cpp
         tests/Bus_tests.cpp
         tests/Cpu_tests.cpp
         tests/Emulator_tests.cpp

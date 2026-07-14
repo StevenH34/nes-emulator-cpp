@@ -1,10 +1,11 @@
 #include "doctest.h"
 
 #include "../src/Bus.h"
+#include "TestBus.h"
 #include "../src/Cpu.h"
 
 TEST_CASE("AddressAbsolute combines low and high bytes in little-endian order") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x34); // low byte
@@ -14,7 +15,7 @@ TEST_CASE("AddressAbsolute combines low and high bytes in little-endian order") 
 }
 
 TEST_CASE("AddressZeroPageX resolves base + X within the zero page") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x10); // base operand
@@ -24,7 +25,7 @@ TEST_CASE("AddressZeroPageX resolves base + X within the zero page") {
 }
 
 TEST_CASE("AddressZeroPageX wraps within the zero page instead of crossing into page 1") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0xFF); // base operand
@@ -34,7 +35,7 @@ TEST_CASE("AddressZeroPageX wraps within the zero page instead of crossing into 
 }
 
 TEST_CASE("AddressZeroPageY resolves base + Y within the zero page") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x20); // base operand
@@ -44,7 +45,7 @@ TEST_CASE("AddressZeroPageY resolves base + Y within the zero page") {
 }
 
 TEST_CASE("AddressZeroPageY wraps within the zero page instead of crossing into page 1") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0xFF); // base operand
@@ -54,7 +55,7 @@ TEST_CASE("AddressZeroPageY wraps within the zero page instead of crossing into 
 }
 
 TEST_CASE("AddressAbsoluteX adds X to a 16-bit base address") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x00); // low byte
@@ -65,7 +66,7 @@ TEST_CASE("AddressAbsoluteX adds X to a 16-bit base address") {
 }
 
 TEST_CASE("AddressAbsoluteX wraps across the 16-bit address space") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0xFF); // low byte
@@ -76,7 +77,7 @@ TEST_CASE("AddressAbsoluteX wraps across the 16-bit address space") {
 }
 
 TEST_CASE("AddressAbsoluteY adds Y to a 16-bit base address") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x00); // low byte
@@ -87,7 +88,7 @@ TEST_CASE("AddressAbsoluteY adds Y to a 16-bit base address") {
 }
 
 TEST_CASE("AddressAbsoluteY wraps across the 16-bit address space") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0xFF); // low byte
@@ -98,7 +99,7 @@ TEST_CASE("AddressAbsoluteY wraps across the 16-bit address space") {
 }
 
 TEST_CASE("AddressRelative adds a positive signed offset to the Program Counter") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x05); // offset = +5, fetched from PC 0x0000
@@ -108,7 +109,7 @@ TEST_CASE("AddressRelative adds a positive signed offset to the Program Counter"
 }
 
 TEST_CASE("AddressRelative subtracts a negative signed offset from the Program Counter") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0xA9); // LDA Immediate opcode
@@ -121,7 +122,7 @@ TEST_CASE("AddressRelative subtracts a negative signed offset from the Program C
 }
 
 TEST_CASE("AddressIndirect reads the target address from the pointer location") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x00); // pointer low byte
@@ -133,7 +134,7 @@ TEST_CASE("AddressIndirect reads the target address from the pointer location") 
 }
 
 TEST_CASE("AddressIndirect emulates the page-boundary bug when the pointer's low byte is 0xFF") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0xFF); // pointer low byte
@@ -146,7 +147,7 @@ TEST_CASE("AddressIndirect emulates the page-boundary bug when the pointer's low
 }
 
 TEST_CASE("AddressIndirectX adds X to the zero page base, then reads a 16-bit pointer") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x10); // base operand
@@ -158,7 +159,7 @@ TEST_CASE("AddressIndirectX adds X to the zero page base, then reads a 16-bit po
 }
 
 TEST_CASE("AddressIndirectX wraps the high-byte pointer fetch within the zero page") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0xF0); // base operand, also read back as the wrapped high byte
@@ -169,7 +170,7 @@ TEST_CASE("AddressIndirectX wraps the high-byte pointer fetch within the zero pa
 }
 
 TEST_CASE("AddressIndirectY reads a zero page pointer, then adds Y to it") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x20); // base operand, used directly as the zero page pointer
@@ -181,7 +182,7 @@ TEST_CASE("AddressIndirectY reads a zero page pointer, then adds Y to it") {
 }
 
 TEST_CASE("AddressIndirectY wraps the high-byte pointer fetch within the zero page") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0xFF); // base operand, also read back as the wrapped high byte

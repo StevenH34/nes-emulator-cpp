@@ -1,10 +1,11 @@
 #include "doctest.h"
 
 #include "../src/Bus.h"
+#include "TestBus.h"
 #include "../src/Cpu.h"
 
 TEST_CASE("IncZeroPage increments the value at the zero page address and stores the result") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x10); // zero page address operand
@@ -17,7 +18,7 @@ TEST_CASE("IncZeroPage increments the value at the zero page address and stores 
 }
 
 TEST_CASE("IncZeroPage sets Zero when the result wraps to 0x00") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x10); // zero page address operand
@@ -30,7 +31,7 @@ TEST_CASE("IncZeroPage sets Zero when the result wraps to 0x00") {
 }
 
 TEST_CASE("IncZeroPage sets Negative when bit 7 of the result is set") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x10); // zero page address operand
@@ -43,7 +44,7 @@ TEST_CASE("IncZeroPage sets Negative when bit 7 of the result is set") {
 }
 
 TEST_CASE("IncZeroPageX increments the value at the zero page address plus X") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x10); // base operand
@@ -57,7 +58,7 @@ TEST_CASE("IncZeroPageX increments the value at the zero page address plus X") {
 }
 
 TEST_CASE("IncZeroPageX wraps within the zero page instead of crossing into page 1") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0xFF); // base operand
@@ -70,7 +71,7 @@ TEST_CASE("IncZeroPageX wraps within the zero page instead of crossing into page
 }
 
 TEST_CASE("IncAbsolute increments the value at a 16-bit address and sets Zero") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x00); // low byte
@@ -84,7 +85,7 @@ TEST_CASE("IncAbsolute increments the value at a 16-bit address and sets Zero") 
 }
 
 TEST_CASE("IncAbsoluteX increments the value at a 16-bit address plus X") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x00); // low byte

@@ -1,10 +1,11 @@
 #include "doctest.h"
 
 #include "../src/Bus.h"
+#include "TestBus.h"
 #include "../src/Cpu.h"
 
 TEST_CASE("BitZeroPage sets Zero when the AND of the accumulator and memory value is zero, without modifying the accumulator") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x0F);
@@ -18,7 +19,7 @@ TEST_CASE("BitZeroPage sets Zero when the AND of the accumulator and memory valu
 }
 
 TEST_CASE("BitZeroPage clears Zero when the AND of the accumulator and memory value is nonzero") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0xFF);
@@ -31,7 +32,7 @@ TEST_CASE("BitZeroPage clears Zero when the AND of the accumulator and memory va
 }
 
 TEST_CASE("BitZeroPage sets Negative and Overflow from bits 7 and 6 of the memory value, not from the AND result") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0xC0);
@@ -45,7 +46,7 @@ TEST_CASE("BitZeroPage sets Negative and Overflow from bits 7 and 6 of the memor
 }
 
 TEST_CASE("BitAbsolute sets Zero, Negative, and Overflow from the value at a 16-bit address, without modifying the accumulator") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x0F);
@@ -60,7 +61,7 @@ TEST_CASE("BitAbsolute sets Zero, Negative, and Overflow from the value at a 16-
 }
 
 TEST_CASE("BitAbsolute clears Zero when the AND of the accumulator and memory value is nonzero") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0xFF);

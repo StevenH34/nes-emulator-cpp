@@ -1,10 +1,11 @@
 #include "doctest.h"
 
 #include "../src/Bus.h"
+#include "TestBus.h"
 #include "../src/Cpu.h"
 
 TEST_CASE("AslAccumulator shifts bits left and clears Carry, Zero, and Negative") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x01); // 0000 0001
@@ -16,7 +17,7 @@ TEST_CASE("AslAccumulator shifts bits left and clears Carry, Zero, and Negative"
 }
 
 TEST_CASE("AslAccumulator sets Carry when bit 7 is shifted out") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x81); // 1000 0001
@@ -28,7 +29,7 @@ TEST_CASE("AslAccumulator sets Carry when bit 7 is shifted out") {
 }
 
 TEST_CASE("AslAccumulator sets Zero when the result is 0x00") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x80); // 1000 0000
@@ -40,7 +41,7 @@ TEST_CASE("AslAccumulator sets Zero when the result is 0x00") {
 }
 
 TEST_CASE("AslAccumulator sets Negative when bit 7 of the result is set") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x40); // 0100 0000
@@ -52,7 +53,7 @@ TEST_CASE("AslAccumulator sets Negative when bit 7 of the result is set") {
 }
 
 TEST_CASE("Asl returns the shifted value without touching memory or the accumulator") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     CHECK(cpu.Asl(0x81) == 0x02); // 1000 0001 -> 0000 0010, bit 7 dropped
@@ -61,7 +62,7 @@ TEST_CASE("Asl returns the shifted value without touching memory or the accumula
 }
 
 TEST_CASE("AslZeroPage shifts the value at the zero page address and stores the result") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x10); // zero page address operand
@@ -74,7 +75,7 @@ TEST_CASE("AslZeroPage shifts the value at the zero page address and stores the 
 }
 
 TEST_CASE("AslZeroPage sets Carry when bit 7 is shifted out") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x10); // zero page address operand
@@ -87,7 +88,7 @@ TEST_CASE("AslZeroPage sets Carry when bit 7 is shifted out") {
 }
 
 TEST_CASE("AslZeroPageX shifts the value at the zero page address plus X") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x10); // base operand
@@ -101,7 +102,7 @@ TEST_CASE("AslZeroPageX shifts the value at the zero page address plus X") {
 }
 
 TEST_CASE("AslZeroPageX wraps within the zero page instead of crossing into page 1") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0xFF); // base operand
@@ -114,7 +115,7 @@ TEST_CASE("AslZeroPageX wraps within the zero page instead of crossing into page
 }
 
 TEST_CASE("AslAbsolute shifts the value at a 16-bit address and sets Zero and Carry") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x00); // low byte
@@ -128,7 +129,7 @@ TEST_CASE("AslAbsolute shifts the value at a 16-bit address and sets Zero and Ca
 }
 
 TEST_CASE("AslAbsoluteX shifts the value at a 16-bit address plus X") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x00); // low byte
@@ -143,7 +144,7 @@ TEST_CASE("AslAbsoluteX shifts the value at a 16-bit address plus X") {
 }
 
 TEST_CASE("LsrAccumulator shifts bits right and clears Carry and Zero") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x02); // 0000 0010
@@ -155,7 +156,7 @@ TEST_CASE("LsrAccumulator shifts bits right and clears Carry and Zero") {
 }
 
 TEST_CASE("LsrAccumulator sets Carry when bit 0 is shifted out") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x03); // 0000 0011
@@ -167,7 +168,7 @@ TEST_CASE("LsrAccumulator sets Carry when bit 0 is shifted out") {
 }
 
 TEST_CASE("LsrAccumulator sets Zero when the result is 0x00") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x01); // 0000 0001
@@ -179,7 +180,7 @@ TEST_CASE("LsrAccumulator sets Zero when the result is 0x00") {
 }
 
 TEST_CASE("LsrAccumulator always clears Negative because bit 7 becomes 0") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x81); // 1000 0001
@@ -191,7 +192,7 @@ TEST_CASE("LsrAccumulator always clears Negative because bit 7 becomes 0") {
 }
 
 TEST_CASE("Lsr returns the shifted value without touching memory or the accumulator") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     CHECK(cpu.Lsr(0x03) == 0x01); // 0000 0011 -> 0000 0001, bit 0 dropped
@@ -200,7 +201,7 @@ TEST_CASE("Lsr returns the shifted value without touching memory or the accumula
 }
 
 TEST_CASE("LsrZeroPage shifts the value at the zero page address and stores the result") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x10); // zero page address operand
@@ -213,7 +214,7 @@ TEST_CASE("LsrZeroPage shifts the value at the zero page address and stores the 
 }
 
 TEST_CASE("LsrZeroPage sets Carry when bit 0 is shifted out") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x10); // zero page address operand
@@ -226,7 +227,7 @@ TEST_CASE("LsrZeroPage sets Carry when bit 0 is shifted out") {
 }
 
 TEST_CASE("LsrZeroPageX shifts the value at the zero page address plus X") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x10); // base operand
@@ -240,7 +241,7 @@ TEST_CASE("LsrZeroPageX shifts the value at the zero page address plus X") {
 }
 
 TEST_CASE("LsrZeroPageX wraps within the zero page instead of crossing into page 1") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0xFF); // base operand
@@ -253,7 +254,7 @@ TEST_CASE("LsrZeroPageX wraps within the zero page instead of crossing into page
 }
 
 TEST_CASE("LsrAbsolute shifts the value at a 16-bit address and sets Zero and Carry") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x00); // low byte
@@ -267,7 +268,7 @@ TEST_CASE("LsrAbsolute shifts the value at a 16-bit address and sets Zero and Ca
 }
 
 TEST_CASE("LsrAbsoluteX shifts the value at a 16-bit address plus X") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x00); // low byte
@@ -282,7 +283,7 @@ TEST_CASE("LsrAbsoluteX shifts the value at a 16-bit address plus X") {
 }
 
 TEST_CASE("RolAccumulator rotates bits left and shifts in a clear Carry") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x01); // 0000 0001
@@ -294,7 +295,7 @@ TEST_CASE("RolAccumulator rotates bits left and shifts in a clear Carry") {
 }
 
 TEST_CASE("RolAccumulator shifts in a set Carry as bit 0") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x01); // 0000 0001
@@ -307,7 +308,7 @@ TEST_CASE("RolAccumulator shifts in a set Carry as bit 0") {
 }
 
 TEST_CASE("RolAccumulator sets Carry when bit 7 is rotated out") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x81); // 1000 0001
@@ -319,7 +320,7 @@ TEST_CASE("RolAccumulator sets Carry when bit 7 is rotated out") {
 }
 
 TEST_CASE("RolAccumulator sets Zero when the result is 0x00") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x80); // 1000 0000
@@ -331,7 +332,7 @@ TEST_CASE("RolAccumulator sets Zero when the result is 0x00") {
 }
 
 TEST_CASE("RolAccumulator sets Negative when bit 7 of the result is set") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x40); // 0100 0000
@@ -343,7 +344,7 @@ TEST_CASE("RolAccumulator sets Negative when bit 7 of the result is set") {
 }
 
 TEST_CASE("Rol returns the rotated value without touching memory or the accumulator") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     CHECK(cpu.Rol(0x81) == 0x02); // 1000 0001 -> 0000 0010, bit 7 moved to Carry
@@ -352,7 +353,7 @@ TEST_CASE("Rol returns the rotated value without touching memory or the accumula
 }
 
 TEST_CASE("RolZeroPage rotates the value at the zero page address and stores the result") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x10); // zero page address operand
@@ -365,7 +366,7 @@ TEST_CASE("RolZeroPage rotates the value at the zero page address and stores the
 }
 
 TEST_CASE("RolZeroPage sets Carry when bit 7 is rotated out") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x10); // zero page address operand
@@ -378,7 +379,7 @@ TEST_CASE("RolZeroPage sets Carry when bit 7 is rotated out") {
 }
 
 TEST_CASE("RolZeroPageX rotates the value at the zero page address plus X") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x10); // base operand
@@ -392,7 +393,7 @@ TEST_CASE("RolZeroPageX rotates the value at the zero page address plus X") {
 }
 
 TEST_CASE("RolZeroPageX wraps within the zero page instead of crossing into page 1") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0xFF); // base operand
@@ -405,7 +406,7 @@ TEST_CASE("RolZeroPageX wraps within the zero page instead of crossing into page
 }
 
 TEST_CASE("RolAbsolute rotates the value at a 16-bit address and sets Zero and Carry") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x00); // low byte
@@ -419,7 +420,7 @@ TEST_CASE("RolAbsolute rotates the value at a 16-bit address and sets Zero and C
 }
 
 TEST_CASE("RolAbsoluteX rotates the value at a 16-bit address plus X") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x00); // low byte

@@ -1,10 +1,11 @@
 #include "doctest.h"
 
 #include "../src/Bus.h"
+#include "TestBus.h"
 #include "../src/Cpu.h"
 
 TEST_CASE("Compare sets Carry and clears Zero and Negative when register value is greater than operand") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Compare(0x10, 0x05); // result = 0x0B
@@ -13,7 +14,7 @@ TEST_CASE("Compare sets Carry and clears Zero and Negative when register value i
 }
 
 TEST_CASE("Compare sets Carry and Zero when register value equals operand") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Compare(0x42, 0x42); // result = 0x00
@@ -22,7 +23,7 @@ TEST_CASE("Compare sets Carry and Zero when register value equals operand") {
 }
 
 TEST_CASE("Compare clears Carry and sets Negative when register value is less than operand") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Compare(0x05, 0x10); // result = 0xF5 (borrow)
@@ -31,7 +32,7 @@ TEST_CASE("Compare clears Carry and sets Negative when register value is less th
 }
 
 TEST_CASE("Compare does not modify the accumulator, X, or Y registers") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x42);
@@ -46,7 +47,7 @@ TEST_CASE("Compare does not modify the accumulator, X, or Y registers") {
 }
 
 TEST_CASE("CmpImmediate compares the accumulator with the value following the opcode") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x42);
@@ -60,7 +61,7 @@ TEST_CASE("CmpImmediate compares the accumulator with the value following the op
 }
 
 TEST_CASE("CmpImmediate clears Carry when the accumulator is less than the operand") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x05);
@@ -72,7 +73,7 @@ TEST_CASE("CmpImmediate clears Carry when the accumulator is less than the opera
 }
 
 TEST_CASE("CpxImmediate compares the X register with the value following the opcode") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.SetXRegister(0x42);
@@ -86,7 +87,7 @@ TEST_CASE("CpxImmediate compares the X register with the value following the opc
 }
 
 TEST_CASE("CpxImmediate clears Carry when the X register is less than the operand") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.SetXRegister(0x05);
@@ -98,7 +99,7 @@ TEST_CASE("CpxImmediate clears Carry when the X register is less than the operan
 }
 
 TEST_CASE("CpxZeroPage compares the X register with the value at the zero page address") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.SetXRegister(0x50);
@@ -113,7 +114,7 @@ TEST_CASE("CpxZeroPage compares the X register with the value at the zero page a
 }
 
 TEST_CASE("CpxZeroPage clears Carry when the X register is less than the zero page value") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.SetXRegister(0x10);
@@ -126,7 +127,7 @@ TEST_CASE("CpxZeroPage clears Carry when the X register is less than the zero pa
 }
 
 TEST_CASE("CpxAbsolute compares the X register with the value at a 16-bit address") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.SetXRegister(0x50);
@@ -142,7 +143,7 @@ TEST_CASE("CpxAbsolute compares the X register with the value at a 16-bit addres
 }
 
 TEST_CASE("CpxAbsolute clears Carry when the X register is less than the absolute value") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.SetXRegister(0x05);
@@ -156,7 +157,7 @@ TEST_CASE("CpxAbsolute clears Carry when the X register is less than the absolut
 }
 
 TEST_CASE("CpyImmediate compares the Y register with the value following the opcode") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.SetYRegister(0x42);
@@ -170,7 +171,7 @@ TEST_CASE("CpyImmediate compares the Y register with the value following the opc
 }
 
 TEST_CASE("CpyImmediate clears Carry when the Y register is less than the operand") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.SetYRegister(0x05);
@@ -182,7 +183,7 @@ TEST_CASE("CpyImmediate clears Carry when the Y register is less than the operan
 }
 
 TEST_CASE("CmpZeroPage compares the accumulator with the value at the zero page address") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x50);
@@ -197,7 +198,7 @@ TEST_CASE("CmpZeroPage compares the accumulator with the value at the zero page 
 }
 
 TEST_CASE("CmpZeroPage clears Carry when the accumulator is less than the zero page value") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x10);
@@ -210,7 +211,7 @@ TEST_CASE("CmpZeroPage clears Carry when the accumulator is less than the zero p
 }
 
 TEST_CASE("CmpZeroPageX compares the accumulator with the value at the zero page address plus X") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x42);
@@ -226,7 +227,7 @@ TEST_CASE("CmpZeroPageX compares the accumulator with the value at the zero page
 }
 
 TEST_CASE("CmpZeroPageX clears Carry when the accumulator is less than the indexed zero page value") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x05);
@@ -240,7 +241,7 @@ TEST_CASE("CmpZeroPageX clears Carry when the accumulator is less than the index
 }
 
 TEST_CASE("CmpAbsolute compares the accumulator with the value at a 16-bit address") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x50);
@@ -256,7 +257,7 @@ TEST_CASE("CmpAbsolute compares the accumulator with the value at a 16-bit addre
 }
 
 TEST_CASE("CmpAbsolute clears Carry when the accumulator is less than the absolute value") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x05);
@@ -270,7 +271,7 @@ TEST_CASE("CmpAbsolute clears Carry when the accumulator is less than the absolu
 }
 
 TEST_CASE("CmpAbsoluteX compares the accumulator with the value at a 16-bit address plus X") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x30);
@@ -287,7 +288,7 @@ TEST_CASE("CmpAbsoluteX compares the accumulator with the value at a 16-bit addr
 }
 
 TEST_CASE("CmpAbsoluteX clears Carry when the accumulator is less than the indexed absolute value") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x05);
@@ -302,7 +303,7 @@ TEST_CASE("CmpAbsoluteX clears Carry when the accumulator is less than the index
 }
 
 TEST_CASE("CmpAbsoluteY compares the accumulator with the value at a 16-bit address plus Y") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x80);
@@ -319,7 +320,7 @@ TEST_CASE("CmpAbsoluteY compares the accumulator with the value at a 16-bit addr
 }
 
 TEST_CASE("CmpAbsoluteY clears Carry when the accumulator is less than the Y-indexed absolute value") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x05);
@@ -334,7 +335,7 @@ TEST_CASE("CmpAbsoluteY clears Carry when the accumulator is less than the Y-ind
 }
 
 TEST_CASE("CmpIndirectX adds X to the zero page base, reads a pointer, then compares with the accumulator") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x99);
@@ -352,7 +353,7 @@ TEST_CASE("CmpIndirectX adds X to the zero page base, reads a pointer, then comp
 }
 
 TEST_CASE("CmpIndirectX clears Carry when the accumulator is less than the indirectly addressed value") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x05);
@@ -368,7 +369,7 @@ TEST_CASE("CmpIndirectX clears Carry when the accumulator is less than the indir
 }
 
 TEST_CASE("CmpIndirectY reads a zero page pointer, adds Y, then compares with the accumulator") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x77);
@@ -386,7 +387,7 @@ TEST_CASE("CmpIndirectY reads a zero page pointer, adds Y, then compares with th
 }
 
 TEST_CASE("CmpIndirectY clears Carry when the accumulator is less than the Y-offset indirect value") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x05);
@@ -402,7 +403,7 @@ TEST_CASE("CmpIndirectY clears Carry when the accumulator is less than the Y-off
 }
 
 TEST_CASE("CpyZeroPage compares the Y register with the value at the zero page address") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.SetYRegister(0x50);
@@ -417,7 +418,7 @@ TEST_CASE("CpyZeroPage compares the Y register with the value at the zero page a
 }
 
 TEST_CASE("CpyZeroPage clears Carry when the Y register is less than the zero page value") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.SetYRegister(0x10);
@@ -430,7 +431,7 @@ TEST_CASE("CpyZeroPage clears Carry when the Y register is less than the zero pa
 }
 
 TEST_CASE("CpyAbsolute compares the Y register with the value at a 16-bit address") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.SetYRegister(0x50);
@@ -446,7 +447,7 @@ TEST_CASE("CpyAbsolute compares the Y register with the value at a 16-bit addres
 }
 
 TEST_CASE("CpyAbsolute clears Carry when the Y register is less than the absolute value") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.SetYRegister(0x05);

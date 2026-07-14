@@ -1,10 +1,11 @@
 #include "doctest.h"
 
 #include "../src/Bus.h"
+#include "TestBus.h"
 #include "../src/Cpu.h"
 
 TEST_CASE("Tax copies the accumulator into the X register and updates the Zero and Negative flags") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x00);
@@ -25,7 +26,7 @@ TEST_CASE("Tax copies the accumulator into the X register and updates the Zero a
 }
 
 TEST_CASE("Tay copies the accumulator into the Y register and updates the Zero and Negative flags") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x00);
@@ -46,7 +47,7 @@ TEST_CASE("Tay copies the accumulator into the Y register and updates the Zero a
 }
 
 TEST_CASE("Txa copies the X register into the accumulator and updates the Zero and Negative flags") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.SetXRegister(0x00);
@@ -67,7 +68,7 @@ TEST_CASE("Txa copies the X register into the accumulator and updates the Zero a
 }
 
 TEST_CASE("Tya copies the Y register into the accumulator and updates the Zero and Negative flags") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.SetYRegister(0x00);
@@ -88,7 +89,7 @@ TEST_CASE("Tya copies the Y register into the accumulator and updates the Zero a
 }
 
 TEST_CASE("Tsx copies the stack pointer into the X register and updates the Zero and Negative flags") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Tsx(); // stack pointer starts at 0xFD (bit 7 set)
@@ -106,7 +107,7 @@ TEST_CASE("Tsx copies the stack pointer into the X register and updates the Zero
 }
 
 TEST_CASE("Txs copies the X register into the stack pointer without affecting flags") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.SetFlag(nes::Cpu::StatusFlag::N, true);

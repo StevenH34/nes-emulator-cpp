@@ -3,6 +3,7 @@
 #include <stdexcept>
 
 #include "../src/Bus.h"
+#include "TestBus.h"
 #include "../src/Cpu.h"
 
 namespace {
@@ -21,7 +22,7 @@ void ResetStatusRegister(nes::Cpu& cpu) {
 } // namespace
 
 TEST_CASE("Cpu status string starts in the expected reset state") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     ResetStatusRegister(cpu);
@@ -30,7 +31,7 @@ TEST_CASE("Cpu status string starts in the expected reset state") {
 }
 
 TEST_CASE("Cpu flag helpers update the status register") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     ResetStatusRegister(cpu);
@@ -54,7 +55,7 @@ TEST_CASE("Cpu flag helpers update the status register") {
 }
 
 TEST_CASE("IsFlagSet reports whether a given status bit is set") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     ResetStatusRegister(cpu);
@@ -71,7 +72,7 @@ TEST_CASE("IsFlagSet reports whether a given status bit is set") {
 }
 
 TEST_CASE("SetCFlag updates only the Carry flag") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     ResetStatusRegister(cpu);
@@ -85,7 +86,7 @@ TEST_CASE("SetCFlag updates only the Carry flag") {
 }
 
 TEST_CASE("SetVFlag updates only the Overflow flag") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     ResetStatusRegister(cpu);
@@ -99,7 +100,7 @@ TEST_CASE("SetVFlag updates only the Overflow flag") {
 }
 
 TEST_CASE("Cpu registers start in the documented power-up state") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     CHECK(cpu.GetXRegister() == 0x00);
@@ -108,7 +109,7 @@ TEST_CASE("Cpu registers start in the documented power-up state") {
 }
 
 TEST_CASE("LdaImmediate updates the Zero and Negative flags based on the loaded value") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0xA9); // LDA Immediate
@@ -128,7 +129,7 @@ TEST_CASE("LdaImmediate updates the Zero and Negative flags based on the loaded 
 }
 
 TEST_CASE("Step dispatches each implemented opcode and returns its cycle count") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0xA9); // LDA Immediate
@@ -152,7 +153,7 @@ TEST_CASE("Step dispatches each implemented opcode and returns its cycle count")
 }
 
 TEST_CASE("Step throws for an unimplemented opcode") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0xFF); // not a recognized opcode

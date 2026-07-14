@@ -1,10 +1,11 @@
 #include "doctest.h"
 
 #include "../src/Bus.h"
+#include "TestBus.h"
 #include "../src/Cpu.h"
 
 TEST_CASE("Adc adds the value to the accumulator") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x10);
@@ -16,7 +17,7 @@ TEST_CASE("Adc adds the value to the accumulator") {
 }
 
 TEST_CASE("Adc includes the Carry flag in the addition") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x10);
@@ -28,7 +29,7 @@ TEST_CASE("Adc includes the Carry flag in the addition") {
 }
 
 TEST_CASE("Adc sets Carry when the unsigned result overflows 0xFF") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0xFF);
@@ -40,7 +41,7 @@ TEST_CASE("Adc sets Carry when the unsigned result overflows 0xFF") {
 }
 
 TEST_CASE("Adc sets Zero when the result is 0x00") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0xFF);
@@ -52,7 +53,7 @@ TEST_CASE("Adc sets Zero when the result is 0x00") {
 }
 
 TEST_CASE("Adc sets Negative when bit 7 of the result is set") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x10); // +16
@@ -64,7 +65,7 @@ TEST_CASE("Adc sets Negative when bit 7 of the result is set") {
 }
 
 TEST_CASE("Adc sets Overflow when two positive operands produce a negative result") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x50); // +80
@@ -76,7 +77,7 @@ TEST_CASE("Adc sets Overflow when two positive operands produce a negative resul
 }
 
 TEST_CASE("Adc sets Overflow when two negative operands produce a positive result") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x90); // -112
@@ -88,7 +89,7 @@ TEST_CASE("Adc sets Overflow when two negative operands produce a positive resul
 }
 
 TEST_CASE("Adc does not set Overflow when operands have different signs") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x50); // +80
@@ -100,7 +101,7 @@ TEST_CASE("Adc does not set Overflow when operands have different signs") {
 }
 
 TEST_CASE("AdcImmediate adds the value following the opcode to the accumulator") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x10);
@@ -114,7 +115,7 @@ TEST_CASE("AdcImmediate adds the value following the opcode to the accumulator")
 }
 
 TEST_CASE("AdcImmediate sets Carry and Zero when the result wraps to 0x00") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0xFF);
@@ -127,7 +128,7 @@ TEST_CASE("AdcImmediate sets Carry and Zero when the result wraps to 0x00") {
 }
 
 TEST_CASE("AdcZeroPage adds the value at the zero page address to the accumulator") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x10);
@@ -142,7 +143,7 @@ TEST_CASE("AdcZeroPage adds the value at the zero page address to the accumulato
 }
 
 TEST_CASE("AdcZeroPageX adds the value at the zero page address plus X to the accumulator") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x10);
@@ -158,7 +159,7 @@ TEST_CASE("AdcZeroPageX adds the value at the zero page address plus X to the ac
 }
 
 TEST_CASE("AdcAbsolute adds the value at a 16-bit address to the accumulator") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x10);
@@ -174,7 +175,7 @@ TEST_CASE("AdcAbsolute adds the value at a 16-bit address to the accumulator") {
 }
 
 TEST_CASE("AdcAbsoluteX adds the value at a 16-bit address plus X to the accumulator") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x10);
@@ -191,7 +192,7 @@ TEST_CASE("AdcAbsoluteX adds the value at a 16-bit address plus X to the accumul
 }
 
 TEST_CASE("AdcAbsoluteY adds the value at a 16-bit address plus Y to the accumulator") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x10);
@@ -208,7 +209,7 @@ TEST_CASE("AdcAbsoluteY adds the value at a 16-bit address plus Y to the accumul
 }
 
 TEST_CASE("AdcIndirectX adds X to the zero page base, reads a pointer, then adds the value") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x10);
@@ -226,7 +227,7 @@ TEST_CASE("AdcIndirectX adds X to the zero page base, reads a pointer, then adds
 }
 
 TEST_CASE("AdcIndirectY reads a zero page pointer, adds Y, then adds the value") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x10);

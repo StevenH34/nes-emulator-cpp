@@ -1,10 +1,11 @@
 #include "doctest.h"
 
 #include "../src/Bus.h"
+#include "TestBus.h"
 #include "../src/Cpu.h"
 
 TEST_CASE("EorImmediate XORs the value following the opcode with the accumulator") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0xFF);
@@ -17,7 +18,7 @@ TEST_CASE("EorImmediate XORs the value following the opcode with the accumulator
 }
 
 TEST_CASE("EorImmediate sets the Negative flag when the result has bit 7 set") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x0F);
@@ -30,7 +31,7 @@ TEST_CASE("EorImmediate sets the Negative flag when the result has bit 7 set") {
 }
 
 TEST_CASE("EorImmediate clears the Zero flag when the result is non-zero") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x0F);
@@ -43,7 +44,7 @@ TEST_CASE("EorImmediate clears the Zero flag when the result is non-zero") {
 }
 
 TEST_CASE("EorZeroPage XORs the value at the zero page address with the accumulator") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0xFF);
@@ -57,7 +58,7 @@ TEST_CASE("EorZeroPage XORs the value at the zero page address with the accumula
 }
 
 TEST_CASE("EorZeroPage sets the Negative flag when the result has bit 7 set") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x0F);
@@ -71,7 +72,7 @@ TEST_CASE("EorZeroPage sets the Negative flag when the result has bit 7 set") {
 }
 
 TEST_CASE("EorZeroPageX XORs the value at the zero page address plus X with the accumulator") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0xFF);
@@ -86,7 +87,7 @@ TEST_CASE("EorZeroPageX XORs the value at the zero page address plus X with the 
 }
 
 TEST_CASE("EorZeroPageX sets the Negative flag when the result has bit 7 set") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x0F);
@@ -101,7 +102,7 @@ TEST_CASE("EorZeroPageX sets the Negative flag when the result has bit 7 set") {
 }
 
 TEST_CASE("EorAbsolute XORs the value at a 16-bit address with the accumulator") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0xFF);
@@ -116,7 +117,7 @@ TEST_CASE("EorAbsolute XORs the value at a 16-bit address with the accumulator")
 }
 
 TEST_CASE("EorAbsolute sets the Negative flag when the result has bit 7 set") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x0F);
@@ -131,7 +132,7 @@ TEST_CASE("EorAbsolute sets the Negative flag when the result has bit 7 set") {
 }
 
 TEST_CASE("EorAbsoluteX XORs the value at a 16-bit address plus X with the accumulator") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0xFF);
@@ -147,7 +148,7 @@ TEST_CASE("EorAbsoluteX XORs the value at a 16-bit address plus X with the accum
 }
 
 TEST_CASE("EorAbsoluteX sets the Negative flag when the result has bit 7 set") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x0F);
@@ -163,7 +164,7 @@ TEST_CASE("EorAbsoluteX sets the Negative flag when the result has bit 7 set") {
 }
 
 TEST_CASE("EorAbsoluteY XORs the value at a 16-bit address plus Y with the accumulator") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0xFF);
@@ -179,7 +180,7 @@ TEST_CASE("EorAbsoluteY XORs the value at a 16-bit address plus Y with the accum
 }
 
 TEST_CASE("EorAbsoluteY sets the Negative flag when the result has bit 7 set") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x0F);
@@ -195,7 +196,7 @@ TEST_CASE("EorAbsoluteY sets the Negative flag when the result has bit 7 set") {
 }
 
 TEST_CASE("EorIndirectX adds X to the zero page base, reads a pointer, then XORs the value") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0xFF);
@@ -212,7 +213,7 @@ TEST_CASE("EorIndirectX adds X to the zero page base, reads a pointer, then XORs
 }
 
 TEST_CASE("EorIndirectX sets the Negative flag when the result has bit 7 set") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x0F);
@@ -229,7 +230,7 @@ TEST_CASE("EorIndirectX sets the Negative flag when the result has bit 7 set") {
 }
 
 TEST_CASE("EorIndirectY reads a zero page pointer, adds Y, then XORs the value") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0xFF);
@@ -246,7 +247,7 @@ TEST_CASE("EorIndirectY reads a zero page pointer, adds Y, then XORs the value")
 }
 
 TEST_CASE("EorIndirectY sets the Negative flag when the result has bit 7 set") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x0F);

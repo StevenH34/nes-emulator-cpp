@@ -1,9 +1,10 @@
 #include "doctest.h"
 
 #include "../src/Bus.h"
+#include "TestBus.h"
 
 TEST_CASE("Bus RAM reads and writes are mirrored across the 2 KB window") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
 
     bus.WriteCpu(0x07FF, 0xAB);
 
@@ -14,7 +15,7 @@ TEST_CASE("Bus RAM reads and writes are mirrored across the 2 KB window") {
 }
 
 TEST_CASE("Bus RAM read and write helpers access the mirrored backing store") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
 
     bus.WriteRam(0x0000, 0x11);
     bus.WriteRam(0x0800, 0x22);
@@ -26,14 +27,14 @@ TEST_CASE("Bus RAM read and write helpers access the mirrored backing store") {
 }
 
 TEST_CASE("Bus RAM starts zero-initialized") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
 
     CHECK(bus.ReadCpu(0x0000) == 0x00);
     CHECK(bus.ReadCpu(0x07FF) == 0x00);
 }
 
 TEST_CASE("Bus writes do not bleed into unrelated, non-mirrored addresses") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
 
     bus.WriteCpu(0x0010, 0x99);
 
@@ -43,7 +44,7 @@ TEST_CASE("Bus writes do not bleed into unrelated, non-mirrored addresses") {
 }
 
 TEST_CASE("Bus returns zero for addresses outside the RAM mirror window") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
 
     CHECK(bus.ReadCpu(0x2000) == 0x00);
     CHECK(bus.ReadCpu(0x8000) == 0x00);
@@ -51,7 +52,7 @@ TEST_CASE("Bus returns zero for addresses outside the RAM mirror window") {
 }
 
 TEST_CASE("Bus ignores writes to addresses outside the RAM mirror window") {
-    nes::Bus bus;
+    nes_test::TestBus bus;
 
     bus.WriteCpu(0x2000, 0xAB);
 
