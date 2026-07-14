@@ -8,12 +8,17 @@
 #include <cstdint>
 #include <array>
 
+#include "Cartridge.h"
+
 namespace nes {
 
 class Bus {
 public:
-    Bus();
+    explicit Bus(Cartridge& cartridge);
     ~Bus() = default;
+    Bus(const Bus&) = delete;
+    Bus& operator=(const Bus&) = delete;
+
     [[nodiscard]] std::uint8_t ReadCpu( std::uint16_t address) const;
     void WriteCpu(std::uint16_t address, std::uint8_t value);
     [[nodiscard]] std::uint8_t ReadRam(std::uint16_t address) const;
@@ -22,6 +27,7 @@ public:
 private:
     // std::vector<std::uint8_t> ram_;
     std::array<std::uint8_t, 2048> ram_{};
+    Cartridge& cartridge_;
 
     // Addresses
     static constexpr std::uint16_t RAM_SIZE = 2048; // 2 KB
@@ -29,6 +35,9 @@ private:
     static constexpr std::uint16_t RAM_END = 0x07FF;
     static constexpr std::uint16_t RAM_MIRROR_END = 0x1FFF;
     static constexpr std::uint16_t RAM_MASK = 0x07FF;
+    // PRG-ROM Cartridge - covers the 32KB of address space for the cartridge code
+    static constexpr std::uint16_t PRG_ROM_START = 0x0000;
+    static constexpr std::uint16_t PRG_ROM_END = 0xFFFF;
 };
 
 } // nes

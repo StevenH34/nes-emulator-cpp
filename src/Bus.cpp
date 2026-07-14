@@ -9,13 +9,14 @@
 
 namespace nes {
 
-Bus::Bus() = default;
+Bus::Bus(Cartridge& cartridge) : cartridge_(cartridge) {} ;
 
 std::uint8_t Bus::ReadCpu(const std::uint16_t address) const {
-    // address 0x000 is always true
-    // Not sure if that's a problem
     if (address >= RAM_START && address <= RAM_MIRROR_END) {
         return ReadRam(address);
+    }
+    if (address >= PRG_ROM_START && address <= PRG_ROM_END) {
+        return cartridge_.GetMapper().ReadPrg(address);
     }
 
     return 0;
