@@ -4,6 +4,7 @@
 
 #include "Cpu.h"
 
+#include <format>
 #include <print>
 
 namespace nes {
@@ -31,6 +32,12 @@ std::string Cpu::StatusString() const {
     output += s >> 0 & 1 ? 'C' : 'c';
 
     return output;
+}
+
+void Cpu::Reset() {
+    const std::uint8_t low = ReadByte(RESET_VECTOR_);
+    const std::uint8_t high = ReadByte(RESET_VECTOR_ + 1);
+    program_counter_ = static_cast<std::uint16_t>(high) << 8 | low;
 }
 
 int Cpu::Step() {
@@ -478,8 +485,8 @@ int Cpu::Step() {
         case Opcodes::NOP:
             Nop();
             break;
-        default: //TODO: Figure out a good way to deal with unsupported Opcodes
-            throw std::runtime_error("Invalid opcode");
+        default:
+            throw std::runtime_error(std::format("Unknown opcode: 0x{:02X}", opcode));
     }
 
     return Opcodes::CYCLES[opcode];
