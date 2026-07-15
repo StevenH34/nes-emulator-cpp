@@ -3,11 +3,19 @@
 
 #include <cstdint>
 #include <array>
+#include <format>
+#include <stdexcept>
 #include <string>
 
 #include "Bus.h"
 
 namespace nes {
+
+class UnknownOpcode : public std::runtime_error {
+public:
+    explicit UnknownOpcode(const std::uint8_t opcode)
+        : std::runtime_error(std::format("Unknown opcode: 0x{:02X}", opcode)) {}
+};
 
 class Cpu {
 public:

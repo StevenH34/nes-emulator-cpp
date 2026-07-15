@@ -527,7 +527,7 @@ int Cpu::Step() {
             Nop();
             break;
         default:
-            throw std::runtime_error(std::format("Unknown opcode: 0x{:02X}", opcode));
+            throw UnknownOpcode(opcode);
     }
 
     return Opcodes::CYCLES[opcode];
