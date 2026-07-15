@@ -1,37 +1,38 @@
 #include "doctest.h"
 
-#include <vector>
-
 #include "../src/Bus.h"
 #include "../src/Cpu.h"
-#include "../src/Emulator.h"
 #include "TestBus.h"
-#include "TestRom.h"
 
-// TODO: Update tests once opcodes are implemented
+TEST_CASE("StaZeroPage writes the accumulator to the zero page address") {
+    nes_test::TestBus bus;
+    nes::Cpu cpu(bus);
 
-TEST_CASE("STA Zero Page") {
-    const nes_test::TempRomFile rom(nes_test::MakeMinimalRom());
-    nes::Emulator emulator(rom.path());
-    // 0xA9 LDA Immediate, 0x42 value, 0x85 STA Zero Page, 0x10 address
-    const std::vector<std::uint8_t> program{0xA9, 0x42, 0x85, 0x10};
-    emulator.LoadProgram(program);
-    emulator.Step();
-    emulator.Step();
+    bus.WriteCpu(0x00, 0x42); // value
+    cpu.LdaImmediate();
 
-    CHECK(emulator.GetBus().ReadCpu(0x10) == 0x42);
+    bus.WriteCpu(0x01, 0x10); // zero page address
+
+    cpu.StaZeroPage();
+
+    CHECK(cpu.GetProgramCounter() == 0x0002); // one operand byte consumed
+    CHECK(bus.ReadCpu(0x10) == 0x42);
 }
 
-TEST_CASE("STA Absolute") {
-    const nes_test::TempRomFile rom(nes_test::MakeMinimalRom());
-    nes::Emulator emulator(rom.path());
-    // 0xA9 LDA Immediate, 0x42 value, 0x85 STA Absolute, 0x00 low byte, 0x02 high byte
-    const std::vector<std::uint8_t> program{0xA9, 0x7F, 0x8D, 0x00, 0x02};
-    emulator.LoadProgram(program);
-    emulator.Step();
-    emulator.Step();
+TEST_CASE("StaAbsolute writes the accumulator to a 16-bit address") {
+    nes_test::TestBus bus;
+    nes::Cpu cpu(bus);
 
-    CHECK(emulator.GetBus().ReadCpu(0x0200) == 0x7F);
+    bus.WriteCpu(0x00, 0x7F); // value
+    cpu.LdaImmediate();
+
+    bus.WriteCpu(0x01, 0x00); // low byte
+    bus.WriteCpu(0x02, 0x02); // high byte, address = 0x0200
+
+    cpu.StaAbsolute();
+
+    CHECK(cpu.GetProgramCounter() == 0x0003); // two operand bytes consumed
+    CHECK(bus.ReadCpu(0x0200) == 0x7F);
 }
 
 TEST_CASE("StaZeroPageX writes the accumulator to the zero page address plus X") {
@@ -115,16 +116,16 @@ TEST_CASE("StaIndirectY reads a zero page pointer, adds Y, then writes the accum
     CHECK(bus.ReadCpu(0x0205) == 0x42);
 }
 
-TEST_CASE("Flags are not modified") {
-    const nes_test::TempRomFile rom(nes_test::MakeMinimalRom());
-    nes::Emulator emulator(rom.path());
-    // 0x00 sets Z Flag
-    const std::vector<std::uint8_t> program{0xA9, 0x00, 0x85, 0x10};
-    emulator.LoadProgram(program);
-    emulator.Step();
-    const auto status_before = emulator.GetCpu().GetStatusRegister();
-    emulator.Step();
-    const auto status_after = emulator.GetCpu().GetStatusRegister();
+TEST_CASE("StaZeroPage does not modify any flags") {
+    nes_test::TestBus bus;
+    nes::Cpu cpu(bus);
 
-    CHECK(status_before == status_after);
+    bus.WriteCpu(0x00, 0x00); // value, LdaImmediate sets the Zero flag
+    cpu.LdaImmediate();
+    const auto status_before = cpu.GetStatusRegister();
+
+    bus.WriteCpu(0x01, 0x10); // zero page address
+    cpu.StaZeroPage();
+
+    CHECK(cpu.GetStatusRegister() == status_before);
 }

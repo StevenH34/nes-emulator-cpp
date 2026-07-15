@@ -1,10 +1,8 @@
 #include "doctest.h"
 
 #include "../src/Cartridge.h"
+#include "TestRom.h"
 
-#include <atomic>
-#include <filesystem>
-#include <fstream>
 #include <vector>
 
 namespace {
@@ -15,33 +13,9 @@ std::vector<std::uint8_t> MakeHeader(const std::uint8_t prg_blocks, const std::u
             0, 0, 0, 0, 0, 0, 0, 0};
 }
 
-// Writes a byte buffer to a uniquely-named temp file and deletes it on destruction,
-// so each test gets an isolated .nes file on disk for Cartridge's file-based constructor.
-class TempRomFile {
-public:
-    explicit TempRomFile(const std::vector<std::uint8_t>& data) {
-        static std::atomic<int> counter{0};
-        path_ = (std::filesystem::temp_directory_path() /
-                 ("cartridge_test_" + std::to_string(counter++) + ".nes")).string();
-        std::ofstream file(path_, std::ios::binary);
-        file.write(reinterpret_cast<const char*>(data.data()), static_cast<std::streamsize>(data.size()));
-    }
-
-    ~TempRomFile() {
-        std::error_code ec;
-        std::filesystem::remove(path_, ec);
-    }
-
-    TempRomFile(const TempRomFile&) = delete;
-    TempRomFile& operator=(const TempRomFile&) = delete;
-
-    [[nodiscard]] const std::string& path() const { return path_; }
-
-private:
-    std::string path_;
-};
-
 }
+
+using nes_test::TempRomFile;
 
 // --- ParseMapperId ---
 
