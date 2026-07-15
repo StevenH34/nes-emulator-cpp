@@ -350,6 +350,31 @@ int Cpu::Step() {
         case Opcodes::CPY_ABSOLUTE:
             CpyAbsolute();
             break;
+        // Branch Instructions
+        case Opcodes::BEQ:
+            Beq();
+            break;
+        case Opcodes::BNE:
+            Bne();
+            break;
+        case Opcodes::BCS:
+            Bcs();
+            break;
+        case Opcodes::BCC:
+            Bcc();
+            break;
+        case Opcodes::BMI:
+            Bmi();
+            break;
+        case Opcodes::BPL:
+            Bpl();
+            break;
+        case Opcodes::BVS:
+            Bvs();
+            break;
+        case Opcodes::BVC:
+            Bvc();
+            break;
         // ADC
         case Opcodes::ADC_IMMEDIATE:
             AdcImmediate();
