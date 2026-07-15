@@ -8,8 +8,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_library(nes_core STATIC
         src/Emulator.cpp
         src/Emulator.h
-        src/Cpu.cpp
-        src/Cpu.h
+        src/cpu/Cpu.cpp
+        src/cpu/Cpu.h
         src/Bus.cpp
         src/Bus.h
         src/Cartridge.cpp

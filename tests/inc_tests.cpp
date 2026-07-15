@@ -2,7 +2,7 @@
 
 #include "../src/Bus.h"
 #include "TestBus.h"
-#include "../src/Cpu.h"
+#include "../src/cpu/Cpu.h"
 
 TEST_CASE("IncZeroPage increments the value at the zero page address and stores the result") {
     nes_test::TestBus bus;

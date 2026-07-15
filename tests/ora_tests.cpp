@@ -2,7 +2,7 @@
 
 #include "../src/Bus.h"
 #include "TestBus.h"
-#include "../src/Cpu.h"
+#include "../src/cpu/Cpu.h"
 
 TEST_CASE("OraImmediate ORs the value following the opcode with the accumulator") {
     nes_test::TestBus bus;

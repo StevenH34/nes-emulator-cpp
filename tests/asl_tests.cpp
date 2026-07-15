@@ -2,7 +2,7 @@
 
 #include "../src/Bus.h"
 #include "TestBus.h"
-#include "../src/Cpu.h"
+#include "../src/cpu/Cpu.h"
 
 TEST_CASE("AslAccumulator shifts bits left and clears Carry, Zero, and Negative") {
     nes_test::TestBus bus;

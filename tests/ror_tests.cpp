@@ -2,7 +2,7 @@
 
 #include "../src/Bus.h"
 #include "TestBus.h"
-#include "../src/Cpu.h"
+#include "../src/cpu/Cpu.h"
 
 TEST_CASE("RorAccumulator rotates bits right and shifts in a clear Carry") {
     nes_test::TestBus bus;

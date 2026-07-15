@@ -1,7 +1,7 @@
 #include "doctest.h"
 
 #include "../src/Bus.h"
-#include "../src/Cpu.h"
+#include "../src/cpu/Cpu.h"
 #include "TestBus.h"
 
 TEST_CASE("StaZeroPage writes the accumulator to the zero page address") {

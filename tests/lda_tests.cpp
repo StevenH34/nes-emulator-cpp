@@ -2,7 +2,7 @@
 
 #include "../src/Bus.h"
 #include "TestBus.h"
-#include "../src/Cpu.h"
+#include "../src/cpu/Cpu.h"
 
 TEST_CASE("Lda loads the accumulator and updates the Zero and Negative flags") {
     nes_test::TestBus bus;

@@ -2,7 +2,7 @@
 
 #include "../src/Bus.h"
 #include "TestBus.h"
-#include "../src/Cpu.h"
+#include "../src/cpu/Cpu.h"
 
 TEST_CASE("StackPushByte writes the value to the stack page and decrements the stack pointer") {
     nes_test::TestBus bus;

@@ -2,7 +2,7 @@
 
 #include "../src/Bus.h"
 #include "TestBus.h"
-#include "../src/Cpu.h"
+#include "../src/cpu/Cpu.h"
 
 TEST_CASE("BitZeroPage sets Zero when the AND of the accumulator and memory value is zero, without modifying the accumulator") {
     nes_test::TestBus bus;

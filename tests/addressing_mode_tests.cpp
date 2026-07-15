@@ -2,7 +2,7 @@
 
 #include "../src/Bus.h"
 #include "TestBus.h"
-#include "../src/Cpu.h"
+#include "../src/cpu/Cpu.h"
 
 TEST_CASE("AddressAbsolute combines low and high bytes in little-endian order") {
     nes_test::TestBus bus;

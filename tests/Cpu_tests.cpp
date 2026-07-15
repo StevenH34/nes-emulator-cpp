@@ -6,7 +6,7 @@
 #include "../src/Cartridge.h"
 #include "TestBus.h"
 #include "TestRom.h"
-#include "../src/Cpu.h"
+#include "../src/cpu/Cpu.h"
 
 namespace {
 

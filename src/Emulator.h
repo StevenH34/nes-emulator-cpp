@@ -2,7 +2,7 @@
 #define NES_EMULATOR_CPP_EMULATOR_H
 
 #include "Bus.h"
-#include "Cpu.h"
+#include "cpu/Cpu.h"
 
 #include <vector>
 
