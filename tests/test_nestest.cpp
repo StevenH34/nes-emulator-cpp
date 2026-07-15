@@ -45,7 +45,7 @@ TEST_CASE("nestest: CPU matches log for all official opcodes") {
         try {
             emulator.Step();
         } catch (const nes::UnknownOpcode&) {
-            MESSAGE("Stopped on UnknownOpcode at line: " << line);
+            // MESSAGE("Stopped on UnknownOpcode at line: " << line);
             break;
         }
     }
