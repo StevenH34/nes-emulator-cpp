@@ -60,11 +60,16 @@ add_executable(nes_emulator_tests
         tests/inc_tests.cpp
         tests/dec_tests.cpp
         tests/bit_tests.cpp
-        tests/nop_tests.cpp)
+        tests/nop_tests.cpp
+        tests/test_nestest.cpp
+)
 
 target_link_libraries(nes_emulator_tests PRIVATE nes_core)
 
 target_include_directories(nes_emulator_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/external)
+
+target_compile_definitions(nes_emulator_tests PRIVATE
+        TEST_ROMS_DIR="${CMAKE_CURRENT_SOURCE_DIR}/tests/roms/")
 
 add_test(NAME nes_emulator_tests COMMAND nes_emulator_tests)
 
