@@ -3,7 +3,9 @@
 #include <stdexcept>
 
 #include "../src/Bus.h"
+#include "../src/Cartridge.h"
 #include "TestBus.h"
+#include "TestRom.h"
 #include "../src/Cpu.h"
 
 namespace {
@@ -150,6 +152,19 @@ TEST_CASE("Step dispatches each implemented opcode and returns its cycle count")
     bus.WriteCpu(0x07, 0xE8); // INX
     CHECK(cpu.Step() == 2);
     CHECK(cpu.GetXRegister() == 0x01);
+}
+
+TEST_CASE("Reset loads the Program Counter from the reset vector") {
+    const auto rom = nes_test::MakeMinimalRom(0x8123);
+    const nes_test::TempRomFile rom_file(rom);
+    nes::Cartridge cartridge(rom_file.path());
+    nes::Bus bus(cartridge);
+    nes::Cpu cpu(bus);
+
+    cpu.SetProgramCounter(0x0000);
+    cpu.Reset();
+
+    CHECK(cpu.GetProgramCounter() == 0x8123);
 }
 
 TEST_CASE("Step throws for an unimplemented opcode") {
