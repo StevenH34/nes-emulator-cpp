@@ -1,7 +1,9 @@
 ### NES Emulator (in C++)
 
-- Added all 151 official opcodes with instructions.
-- Now adding the Cartridge and Mapper000 
+- ✅ Added All 151 official opcodes with instructions.
+- ✅ Added Cartridge and Mapper000 support.
+- ✅ Added nestest to verify all 151 opcodes are working correctly.
+- 💀 Next step: add the PPU.
 
 ### Testing
 
