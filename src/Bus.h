@@ -1,7 +1,3 @@
-//
-// Created by Steven Hedges on 6/3/26.
-//
-
 #ifndef NES_EMULATOR_CPP_BUS_H
 #define NES_EMULATOR_CPP_BUS_H
 

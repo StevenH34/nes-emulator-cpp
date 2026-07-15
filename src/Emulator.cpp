@@ -1,7 +1,3 @@
-//
-// Created by Steven Hedges on 6/2/26.
-//
-
 #include "Emulator.h"
 
 #include <iostream>

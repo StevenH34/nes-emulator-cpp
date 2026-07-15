@@ -1,7 +1,3 @@
-//
-// Created by Steven Hedges on 6/3/26.
-//
-
 #include "Bus.h"
 
 #include <iostream>
