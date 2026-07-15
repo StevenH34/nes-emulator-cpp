@@ -1,5 +1,4 @@
 #include "doctest.h"
-#include "TestRom.h"
 
 #include "../src/Emulator.h"
 
