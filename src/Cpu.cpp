@@ -448,6 +448,22 @@ int Cpu::Step() {
         case Opcodes::ROL_ABSOLUTE_X:
             RolAbsoluteX();
             break;
+        // ROR
+        case Opcodes::ROR_ACCUMULATOR:
+            RorAccumulator();
+            break;
+        case Opcodes::ROR_ZERO_PAGE:
+            RorZeroPage();
+            break;
+        case Opcodes::ROR_ZERO_PAGE_X:
+            RorZeroPageX();
+            break;
+        case Opcodes::ROR_ABSOLUTE:
+            RorAbsolute();
+            break;
+        case Opcodes::ROR_ABSOLUTE_X:
+            RorAbsoluteX();
+            break;
         // INC
         case Opcodes::INC_ZERO_PAGE:
             IncZeroPage();
@@ -1162,7 +1178,7 @@ void Cpu::LsrAbsoluteX() {
  * ROL (ROtate Left)
  * Bit 7 goes to Carry, old Carry goes to bit 0
  */
-std::uint8_t Cpu::Rol(std::uint8_t value) {
+std::uint8_t Cpu::Rol(const std::uint8_t value) {
     const std::uint8_t carry_in = IsFlagSet(static_cast<std::uint8_t>(StatusFlag::C)) ? 1 : 0;
     SetCFlag((value >> 7 & 1) == 1); // 7-bit falls off and goes to the C flag
     const std::uint8_t result = value << 1 | carry_in;
@@ -1197,6 +1213,48 @@ void Cpu::RolAbsoluteX() {
     const std::uint16_t address = AddressAbsoluteX();
     const std::uint8_t value = ReadByte(address);
     WriteByte(address, Rol(value));
+}
+
+/**
+ * ROR (ROtate Right)
+ * Bit 0 goes to Carry, old Carry goes to bit 7
+ */
+
+std::uint8_t Cpu::Ror(const std::uint8_t value) {
+    const std::uint8_t carry = IsFlagSet(static_cast<std::uint8_t>(StatusFlag::C)) ? 0x80 : 0x00;
+    SetCFlag((value >> 0 & 1) == 1); // 0-bit falls off and goes to the C flag
+    const std::uint8_t result = value >> 1 | carry;
+    SetZFlag(result);
+    SetNFlag(result);
+    return result;
+}
+
+void Cpu::RorAccumulator() {
+    accumulator_ = Ror(accumulator_);
+}
+
+void Cpu::RorZeroPage() {
+    const std::uint16_t address = AddressZeroPage();
+    const std::uint8_t value = ReadByte(address);
+    WriteByte(address, Ror(value));
+}
+
+void Cpu::RorZeroPageX() {
+    const std::uint16_t address = AddressZeroPageX();
+    const std::uint8_t value = ReadByte(address);
+    WriteByte(address, Ror(value));
+}
+
+void Cpu::RorAbsolute() {
+    const std::uint16_t address = AddressAbsolute();
+    const std::uint8_t value = ReadByte(address);
+    WriteByte(address, Ror(value));
+}
+
+void Cpu::RorAbsoluteX() {
+    const std::uint16_t address = AddressAbsoluteX();
+    const std::uint8_t value = ReadByte(address);
+    WriteByte(address, Ror(value));
 }
 
 /// ADC (Add with Carry)

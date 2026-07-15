@@ -234,6 +234,15 @@ public:
     void RolAbsolute();
     void RolAbsoluteX();
 
+    /// ROR (ROtate Right)
+    /// Affects Flags: N Z C
+    std::uint8_t Ror(std::uint8_t value);
+    void RorAccumulator();
+    void RorZeroPage();
+    void RorZeroPageX();
+    void RorAbsolute();
+    void RorAbsoluteX();
+
     /// ADC (Add with Carry)
     /// Affects flags: N V Z C
     void Adc(std::uint8_t value);
