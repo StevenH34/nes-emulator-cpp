@@ -36,7 +36,7 @@ private:
     static constexpr std::uint16_t RAM_MIRROR_END = 0x1FFF;
     static constexpr std::uint16_t RAM_MASK = 0x07FF;
     // PRG-ROM Cartridge - covers the 32KB of address space for the cartridge code
-    static constexpr std::uint16_t PRG_ROM_START = 0x0000;
+    static constexpr std::uint16_t PRG_ROM_START = 0x8000;
     static constexpr std::uint16_t PRG_ROM_END = 0xFFFF;
 };
 
