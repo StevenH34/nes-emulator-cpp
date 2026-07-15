@@ -48,7 +48,9 @@ add_executable(nes_emulator_tests
         tests/branch_jump_tests.cpp
         tests/stack_tests.cpp
         tests/compare_tests.cpp
-        tests/shift_tests.cpp
+        tests/asl_tests.cpp
+        tests/lsr_tests.cpp
+        tests/rol_tests.cpp
         tests/ror_tests.cpp
         tests/adc_tests.cpp
         tests/and_tests.cpp
