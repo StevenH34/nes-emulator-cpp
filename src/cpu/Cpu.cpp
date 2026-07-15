@@ -1,4 +1,5 @@
 #include "Cpu.h"
+#include "Opcodes.h"
 
 #include <format>
 #include <print>

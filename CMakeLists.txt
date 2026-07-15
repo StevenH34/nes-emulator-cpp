@@ -10,6 +10,7 @@ add_library(nes_core STATIC
         src/Emulator.h
         src/cpu/Cpu.cpp
         src/cpu/Cpu.h
+        src/cpu/Opcodes.h
         src/Bus.cpp
         src/Bus.h
         src/Cartridge.cpp
