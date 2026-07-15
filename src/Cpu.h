@@ -33,11 +33,13 @@ public:
     [[nodiscard]] std::uint8_t GetXRegister() const { return x_register_;};
     [[nodiscard]] std::uint8_t GetYRegister() const { return y_register_; }
     [[nodiscard]] std::uint8_t GetStatusRegister() const { return status_register_; }
+    [[nodiscard]] std::uint8_t GetStackPointer() const { return stack_pointer_; }
     [[nodiscard]] std::uint16_t GetProgramCounter() const { return program_counter_; }
 
     // Test helpers for driving register state directly
     void SetXRegister(const std::uint8_t value) { x_register_ = value; }
     void SetYRegister(const std::uint8_t value) { y_register_ = value; }
+    void SetProgramCounter(const std::uint16_t value) { program_counter_ = value; }
 
     /// Addressing Modes
     // Zero Page is an 8-bit address in the first 256 bytes of memory
