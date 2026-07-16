@@ -19,7 +19,9 @@ add_library(nes_core STATIC
         src/mappers/Mapper.h
         src/mappers/Mapper.cpp
         src/mappers/Mapper000.cpp
-        src/mappers/Mapper000.h)
+        src/mappers/Mapper000.h
+        src/ppu/Ppu.cpp
+        src/ppu/Ppu.h)
 
 target_include_directories(nes_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/src)
 

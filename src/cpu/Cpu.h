@@ -20,7 +20,7 @@ class Cpu {
 public:
     explicit Cpu(Bus& bus);
 
-    void PrintDebugging();
+    void PrintDebugging() const;
     [[nodiscard]] std::string StatusString() const;
     void Reset();
     [[nodiscard]] int Step();

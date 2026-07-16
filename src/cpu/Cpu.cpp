@@ -7,14 +7,14 @@ namespace nes {
 
 Cpu::Cpu(Bus& bus) : bus_(bus) {}
 
-void Cpu::PrintDebugging() {
+void Cpu::PrintDebugging() const {
     std::println("A={:02X}, X={:02X}, Y={:02X}, SP={:02X}, PC={:04X} [{}]",
                  accumulator_, x_register_, y_register_,
                  stack_pointer_, program_counter_, StatusString());
 }
 
 std::string Cpu::StatusString() const {
-    auto s = status_register_;
+    const auto s = status_register_;
     std::string output;
     output.reserve(8);
 
