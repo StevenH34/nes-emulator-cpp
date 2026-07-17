@@ -8,7 +8,7 @@ Ppu::Ppu(Cartridge& cartridge) : cartridge_(cartridge) {}
 
 /// Latch methods
 /// Returns 1 or 32 depending on bit 2 of PPUCTRL.
-/// The & VRAM_MASK makes sure v doesn’t exceed 14 bits.
+/// The & VRAM_MASK makes sure v doesn't exceed 14 bits.
 void Ppu::IncrementVRegister() {
     v_register_ = v_register_ + VramIncrement() & PpuAddresses::VRAM_MASK;
 }
@@ -97,6 +97,75 @@ void Ppu::WriteAddr(const std::uint8_t value) {
     }
     ToggleLatch();
 }
+
+/// PPUDATA ($2007): VRAM access
+std::uint8_t Ppu::ReadDataRegister() {
+    std::uint8_t result;
+    if (v_register_ >= PpuAddresses::PALETTE_START) {
+        result = ReadVram(v_register_);
+        vram_buffer_ = ReadVram(v_register_ - 0x1000);
+    } else {
+        result = vram_buffer_;
+        vram_buffer_ = ReadVram(v_register_);
+    }
+    IncrementVRegister();
+    return result;
+}
+
+void Ppu::WriteData(std::uint8_t value) {
+    WriteVram(v_register_ ,value);
+    IncrementVRegister();
+}
+
+/// OAMDATA ($2004): Sprites
+void Ppu::WriteOamData(const std::uint8_t value) {
+    oam[oam_addr_register_] = value;
+    oam_addr_register_ += 1;
+}
+
+/// Register router
+std::uint8_t Ppu::ReadRegister(const std::uint16_t address) {
+    switch (address & 0x07) {
+        case 0x02:
+            return ReadStatusRegister();
+        case 0x04:
+            return ReadOamData();
+        case 0x07:
+            return ReadDataRegister();
+        default:
+            return 0x00;
+    }
+}
+
+void Ppu::WriteRegister(std::uint16_t address, std::uint8_t value) {
+    switch (address & 0x07) {
+        case 0x00:
+            WriteCtrlRegister(value);
+            break;
+        case 0x01:
+            WriteMask(value);
+            break;
+        case 0x03:
+            WriteOamAddr(value);
+            break;
+        case 0x04:
+            WriteOamData(value);
+            break;
+        case 0x05:
+            WriteScroll(value);
+            break;
+        case 0x06:
+            WriteAddr(value);
+            break;
+        case 0x07:
+            WriteData(value);
+            break;
+        default:
+            // PPUSTATUS ($2002) is read-only; writes are ignored.
+            break;
+    }
+}
+
 /// VRAM: the memory router
 std::uint8_t Ppu::ReadVram(const std::uint16_t address) const {
     switch (const std::uint16_t addr = address & PpuAddresses::VRAM_MASK) {

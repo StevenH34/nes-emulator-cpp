@@ -103,6 +103,22 @@ public:
 
     /// PPUADDR ($2006): VRAM address
     void WriteAddr(std::uint8_t value);
+
+    /// PPUDATA ($2007): VRAM access
+    std::uint8_t ReadDataRegister();
+    void WriteData(std::uint8_t value);
+
+    /// OAMADDR ($2003): OAM address
+    void WriteOamAddr(const std::uint8_t value) {oam_addr_register_ = value;}
+
+    /// OAMDATA ($2004): Sprites
+    [[nodiscard]] std::uint8_t ReadOamData() const { return oam[oam_addr_register_]; }
+    void WriteOamData(std::uint8_t value);
+
+    /// Register router
+    std::uint8_t ReadRegister(std::uint16_t address);
+    void WriteRegister(std::uint16_t address, std::uint8_t value);
+
     /// VRAM: the memory router
     [[nodiscard]] std::uint8_t ReadVram(std::uint16_t address) const;
     void WriteVram(std::uint16_t address, std::uint8_t value);
