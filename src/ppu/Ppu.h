@@ -96,6 +96,11 @@ public:
     void SetVblank();
     void ClearVblank();
 
+    /// Scroll register methods - PPUSCROLL ($2005)
+    void WriteScroll(std::uint8_t value);
+    void WriteScrollX(std::uint8_t value);
+    void WriteScrollY(std::uint8_t value);
+
 private:
     /// Will read CHR ROM from Cartridge
     Cartridge& cartridge_;

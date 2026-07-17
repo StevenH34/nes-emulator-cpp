@@ -69,4 +69,21 @@ void Ppu::ClearVblank() {
     status_register_ &= ~FLAG_VBLANK;
 }
 
+/// Scroll register methods - PPUSCROLL ($2005)
+void Ppu::WriteScroll(const std::uint8_t value) {
+    IsLatchOn() ? WriteScrollX(value) : WriteScrollY(value);
+    ToggleLatch();
+}
+
+void Ppu::WriteScrollX(const std::uint8_t value) {
+    x_register_ = value & FINE_BITS;
+    const std::uint16_t coarse_x = static_cast<std::uint16_t>(value) >> 3;
+    SetCoarseX(coarse_x);
+}
+
+void Ppu::WriteScrollY(const std::uint8_t value) {
+    const std::uint16_t fine_y = static_cast<std::uint16_t>(value) & FINE_BITS;
+    const std::uint16_t coarse_y = static_cast<std::uint16_t>(value) >> 3;
+    SetScrollY(fine_y, coarse_y);
+}
 } // namespace nes
