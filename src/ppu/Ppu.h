@@ -54,7 +54,35 @@ public:
     {236, 174, 236}, {236, 174, 212}, {236, 180, 176}, {228, 196, 144},
     {204, 210, 120}, {180, 222, 120}, {168, 226, 144}, {152, 226, 180},
     {160, 214, 228}, {160, 162, 160}, {0, 0, 0},       {0, 0, 0},
-  }};
+    }};
+    /// Extract bits
+    static constexpr std::uint16_t MASK_COARSE_X   = 0x001F;
+    static constexpr std::uint16_t MASK_COARSE_Y   = 0x03E0;
+    static constexpr std::uint16_t MASK_NAMETABLE  = 0x0C00;
+    static constexpr std::uint16_t MASK_FINE_Y     = 0x7000;
+    /// Clears bits
+    static constexpr std::uint16_t CLEAR_NAMETABLE = 0xF3FF;
+    static constexpr std::uint16_t CLEAR_COARSE_X  = 0xFFE0;
+    /// Clears coarse Y + fine Y, but keeps the nametable and coarse X bits.
+    static constexpr std::uint16_t CLEAR_ALL_Y     = 0x0C1F;
+    /// Ctrl register constants
+    static constexpr std::uint8_t FLAG_VRAM_INCREMENT = 0x04;
+    static constexpr std::uint8_t FLAG_NMI_ENABLED    = 0x80;
+
+    /// Latch methods
+    [[nodiscard]] bool IsLatchOn() const { return w_register_; }
+    void ResetLatch() { w_register_ = false; }
+    void ToggleLatch() { w_register_ = !w_register_; } // Alternates between first and second write
+    void IncrementVRegister();
+    void SetCoarseX(std::uint16_t coarse_x);
+    void SetNametable(std::uint16_t nametable);
+    void SetScrollY(std::uint16_t fine_y, std::uint16_t coarse_y);
+
+    /// Ctrl methods
+    void WriteCtrlRegister(std::uint8_t value);
+    [[nodiscard]] std::uint16_t VramIncrement() const;
+    [[nodiscard]] bool isNmiEnabled() const;
+
 
 private:
     /// Will read CHR ROM from Cartridge
