@@ -7,12 +7,16 @@
 namespace nes {
 
 struct PpuAddresses {
-    /// PPU memory map
+    /// The PPU has its own 16KB address space
+    /// $0000-$1FFF: Pattern tables from the cartridge’s CHR-ROM
     static constexpr std::uint16_t PATTERN_TABLE_START  = 0x0000;
     static constexpr std::uint16_t PATTERN_TABLE_END    = 0x1FFF;
+    /// $2000-$3EFF: Nametables (2KB of internal VRAM, with mirroring)
     static constexpr std::uint16_t NAMETABLE_START      = 0x2000;
     static constexpr std::uint16_t NAMETABLE_MIRROR_END = 0x3EFF;
+    /// $3F00-$3FFF: palettes (32 internal bytes)
     static constexpr std::uint16_t PALETTE_START        = 0x3F00;
+    /// VRAM_MASK wraps an address into 16KB range
     static constexpr std::uint16_t VRAM_MASK            = 0x3FFF;
 
     /// Internal memory sizes
@@ -25,6 +29,7 @@ struct PpuAddresses {
     static constexpr std::uint16_t NAMETABLE_AREA_MASK = 0x0FFF; // Wraps address within the 4 logical nametables (4KB)
 
     /// Palette
+    /// Used for mirroring between background and sprite pallets
     static constexpr std::uint16_t PALETTE_MASK        = 0x1F;
     static constexpr std::uint16_t PALETTE_SPRITE_BASE = 0x10; // Sprite palettes start at $3F10
     static constexpr std::uint16_t PALETTE_COLOR_MASK  = 0x03; // Color 0 of each palette (every 4th entry)

@@ -25,3 +25,4 @@ Build and run tests: `cmake --build cmake-build-debug --target run_tests`
 - [OneLoneCoder/olcNES - GitHub](https://github.com/OneLoneCoder/olcNES)
 - [6502 Instruction Reference](https://www.nesdev.org/obelisk-6502-guide/reference.html?__cf_chl_f_tk=z6uyc9XSsj2aWhSthPoDHP6SSNSXVHT0jTnPmVBZycc-1783039093-1.0.1.1-Rxg3fg7plNMeW95x2ZbAMl43kuHGWjQSOfGkQ1jImAA)
 - [NMOS 6502 Opcodes by John Pickens](https://6502.org/tutorials/6502opcodes.html)
+- [PPU Registers - Nesdev Wiki](https://www.nesdev.org/wiki/PPU_registers)
