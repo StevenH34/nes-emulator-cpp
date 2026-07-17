@@ -97,4 +97,68 @@ void Ppu::WriteAddr(const std::uint8_t value) {
     }
     ToggleLatch();
 }
+/// VRAM: the memory router
+std::uint8_t Ppu::ReadVram(const std::uint16_t address) const {
+    switch (const std::uint16_t addr = address & PpuAddresses::VRAM_MASK) {
+        case PpuAddresses::PATTERN_TABLE_START ... PpuAddresses::PATTERN_TABLE_END:
+            return cartridge_.GetMapper().ReadChr(addr);
+        case PpuAddresses::NAMETABLE_START ... PpuAddresses::NAMETABLE_MIRROR_END:
+            return nametable_ram[MirrorNametableAddr(addr)];
+        case PpuAddresses::PALETTE_START ... PpuAddresses::VRAM_MASK:
+            return palette_ram[PaletteIndex(addr)];
+        default:
+            return 0x00;
+    }
+}
+
+void Ppu::WriteVram(const std::uint16_t address, const std::uint8_t value) {
+    switch (const std::uint16_t addr = address & PpuAddresses::VRAM_MASK) {
+        case PpuAddresses::PATTERN_TABLE_START ... PpuAddresses::PATTERN_TABLE_END:
+            cartridge_.GetMapper().WriteChr(addr, value);
+            break;
+        case PpuAddresses::NAMETABLE_START ... PpuAddresses::NAMETABLE_MIRROR_END:
+            nametable_ram[MirrorNametableAddr(addr)] = value;
+            break;
+        case PpuAddresses::PALETTE_START ... PpuAddresses::VRAM_MASK:
+            palette_ram[PaletteIndex(addr)] = value & PpuAddresses::COLOR_MASK;
+            break;
+        default:
+            break;
+    }
+}
+
+/// Nametable mirroring
+std::uint16_t Ppu::MirrorNametableAddr(const std::uint16_t address) const {
+    const std::uint16_t relative = address - PpuAddresses::NAMETABLE_START & PpuAddresses::NAMETABLE_AREA_MASK;
+    const std::uint16_t nametable = relative / PpuAddresses::NAMETABLE_SIZE;
+    const std::uint16_t offest = relative % PpuAddresses::NAMETABLE_SIZE;
+    const auto mirror = cartridge_.GetMirroring();
+
+    const std::uint16_t physical = [&]() -> std::uint16_t {
+        switch (mirror) {
+            case Cartridge::Mirroring::Vertical:
+                return nametable & 1;;
+            case Cartridge::Mirroring::Horizontal:
+                return nametable >> 1;
+            // case Cartridge::Mirroring::SingleScreenLower:
+            //     return 0;                      // 0,0,0,0
+            // case Cartridge::Mirroring::SingleScreenUpper:
+            //     return 1;
+            default:
+                return nametable & 1;
+        }
+    }();
+
+    return physical * PpuAddresses::NAMETABLE_SIZE + offest;
+}
+
+/// Palette mirroring
+std::uint16_t Ppu::PaletteIndex(const std::uint16_t address) {
+    std::uint16_t index = address & PpuAddresses::PALETTE_MASK;
+    if (index >=  PpuAddresses::PALETTE_SPRITE_BASE && (index &  PpuAddresses::PALETTE_COLOR_MASK) == 0) {
+        index -= PpuAddresses::PALETTE_SPRITE_BASE;
+    }
+    return index;
+}
+
 } // namespace nes

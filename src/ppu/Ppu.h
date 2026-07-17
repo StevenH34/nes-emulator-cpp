@@ -103,6 +103,13 @@ public:
 
     /// PPUADDR ($2006): VRAM address
     void WriteAddr(std::uint8_t value);
+    /// VRAM: the memory router
+    [[nodiscard]] std::uint8_t ReadVram(std::uint16_t address) const;
+    void WriteVram(std::uint16_t address, std::uint8_t value);
+    /// Nametable mirroring
+    [[nodiscard]] std::uint16_t MirrorNametableAddr(std::uint16_t address) const;
+    /// Palette mirroring
+    static std::uint16_t PaletteIndex(std::uint16_t address);
 
 private:
     /// Will read CHR ROM from Cartridge
