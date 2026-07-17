@@ -68,6 +68,10 @@ public:
     /// Ctrl register constants
     static constexpr std::uint8_t FLAG_VRAM_INCREMENT = 0x04;
     static constexpr std::uint8_t FLAG_NMI_ENABLED    = 0x80;
+    /// Status register constant
+    static constexpr std::uint8_t FLAG_VBLANK = 0x08;
+    /// Scroll register constant
+    static constexpr std::uint8_t FINE_BITS = 0x07;
 
     /// Latch methods
     [[nodiscard]] bool IsLatchOn() const { return w_register_; }
@@ -83,6 +87,14 @@ public:
     [[nodiscard]] std::uint16_t VramIncrement() const;
     [[nodiscard]] bool isNmiEnabled() const;
 
+    /// Mask register method
+    /// PPUMASK controls what the PPU draws
+    void WriteMask(const std::uint8_t value) { mask_register_ = value; }
+
+    /// Status register methods
+    std::uint8_t ReadStatusRegister();
+    void SetVblank();
+    void ClearVblank();
 
 private:
     /// Will read CHR ROM from Cartridge

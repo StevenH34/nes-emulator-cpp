@@ -29,6 +29,14 @@ void Ppu::SetScrollY(const std::uint16_t fine_y, const std::uint16_t coarse_y) {
 }
 
 /// Ctrl methods
+/// PPUCTRL configures the PPU
+/// bit 0-1: base nametable (0=$2000, 1=$2400, 2=$2800, 3=$2C00)
+/// bit 2: VRAM increment (0=+1 horizontal, 1=+32 vertical)
+/// bit 3: sprite pattern table (0=$0000, 1=$1000)
+/// bit 4: background pattern table (0=$0000, 1=$1000)
+/// bit 5: sprite size (0=8x8, 1=8x16)
+/// bit 6: master/slave (not used on NES)
+/// bit 7: generate NMI on VBlank
 void Ppu::WriteCtrlRegister(const std::uint8_t value) {
     ctrl_register_ = value;
     const auto nametable = static_cast<std::uint16_t>(value & 0x03);
@@ -42,4 +50,23 @@ std::uint16_t Ppu::VramIncrement() const {
 bool Ppu::isNmiEnabled() const {
     return (ctrl_register_ & FLAG_NMI_ENABLED) != 0;
 }
+
+/// Status register methods
+std::uint8_t Ppu::ReadStatusRegister() {
+    const std::uint8_t status_snapshot = status_register_;
+    // Clear the VBlank flag
+    ClearVblank();
+    // Reset the latch
+    ResetLatch();
+    return status_snapshot;
+}
+
+void Ppu::SetVblank() {
+    status_register_ |= FLAG_VBLANK;
+}
+
+void Ppu::ClearVblank() {
+    status_register_ &= ~FLAG_VBLANK;
+}
+
 } // namespace nes
