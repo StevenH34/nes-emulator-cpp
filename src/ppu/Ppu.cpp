@@ -86,4 +86,15 @@ void Ppu::WriteScrollY(const std::uint8_t value) {
     const std::uint16_t coarse_y = static_cast<std::uint16_t>(value) >> 3;
     SetScrollY(fine_y, coarse_y);
 }
+
+/// PPUADDR ($2006): VRAM address
+void Ppu::WriteAddr(const std::uint8_t value) {
+    if (IsLatchOn()) {
+        t_register_ = t_register_ & 0xFF00 | static_cast<std::uint16_t>(value);
+        v_register_ = t_register_;
+    } else {
+        t_register_ = t_register_ & 0x00FF | (static_cast<std::uint16_t>(value) & 0x3F) << 8;
+    }
+    ToggleLatch();
+}
 } // namespace nes

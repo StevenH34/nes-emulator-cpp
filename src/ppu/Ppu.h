@@ -101,6 +101,9 @@ public:
     void WriteScrollX(std::uint8_t value);
     void WriteScrollY(std::uint8_t value);
 
+    /// PPUADDR ($2006): VRAM address
+    void WriteAddr(std::uint8_t value);
+
 private:
     /// Will read CHR ROM from Cartridge
     Cartridge& cartridge_;
