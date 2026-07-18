@@ -176,4 +176,57 @@ TEST_CASE("Step throws for an unimplemented opcode") {
     CHECK_THROWS_AS((void)cpu.Step(), std::runtime_error);
 }
 
+TEST_CASE("Nmi pushes the Program Counter and a masked status register onto the stack") {
+    nes_test::TestBus bus;
+    nes::Cpu cpu(bus);
+
+    cpu.SetProgramCounter(0xABCD);
+    cpu.SetFlag(nes::Cpu::StatusFlag::B, true);
+    cpu.SetFlag(nes::Cpu::StatusFlag::C, true);
+
+    cpu.Nmi();
+
+    // LIFO: the byte pushed last (status) comes off first, then the word (PC).
+    const std::uint8_t pushed_status = cpu.StackPullByte();
+    CHECK(cpu.StackPullWord() == 0xABCD);
+
+    // The pushed copy always has U set and B cleared, regardless of the live register...
+    CHECK((pushed_status & static_cast<std::uint8_t>(nes::Cpu::StatusFlag::U)) != 0);
+    CHECK((pushed_status & static_cast<std::uint8_t>(nes::Cpu::StatusFlag::B)) == 0);
+    CHECK((pushed_status & static_cast<std::uint8_t>(nes::Cpu::StatusFlag::C)) != 0); // other flags preserved
+
+    // ...but Nmi only pushes a masked copy - it doesn't clear B on the live status register itself.
+    CHECK(cpu.IsFlagSet(static_cast<std::uint8_t>(nes::Cpu::StatusFlag::B)));
+}
+
+TEST_CASE("Nmi sets the Interrupt Disable flag") {
+    nes_test::TestBus bus;
+    nes::Cpu cpu(bus);
+
+    cpu.SetFlag(nes::Cpu::StatusFlag::I, false);
+    CHECK_FALSE(cpu.IsFlagSet(static_cast<std::uint8_t>(nes::Cpu::StatusFlag::I)));
+
+    cpu.Nmi();
+
+    CHECK(cpu.IsFlagSet(static_cast<std::uint8_t>(nes::Cpu::StatusFlag::I)));
+}
+
+TEST_CASE("Nmi loads the Program Counter from the NMI vector") {
+    auto rom = nes_test::MakeMinimalRom();
+    const auto prg_start = nes::Cartridge::HEADER_SIZE;
+    // NMI vector lives in the last 6 bytes of the 16 KB PRG bank (CPU 0xFFFA/0xFFFB,
+    // mirrored down to PRG offset 0x3FFA/0x3FFB by Mapper000's 16 KB mask).
+    rom[prg_start + 0x3FFA] = 0x34;
+    rom[prg_start + 0x3FFB] = 0x92;
+
+    const nes_test::TempRomFile rom_file(rom);
+    nes::Cartridge cartridge(rom_file.path());
+    nes::Bus bus(cartridge);
+    nes::Cpu cpu(bus);
+
+    cpu.Nmi();
+
+    CHECK(cpu.GetProgramCounter() == 0x9234);
+}
+
 

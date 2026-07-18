@@ -26,7 +26,7 @@ public:
     [[nodiscard]] int Step();
     [[nodiscard]] std::uint8_t FetchByte();
     [[nodiscard]] std::uint8_t ReadByte(std::uint16_t address) const;
-    void WriteByte(std::uint16_t address, std::uint8_t value);
+    void WriteByte(std::uint16_t address, std::uint8_t value) const;
 
     [[nodiscard]] std::uint8_t GetAccumulator() const { return accumulator_; }
     [[nodiscard]] std::uint8_t GetXRegister() const { return x_register_;};
@@ -345,7 +345,7 @@ public:
     void BitAbsolute();
 
     /// NOP (No OPeration)
-    void Nop();
+    static void Nop();
 
     void Nmi();
 

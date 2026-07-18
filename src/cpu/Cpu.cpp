@@ -47,7 +47,7 @@ std::uint8_t Cpu::ReadByte(const std::uint16_t address) const {
     return bus_.ReadCpu(address);
 }
 
-void Cpu::WriteByte(const std::uint16_t address, const std::uint8_t value) {
+void Cpu::WriteByte(const std::uint16_t address, const std::uint8_t value) const {
     bus_.WriteCpu(address, value);
 }
 
@@ -1176,7 +1176,7 @@ void Cpu::Nop() {
 
 void Cpu::Nmi() {
     StackPushWord(program_counter_);
-    StackPushByte(status_register_ | static_cast<std::uint8_t>(StatusFlag::U) & static_cast<std::uint8_t>(~StatusFlag::B));
+    StackPushByte((status_register_ | static_cast<std::uint8_t>(StatusFlag::U)) & ~static_cast<std::uint8_t>(StatusFlag::B));
     SetFlag(StatusFlag::I, true);
     const std::uint8_t low_byte = ReadByte(NMI_VECTOR_);
     const std::uint8_t high_byte = ReadByte(NMI_VECTOR_ + 1);
