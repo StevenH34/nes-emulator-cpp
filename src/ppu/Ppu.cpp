@@ -112,7 +112,7 @@ std::uint8_t Ppu::ReadDataRegister() {
     return result;
 }
 
-void Ppu::WriteData(std::uint8_t value) {
+void Ppu::WriteData(const std::uint8_t value) {
     WriteVram(v_register_ ,value);
     IncrementVRegister();
 }
@@ -206,7 +206,7 @@ std::uint16_t Ppu::MirrorNametableAddr(const std::uint16_t address) const {
     const std::uint16_t physical = [&]() -> std::uint16_t {
         switch (mirror) {
             case Cartridge::Mirroring::Vertical:
-                return nametable & 1;;
+                return nametable & 1;
             case Cartridge::Mirroring::Horizontal:
                 return nametable >> 1;
             // case Cartridge::Mirroring::SingleScreenLower:
@@ -224,7 +224,7 @@ std::uint16_t Ppu::MirrorNametableAddr(const std::uint16_t address) const {
 /// Palette mirroring
 std::uint16_t Ppu::PaletteIndex(const std::uint16_t address) {
     std::uint16_t index = address & PpuAddresses::PALETTE_MASK;
-    if (index >=  PpuAddresses::PALETTE_SPRITE_BASE && (index &  PpuAddresses::PALETTE_COLOR_MASK) == 0) {
+    if (index >= PpuAddresses::PALETTE_SPRITE_BASE && (index & PpuAddresses::PALETTE_COLOR_MASK) == 0) {
         index -= PpuAddresses::PALETTE_SPRITE_BASE;
     }
     return index;
