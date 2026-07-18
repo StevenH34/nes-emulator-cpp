@@ -7,15 +7,15 @@
 
 ### Building and Running
 
-Configure Build dir: `cmake -S . -B cmake-build-debug BUILD_TYPE=Debug` \
-Build app target: `cmake --build cmake-build-debug --target nes_emulator` \
-Run Emulator: `./cmake-build-debug/nes_emulator`
+Configure Build dir: `cmake -S . -B cmake-build-debug -DCMAKE_BUILD_TYPE=Debug` \
+Build app target: `cmake --build cmake-build-debug --target nes_emulator_cpp` \
+Run Emulator: `./cmake-build-debug/nes_emulator_cpp`
 
 ### Testing
 
 Using `doctest.h`.
 
-Build tests only: `cmake --build cmake-build-debug --target tests` \
+Build tests only: `cmake --build cmake-build-debug --target nes_emulator_tests` \
 Build and run tests: `cmake --build cmake-build-debug --target run_tests`
 
 ### Resources
