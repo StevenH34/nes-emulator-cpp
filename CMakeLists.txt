@@ -43,6 +43,7 @@ add_executable(nes_emulator_tests
         tests/Emulator_tests.cpp
         tests/Cartridge_tests.cpp
         tests/Mapper000_tests.cpp
+        tests/Ppu_tests.cpp
         tests/sta_tests.cpp
         tests/addressing_mode_tests.cpp
         tests/lda_tests.cpp
