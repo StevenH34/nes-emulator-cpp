@@ -19,7 +19,10 @@ add_library(nes_core STATIC
         src/mappers/Mapper.h
         src/mappers/Mapper.cpp
         src/mappers/Mapper000.cpp
-        src/mappers/Mapper000.h)
+        src/mappers/Mapper000.h
+        src/ppu/Ppu.cpp
+        src/ppu/Ppu.h
+        "src/ppu/Ppu_Addresses.h")
 
 target_include_directories(nes_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
@@ -40,6 +43,7 @@ add_executable(nes_emulator_tests
         tests/Emulator_tests.cpp
         tests/Cartridge_tests.cpp
         tests/Mapper000_tests.cpp
+        tests/Ppu_tests.cpp
         tests/sta_tests.cpp
         tests/addressing_mode_tests.cpp
         tests/lda_tests.cpp
