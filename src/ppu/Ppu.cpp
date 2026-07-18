@@ -71,7 +71,7 @@ void Ppu::ClearVblank() {
 
 /// Scroll register methods - PPUSCROLL ($2005)
 void Ppu::WriteScroll(const std::uint8_t value) {
-    IsLatchOn() ? WriteScrollX(value) : WriteScrollY(value);
+    IsLatchOn() ? WriteScrollY(value) : WriteScrollX(value);
     ToggleLatch();
 }
 
