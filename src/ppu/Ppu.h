@@ -73,6 +73,11 @@ public:
     /// Scroll register constant
     static constexpr std::uint8_t FINE_BITS = 0x07;
 
+    /// Internal register accessors (for tests; v/t/x have no other observable read path)
+    [[nodiscard]] std::uint16_t GetV() const { return v_register_; }
+    [[nodiscard]] std::uint16_t GetT() const { return t_register_; }
+    [[nodiscard]] std::uint8_t GetX() const { return x_register_; }
+
     /// Latch methods
     [[nodiscard]] bool IsLatchOn() const { return w_register_; }
     void ResetLatch() { w_register_ = false; }
