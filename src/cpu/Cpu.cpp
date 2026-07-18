@@ -1174,5 +1174,13 @@ void Cpu::Nop() {
     // Do nothing
 }
 
+void Cpu::Nmi() {
+    StackPushWord(program_counter_);
+    StackPushByte(status_register_ | static_cast<std::uint8_t>(StatusFlag::U) & static_cast<std::uint8_t>(~StatusFlag::B));
+    SetFlag(StatusFlag::I, true);
+    const std::uint8_t low_byte = ReadByte(NMI_VECTOR_);
+    const std::uint8_t high_byte = ReadByte(NMI_VECTOR_ + 1);
+    program_counter_ = static_cast<std::uint16_t>(high_byte) << 8 | static_cast<std::uint16_t>(low_byte);
+}
 
 } // nes

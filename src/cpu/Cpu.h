@@ -347,6 +347,8 @@ public:
     /// NOP (No OPeration)
     void Nop();
 
+    void Nmi();
+
 private:
     Bus& bus_;
 
