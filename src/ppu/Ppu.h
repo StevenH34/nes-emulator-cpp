@@ -127,6 +127,14 @@ public:
     /// Palette mirroring
     static std::uint16_t PaletteIndex(std::uint16_t address);
 
+    /// Timing
+    void Step();
+    [[nodiscard]] bool IsFrameComplete() const { return frame_complete_; }
+    void ClearFrameComplete() { frame_complete_ = false; }
+    void TriggerNmi() const;
+    void AdvanceCycle();
+
+
 private:
     /// Will read CHR ROM from Cartridge
     Cartridge& cartridge_;

@@ -230,4 +230,33 @@ std::uint16_t Ppu::PaletteIndex(const std::uint16_t address) {
     return index;
 }
 
+/// Timing
+/// Advances one cycle. Every 341 cycles a scanline ends.
+void Ppu::Step() {
+    AdvanceCycle();
+}
+
+void Ppu::TriggerNmi() const {
+    if (!nmi_callback_) {
+        throw std::runtime_error("nmi_callback_ is null");
+    }
+    nmi_callback_();
+}
+
+void Ppu::AdvanceCycle() {
+    cycle_ += 1;
+    if (cycle_ >= CYCLES_PER_SCANLINE) {
+        cycle_ = 0;
+        scanline_ += 1;
+        if (scanline_ == VBLANK_SCANLINE) {
+            SetVblank();
+            frame_complete_ = true;
+            if (isNmiEnabled()) TriggerNmi();
+        } else if (scanline_ == PRE_RENDER_SCANLINE) {
+            ClearVblank();
+        } else if (scanline_ >= SCANLINES_PER_FRAME) {
+            scanline_ = 0;
+        }
+    }
+}
 } // namespace nes
