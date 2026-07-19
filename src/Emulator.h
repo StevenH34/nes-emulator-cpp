@@ -18,8 +18,9 @@ public:
     Emulator(Emulator&&) = delete;
     Emulator& operator=(Emulator&&) = delete;
 
-    void Run();
-    void Step();
+    static void Run();
+    int Step();
+    const std::vector<std::uint8_t>& RunFrame();
 
     // For loading test programs
     void LoadProgram(const std::vector<std::uint8_t>& program, std::uint16_t start_address = 0x0000);
@@ -30,6 +31,7 @@ public:
 
 private:
     Cartridge cartridge_;
+    Ppu ppu_;
     Bus bus_;
     Cpu cpu_;
 };

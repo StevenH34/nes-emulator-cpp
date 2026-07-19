@@ -347,7 +347,7 @@ public:
     /// NOP (No OPeration)
     static void Nop();
 
-    void Nmi();
+    void Nmi(); // Non-Maskable Interrupt Request
 
 private:
     Bus& bus_;
