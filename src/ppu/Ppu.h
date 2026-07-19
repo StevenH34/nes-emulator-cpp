@@ -73,10 +73,11 @@ public:
     /// Scroll register constant
     static constexpr std::uint8_t FINE_BITS = 0x07;
 
-    /// Internal register accessors (for tests; v/t/x have no other observable read path)
+    // Getters
     [[nodiscard]] std::uint16_t GetV() const { return v_register_; }
     [[nodiscard]] std::uint16_t GetT() const { return t_register_; }
     [[nodiscard]] std::uint8_t GetX() const { return x_register_; }
+    [[nodiscard]] const std::vector<std::uint8_t>& GetFrameBuffer() const { return frame_buffer_; }
 
     /// Latch methods
     [[nodiscard]] bool IsLatchOn() const { return w_register_; }
@@ -138,6 +139,7 @@ public:
     void ClearFrameComplete() { frame_complete_ = false; }
     void TriggerNmi() const;
     void AdvanceCycle();
+    void SetNmiCallback(std::function<void()> callback) { nmi_callback_ = std::move(callback); }
 
 
 private:

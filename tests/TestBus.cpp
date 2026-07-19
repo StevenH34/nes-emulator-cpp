@@ -4,6 +4,6 @@
 
 namespace nes_test {
 
-TestBus::TestBus() : nes::Bus(GetTestCartridge()) {}
+TestBus::TestBus() : PpuHolder(GetTestCartridge()), nes::Bus(GetTestCartridge(), ppu) {}
 
 } // nes_test

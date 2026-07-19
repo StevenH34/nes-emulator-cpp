@@ -5,12 +5,13 @@
 #include <array>
 
 #include "Cartridge.h"
+#include "ppu/Ppu.h"
 
 namespace nes {
 
 class Bus {
 public:
-    explicit Bus(Cartridge& cartridge);
+    explicit Bus(Cartridge& cartridge, Ppu& ppu);
     ~Bus() = default;
     Bus(const Bus&) = delete;
     Bus& operator=(const Bus&) = delete;
@@ -24,6 +25,7 @@ private:
     // std::vector<std::uint8_t> ram_;
     std::array<std::uint8_t, 2048> ram_{};
     Cartridge& cartridge_;
+    Ppu& ppu_;
 
     /// CPU RAM
     static constexpr std::uint16_t RAM_SIZE = 2048; // 2 KB
