@@ -4,6 +4,7 @@
 
 #include "../src/Bus.h"
 #include "../src/Cartridge.h"
+#include "../src/ppu/Ppu.h"
 #include "TestBus.h"
 #include "TestRom.h"
 #include "../src/cpu/Cpu.h"
@@ -158,7 +159,8 @@ TEST_CASE("Reset loads the Program Counter from the reset vector") {
     const auto rom = nes_test::MakeMinimalRom(0x8123);
     const nes_test::TempRomFile rom_file(rom);
     nes::Cartridge cartridge(rom_file.path());
-    nes::Bus bus(cartridge);
+    nes::Ppu ppu(cartridge);
+    nes::Bus bus(cartridge, ppu);
     nes::Cpu cpu(bus);
 
     cpu.SetProgramCounter(0x0000);
@@ -221,7 +223,8 @@ TEST_CASE("Nmi loads the Program Counter from the NMI vector") {
 
     const nes_test::TempRomFile rom_file(rom);
     nes::Cartridge cartridge(rom_file.path());
-    nes::Bus bus(cartridge);
+    nes::Ppu ppu(cartridge);
+    nes::Bus bus(cartridge, ppu);
     nes::Cpu cpu(bus);
 
     cpu.Nmi();

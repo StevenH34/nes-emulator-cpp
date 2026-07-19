@@ -547,6 +547,29 @@ TEST_CASE("ClearFrameComplete resets the frame-complete flag") {
     CHECK_FALSE(ppu.IsFrameComplete());
 }
 
+TEST_CASE("NMI callback fires exactly once per frame when NMI is enabled") {
+    auto cart = MakeCartridge();
+    nes::Ppu ppu(cart);
+    int nmi_count = 0;
+    ppu.SetNmiCallback([&nmi_count] { nmi_count += 1; });
+    ppu.WriteCtrlRegister(nes::Ppu::FLAG_NMI_ENABLED);
+
+    StepN(ppu, nes::Ppu::CYCLES_PER_SCANLINE * nes::Ppu::SCANLINES_PER_FRAME);
+
+    CHECK(nmi_count == 1);
+}
+
+TEST_CASE("NMI callback does not fire when NMI is disabled") {
+    auto cart = MakeCartridge();
+    nes::Ppu ppu(cart);
+    int nmi_count = 0;
+    ppu.SetNmiCallback([&nmi_count] { nmi_count += 1; });
+
+    StepN(ppu, nes::Ppu::CYCLES_PER_SCANLINE * nes::Ppu::SCANLINES_PER_FRAME);
+
+    CHECK(nmi_count == 0);
+}
+
 TEST_CASE("Step throws when NMI is enabled at VBlank but no callback is registered") {
     auto cart = MakeCartridge();
     nes::Ppu ppu(cart);

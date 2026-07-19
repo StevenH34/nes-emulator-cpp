@@ -4,6 +4,7 @@
 
 #include "../src/Bus.h"
 #include "../src/Cartridge.h"
+#include "../src/ppu/Ppu.h"
 #include "TestBus.h"
 #include "TestRom.h"
 
@@ -77,7 +78,8 @@ TEST_CASE("Bus reads PRG-ROM through the cartridge mapper at 0x8000-0xFFFF") {
 
     const nes_test::TempRomFile rom(data);
     nes::Cartridge cartridge(rom.path());
-    const nes::Bus bus(cartridge);
+    nes::Ppu ppu(cartridge);
+    const nes::Bus bus(cartridge, ppu);
 
     CHECK(bus.ReadCpu(0x8000) == 0x42);
     CHECK(bus.ReadCpu(0xC000) == 0x42);
