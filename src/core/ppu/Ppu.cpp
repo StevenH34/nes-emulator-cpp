@@ -51,6 +51,18 @@ bool Ppu::isNmiEnabled() const {
     return (ctrl_register_ & FLAG_NMI_ENABLED) != 0;
 }
 
+// Checks bit 4 of PPUCTRL. If set, background tiles live in pattern table 1 ($1000),
+// otherwise in pattern table 0 ($0000).
+std::uint16_t Ppu::BackgroundPatternTable() const {
+    return (ctrl_register_ & FLAG_BG_PATTERN_TABLE) != 0 ? PATTERN_TABLE_1 : PATTERN_TABLE_0;
+}
+
+// Checks bit 3 of PPUCTRL. If set, sprite tiles live in pattern table 1 ($1000),
+// otherwise in pattern table 0 ($0000).
+std::uint16_t Ppu::SpritePatternTable() const {
+    return (ctrl_register_ & FLAG_SPR_PATTERN_TABLE) != 0 ? PATTERN_TABLE_1 : PATTERN_TABLE_0;
+}
+
 /// Status register methods
 std::uint8_t Ppu::ReadStatusRegister() {
     const std::uint8_t status_snapshot = status_register_;

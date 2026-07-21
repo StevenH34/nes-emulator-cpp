@@ -68,10 +68,16 @@ public:
     /// Ctrl register constants
     static constexpr std::uint8_t FLAG_VRAM_INCREMENT = 0x04;
     static constexpr std::uint8_t FLAG_NMI_ENABLED    = 0x80;
+    static constexpr std::uint8_t FLAG_SPR_PATTERN_TABLE = 0x08;
+    static constexpr std::uint8_t FLAG_BG_PATTERN_TABLE  = 0x10;
+    // Pattern tables
+    static constexpr std::uint16_t PATTERN_TABLE_0 = 0x0000;
+    static constexpr std::uint16_t PATTERN_TABLE_1 = 0x1000;
     /// Status register constant
     static constexpr std::uint8_t FLAG_VBLANK = 0x08;
     /// Scroll register constant
     static constexpr std::uint8_t FINE_BITS = 0x07;
+
 
     // Getters
     [[nodiscard]] std::uint16_t GetV() const { return v_register_; }
@@ -92,6 +98,8 @@ public:
     void WriteCtrlRegister(std::uint8_t value);
     [[nodiscard]] std::uint16_t VramIncrement() const;
     [[nodiscard]] bool isNmiEnabled() const;
+    [[nodiscard]] std::uint16_t BackgroundPatternTable() const;
+    [[nodiscard]] std::uint16_t SpritePatternTable() const;
 
     /// Mask register method
     /// PPUMASK controls what the PPU draws
