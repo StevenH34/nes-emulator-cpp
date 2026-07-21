@@ -6,35 +6,35 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_library(nes_core STATIC
-        src/Emulator.cpp
-        src/Emulator.h
-        src/cpu/Cpu.cpp
-        src/cpu/Cpu_Step.cpp
-        src/cpu/Cpu.h
-        src/cpu/Opcodes.h
-        src/Bus.cpp
-        src/Bus.h
-        src/Cartridge.cpp
-        src/Cartridge.h
-        src/mappers/Mapper.h
-        src/mappers/Mapper.cpp
-        src/mappers/Mapper000.cpp
-        src/mappers/Mapper000.h
-        src/ppu/Ppu.cpp
-        src/ppu/Ppu.h
-        "src/ppu/Ppu_Addresses.h"
-        src/Window.cpp
-        src/Window.h
-        src/NesApp.cpp
-        src/NesApp.h)
+        src/core/Emulator.cpp
+        src/core/Emulator.h
+        src/core/cpu/Cpu.cpp
+        src/core/cpu/Cpu_Step.cpp
+        src/core/cpu/Cpu.h
+        src/core/cpu/Opcodes.h
+        src/core/Bus.cpp
+        src/core/Bus.h
+        src/core/Cartridge.cpp
+        src/core/Cartridge.h
+        src/core/mappers/Mapper.h
+        src/core/mappers/Mapper.cpp
+        src/core/mappers/Mapper000.cpp
+        src/core/mappers/Mapper000.h
+        src/core/ppu/Ppu.cpp
+        src/core/ppu/Ppu.h
+        "src/core/ppu/Ppu_Addresses.h"
+        src/app/Window.cpp
+        src/app/Window.h
+        src/app/NesApp.cpp
+        src/app/NesApp.h)
 
-target_include_directories(nes_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_include_directories(nes_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/src/core)
 
 find_package(SDL3 CONFIG REQUIRED)
 
 target_link_libraries(nes_core PUBLIC SDL3::SDL3)
 
-add_executable(nes_emulator_cpp src/main.cpp)
+add_executable(nes_emulator_cpp src/app/main.cpp)
 
 target_link_libraries(nes_emulator_cpp PRIVATE nes_core)
 
