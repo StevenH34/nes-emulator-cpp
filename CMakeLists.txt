@@ -26,9 +26,17 @@ add_library(nes_core STATIC
 
 target_include_directories(nes_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
+find_package(SDL3 CONFIG REQUIRED)
+
 add_executable(nes_emulator_cpp src/main.cpp)
 
-target_link_libraries(nes_emulator_cpp PRIVATE nes_core)
+target_link_libraries(nes_emulator_cpp PRIVATE nes_core SDL3::SDL3)
+
+add_custom_command(TARGET nes_emulator_cpp POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "$<TARGET_RUNTIME_DLLS:nes_emulator_cpp>"
+        "$<TARGET_FILE_DIR:nes_emulator_cpp>"
+        COMMAND_EXPAND_LISTS)
 
 enable_testing()
 
