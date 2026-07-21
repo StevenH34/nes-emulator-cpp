@@ -7,7 +7,22 @@
 
 ### Building and Running
 
-Configure Build dir: `cmake -S . -B cmake-build-debug -DCMAKE_BUILD_TYPE=Debug` \
+Rendering uses SDL3, installed via [vcpkg](https://github.com/microsoft/vcpkg).
+
+**Prerequisites**
+- A C++23 compiler (MSVC / Visual Studio Build Tools with the "Desktop development with C++" workload on Windows)
+- [vcpkg](https://github.com/microsoft/vcpkg), cloned and bootstrapped:
+  ```
+  git clone https://github.com/microsoft/vcpkg
+  ./vcpkg/bootstrap-vcpkg.bat   # bootstrap-vcpkg.sh on Linux/macOS
+  ```
+- The `VCPKG_ROOT` environment variable set to that clone's path
+
+SDL3 itself does **not** need to be installed manually — it's declared in `vcpkg.json` and vcpkg installs it automatically on first configure.
+
+On Windows, run these from a "Developer Command Prompt/PowerShell for VS" (or after running `vcvars64.bat`) so `cl.exe` and `ninja` are on `PATH`.
+
+Configure Build dir: `cmake --preset default` \
 Build app target: `cmake --build cmake-build-debug --target nes_emulator_cpp` \
 Run Emulator: `./cmake-build-debug/nes_emulator_cpp`
 
