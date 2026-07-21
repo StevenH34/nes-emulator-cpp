@@ -1,8 +1,8 @@
 #include "doctest.h"
 
-#include "../src/core/Bus.h"
+#include "../../../src/core/Bus.h"
 #include "TestBus.h"
-#include "../src/core/cpu/Cpu.h"
+#include "../../../src/core/cpu/Cpu.h"
 
 TEST_CASE("EorImmediate XORs the value following the opcode with the accumulator") {
     nes_test::TestBus bus;

@@ -1,122 +1,107 @@
 #include "doctest.h"
 
-#include "../src/core/Bus.h"
+#include "../../../src/core/Bus.h"
 #include "TestBus.h"
-#include "../src/core/cpu/Cpu.h"
+#include "../../../src/core/cpu/Cpu.h"
 
-TEST_CASE("RorAccumulator rotates bits right and shifts in a clear Carry") {
+TEST_CASE("LsrAccumulator shifts bits right and clears Carry and Zero") {
     nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x02); // 0000 0010
 
-    cpu.RorAccumulator();
+    cpu.LsrAccumulator();
 
     CHECK(cpu.GetAccumulator() == 0x01); // 0000 0001
     CHECK(cpu.StatusString() == "nvUbdIzc"); // Carry clear, Zero clear, Negative clear
 }
 
-TEST_CASE("RorAccumulator shifts in a set Carry as bit 7") {
-    nes_test::TestBus bus;
-    nes::Cpu cpu(bus);
-
-    cpu.Lda(0x02); // 0000 0010
-    cpu.SetCFlag(true);
-
-    cpu.RorAccumulator();
-
-    CHECK(cpu.GetAccumulator() == 0x81); // 1000 0001, old Carry becomes bit 7
-    CHECK(cpu.StatusString() == "NvUbdIzc"); // Carry clear, Zero clear, Negative set
-}
-
-TEST_CASE("RorAccumulator sets Carry when bit 0 is rotated out") {
+TEST_CASE("LsrAccumulator sets Carry when bit 0 is shifted out") {
     nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x03); // 0000 0011
 
-    cpu.RorAccumulator();
+    cpu.LsrAccumulator();
 
-    CHECK(cpu.GetAccumulator() == 0x01); // 0000 0001, bit 0 moved to Carry
+    CHECK(cpu.GetAccumulator() == 0x01); // 0000 0001, bit 0 dropped
     CHECK(cpu.StatusString() == "nvUbdIzC"); // Carry set, Zero clear, Negative clear
 }
 
-TEST_CASE("RorAccumulator sets Zero when the result is 0x00") {
+TEST_CASE("LsrAccumulator sets Zero when the result is 0x00") {
     nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     cpu.Lda(0x01); // 0000 0001
 
-    cpu.RorAccumulator();
+    cpu.LsrAccumulator();
 
     CHECK(cpu.GetAccumulator() == 0x00);
     CHECK(cpu.StatusString() == "nvUbdIZC"); // Carry set, Zero set, Negative clear
 }
 
-TEST_CASE("RorAccumulator sets Negative when the old Carry rotates into bit 7") {
+TEST_CASE("LsrAccumulator always clears Negative because bit 7 becomes 0") {
     nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
-    cpu.Lda(0x00);
-    cpu.SetCFlag(true);
+    cpu.Lda(0x81); // 1000 0001
 
-    cpu.RorAccumulator();
+    cpu.LsrAccumulator();
 
-    CHECK(cpu.GetAccumulator() == 0x80); // 1000 0000
-    CHECK(cpu.StatusString() == "NvUbdIzc"); // Carry clear, Zero clear, Negative set
+    CHECK(cpu.GetAccumulator() == 0x40); // 0100 0000
+    CHECK(cpu.StatusString() == "nvUbdIzC"); // Carry set (bit 0 dropped), Negative clear
 }
 
-TEST_CASE("Ror returns the rotated value without touching memory or the accumulator") {
+TEST_CASE("Lsr returns the shifted value without touching memory or the accumulator") {
     nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
-    CHECK(cpu.Ror(0x03) == 0x01); // 0000 0011 -> 0000 0001, bit 0 moved to Carry
+    CHECK(cpu.Lsr(0x03) == 0x01); // 0000 0011 -> 0000 0001, bit 0 dropped
     CHECK(cpu.StatusString() == "nvUbdIzC"); // Carry set, Zero clear, Negative clear
     CHECK(cpu.GetAccumulator() == 0x00);
 }
 
-TEST_CASE("RorZeroPage rotates the value at the zero page address and stores the result") {
+TEST_CASE("LsrZeroPage shifts the value at the zero page address and stores the result") {
     nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x10); // zero page address operand
     bus.WriteCpu(0x10, 0x02); // value at the zero page address
 
-    cpu.RorZeroPage();
+    cpu.LsrZeroPage();
 
     CHECK(bus.ReadCpu(0x10) == 0x01);
     CHECK(cpu.StatusString() == "nvUbdIzc"); // Carry clear, Zero clear, Negative clear
 }
 
-TEST_CASE("RorZeroPage sets Carry when bit 0 is rotated out") {
+TEST_CASE("LsrZeroPage sets Carry when bit 0 is shifted out") {
     nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x10); // zero page address operand
     bus.WriteCpu(0x10, 0x01); // 0000 0001
 
-    cpu.RorZeroPage();
+    cpu.LsrZeroPage();
 
-    CHECK(bus.ReadCpu(0x10) == 0x00); // bit 0 moved to Carry
+    CHECK(bus.ReadCpu(0x10) == 0x00); // bit 0 dropped
     CHECK(cpu.StatusString() == "nvUbdIZC"); // Carry set, Zero set, Negative clear
 }
 
-TEST_CASE("RorZeroPageX rotates the value at the zero page address plus X") {
+TEST_CASE("LsrZeroPageX shifts the value at the zero page address plus X") {
     nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
     bus.WriteCpu(0x00, 0x10); // base operand
     cpu.SetXRegister(0x05);
-    bus.WriteCpu(0x15, 0x02); // value at 0x10 + X
-    cpu.SetCFlag(true);
+    bus.WriteCpu(0x15, 0x80); // value at 0x10 + X
 
-    cpu.RorZeroPageX();
+    cpu.LsrZeroPageX();
 
-    CHECK(bus.ReadCpu(0x15) == 0x81); // old Carry rotated into bit 7
-    CHECK(cpu.StatusString() == "NvUbdIzc"); // Negative set
+    CHECK(bus.ReadCpu(0x15) == 0x40);
+    CHECK(cpu.StatusString() == "nvUbdIzc");
 }
 
-TEST_CASE("RorZeroPageX wraps within the zero page instead of crossing into page 1") {
+TEST_CASE("LsrZeroPageX wraps within the zero page instead of crossing into page 1") {
     nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
@@ -124,12 +109,12 @@ TEST_CASE("RorZeroPageX wraps within the zero page instead of crossing into page
     cpu.SetXRegister(0x02);
     bus.WriteCpu(0x01, 0x06); // value at wrapped address (0xFF + 0x02) & 0xFF
 
-    cpu.RorZeroPageX();
+    cpu.LsrZeroPageX();
 
     CHECK(bus.ReadCpu(0x01) == 0x03);
 }
 
-TEST_CASE("RorAbsolute rotates the value at a 16-bit address and sets Zero and Carry") {
+TEST_CASE("LsrAbsolute shifts the value at a 16-bit address and sets Zero and Carry") {
     nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
@@ -137,13 +122,13 @@ TEST_CASE("RorAbsolute rotates the value at a 16-bit address and sets Zero and C
     bus.WriteCpu(0x01, 0x02); // high byte, address = 0x0200
     bus.WriteCpu(0x0200, 0x01); // 0000 0001
 
-    cpu.RorAbsolute();
+    cpu.LsrAbsolute();
 
     CHECK(bus.ReadCpu(0x0200) == 0x00);
     CHECK(cpu.StatusString() == "nvUbdIZC"); // Carry set, Zero set, Negative clear
 }
 
-TEST_CASE("RorAbsoluteX rotates the value at a 16-bit address plus X") {
+TEST_CASE("LsrAbsoluteX shifts the value at a 16-bit address plus X") {
     nes_test::TestBus bus;
     nes::Cpu cpu(bus);
 
@@ -152,7 +137,7 @@ TEST_CASE("RorAbsoluteX rotates the value at a 16-bit address plus X") {
     cpu.SetXRegister(0x10);
     bus.WriteCpu(0x0210, 0x04);
 
-    cpu.RorAbsoluteX();
+    cpu.LsrAbsoluteX();
 
     CHECK(bus.ReadCpu(0x0210) == 0x02);
     CHECK(cpu.StatusString() == "nvUbdIzc");

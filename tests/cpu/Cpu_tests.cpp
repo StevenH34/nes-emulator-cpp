@@ -2,12 +2,12 @@
 
 #include <stdexcept>
 
-#include "../src/core/Bus.h"
-#include "../src/core/Cartridge.h"
-#include "../src/core/ppu/Ppu.h"
+#include "../../src/core/Bus.h"
+#include "../../src/core/Cartridge.h"
+#include "../../src/core/ppu/Ppu.h"
 #include "TestBus.h"
 #include "TestRom.h"
-#include "../src/core/cpu/Cpu.h"
+#include "../../src/core/cpu/Cpu.h"
 
 namespace {
 
