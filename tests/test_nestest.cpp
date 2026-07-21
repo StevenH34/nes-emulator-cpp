@@ -1,6 +1,6 @@
 #include "doctest.h"
 
-#include "../src/Emulator.h"
+#include "../src/core/Emulator.h"
 
 #include <fstream>
 #include <string>

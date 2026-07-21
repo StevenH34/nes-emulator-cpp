@@ -2,14 +2,34 @@
 
 - ✅ Added All 151 official opcodes with instructions.
 - ✅ Added Cartridge and Mapper000 support.
-- ✅ Added nestest to verify all 151 opcodes are working correctly. 
-- Next step: add the PPU.
+- ✅ Added nestest to verify all 151 opcodes are working correctly.
+- ✅ Added PPU registers.
+- ✅ Added an SDL3 window and app loop.
+- Next step: implement PPU background/sprite rendering.
 
 ### Building and Running
 
-Configure Build dir: `cmake -S . -B cmake-build-debug -DCMAKE_BUILD_TYPE=Debug` \
+Rendering uses SDL3, installed via [vcpkg](https://github.com/microsoft/vcpkg).
+
+**Prerequisites**
+- A C++23 compiler:
+  - Windows: MSVC / Visual Studio Build Tools with the "Desktop development with C++" workload
+  - macOS: Xcode Command Line Tools (`xcode-select --install`), Xcode 16+ for full C++23 support
+- CMake and Ninja (macOS: `brew install cmake ninja`; on Windows these come with the "Desktop development with C++" workload)
+- [vcpkg](https://github.com/microsoft/vcpkg), cloned and bootstrapped:
+  ```
+  git clone https://github.com/microsoft/vcpkg
+  ./vcpkg/bootstrap-vcpkg.bat   # bootstrap-vcpkg.sh on Linux/macOS
+  ```
+- The `VCPKG_ROOT` environment variable set to that clone's path
+
+SDL3 itself does **not** need to be installed manually — it's declared in `vcpkg.json` and vcpkg installs it automatically on first configure.
+
+On Windows, run these from a "Developer Command Prompt/PowerShell for VS" (or after running `vcvars64.bat`) so `cl.exe` and `ninja` are on `PATH`. On macOS, a normal terminal is fine as long as the Command Line Tools are installed.
+
+Configure Build dir: `cmake --preset default` \
 Build app target: `cmake --build cmake-build-debug --target nes_emulator_cpp` \
-Run Emulator: `./cmake-build-debug/nes_emulator_cpp`
+Run Emulator: `./cmake-build-debug/nes_emulator_cpp <rom_path>` (e.g. `./cmake-build-debug/nes_emulator_cpp tests/roms/nestest.nes`)
 
 ### Testing
 

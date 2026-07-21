@@ -1,8 +1,8 @@
 #include "doctest.h"
 
-#include "../src/Bus.h"
+#include "../src/core/Bus.h"
 #include "TestBus.h"
-#include "../src/cpu/Cpu.h"
+#include "../src/core/cpu/Cpu.h"
 
 TEST_CASE("Lda loads the accumulator and updates the Zero and Negative flags") {
     nes_test::TestBus bus;

@@ -1,6 +1,6 @@
 #include "doctest.h"
 
-#include "../src/Cartridge.h"
+#include "../src/core/Cartridge.h"
 #include "TestRom.h"
 
 #include <vector>
