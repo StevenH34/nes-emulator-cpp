@@ -1,4 +1,4 @@
-#include "Emulator.h"
+#include "NesApp.h"
 
 #include <cstdio>
 
@@ -8,7 +8,14 @@ int main(const int argc, char* argv[]) {
         return 1;
     }
 
-    nes::Emulator emulator(argv[1]);
-    emulator.Run();
+    try {
+        nes_app::NesApp app(argv[1]);
+        app.Run();
+    }
+    catch (const std::exception& e) {
+        std::fprintf(stderr, "Error: %s\n", e.what());
+        return 1;
+    }
+
     return 0;
 }
