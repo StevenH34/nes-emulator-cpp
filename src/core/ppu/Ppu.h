@@ -70,14 +70,16 @@ public:
     static constexpr std::uint8_t FLAG_NMI_ENABLED    = 0x80;
     static constexpr std::uint8_t FLAG_SPR_PATTERN_TABLE = 0x08;
     static constexpr std::uint8_t FLAG_BG_PATTERN_TABLE  = 0x10;
-    // Pattern tables
+    /// Pattern tables
     static constexpr std::uint16_t PATTERN_TABLE_0 = 0x0000;
     static constexpr std::uint16_t PATTERN_TABLE_1 = 0x1000;
     /// Status register constant
     static constexpr std::uint8_t FLAG_VBLANK = 0x08;
     /// Scroll register constant
     static constexpr std::uint8_t FINE_BITS = 0x07;
-
+    /// PPUMASK
+    static constexpr std::uint8_t FLAG_SHOW_BG = 0x08;
+    static constexpr std::uint8_t FLAG_SHOW_SPRITES = 0x10;
 
     // Getters
     [[nodiscard]] std::uint16_t GetV() const { return v_register_; }
@@ -101,9 +103,13 @@ public:
     [[nodiscard]] std::uint16_t BackgroundPatternTable() const;
     [[nodiscard]] std::uint16_t SpritePatternTable() const;
 
-    /// Mask register method
     /// PPUMASK controls what the PPU draws
     void WriteMask(const std::uint8_t value) { mask_register_ = value; }
+    /// If bit 3 of PPUMASK is off, background is not drawn
+    [[nodiscard]] bool IsShowBackground() const { return (mask_register_ & FLAG_SHOW_BG) != 0; }
+    [[nodiscard]] bool IsShowSprites() const { return (mask_register_ & FLAG_SHOW_SPRITES) != 0; }
+    /// If either is on, the PPU is rendering
+    [[nodiscard]] bool IsRenderingEnabled() const { return IsShowBackground() || IsShowSprites(); }
 
     /// Status register methods
     std::uint8_t ReadStatusRegister();
