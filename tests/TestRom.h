@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include "../src/Cartridge.h"
+#include "../src/core/Cartridge.h"
 
 namespace nes_test {
 

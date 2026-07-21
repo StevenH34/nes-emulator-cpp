@@ -1,8 +1,8 @@
 #include "doctest.h"
 
-#include "../src/Bus.h"
+#include "../src/core/Bus.h"
 #include "TestBus.h"
-#include "../src/cpu/Cpu.h"
+#include "../src/core/cpu/Cpu.h"
 
 TEST_CASE("Beq branches when the Zero flag is set") {
     nes_test::TestBus bus;

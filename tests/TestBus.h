@@ -1,8 +1,8 @@
 #ifndef NES_EMULATOR_CPP_TEST_BUS_H
 #define NES_EMULATOR_CPP_TEST_BUS_H
 
-#include "../src/Bus.h"
-#include "../src/ppu/Ppu.h"
+#include "../src/core/Bus.h"
+#include "../src/core/ppu/Ppu.h"
 
 namespace nes_test {
 

@@ -1,8 +1,8 @@
 #include "doctest.h"
 
-#include "../src/ppu/Ppu.h"
-#include "../src/ppu/Ppu_Addresses.h"
-#include "../src/Cartridge.h"
+#include "../src/core/ppu/Ppu.h"
+#include "../src/core/ppu/Ppu_Addresses.h"
+#include "../src/core/Cartridge.h"
 #include "TestRom.h"
 
 #include <vector>

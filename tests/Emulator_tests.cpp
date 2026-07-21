@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "../src/Emulator.h"
+#include "../src/core/Emulator.h"
 #include "TestRom.h"
 
 TEST_CASE("Emulator::LoadProgram copies bytes into RAM") {
