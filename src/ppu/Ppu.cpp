@@ -168,32 +168,27 @@ void Ppu::WriteRegister(std::uint16_t address, std::uint8_t value) {
 
 /// VRAM: the memory router
 std::uint8_t Ppu::ReadVram(const std::uint16_t address) const {
-    switch (const std::uint16_t addr = address & PpuAddresses::VRAM_MASK) {
-        case PpuAddresses::PATTERN_TABLE_START ... PpuAddresses::PATTERN_TABLE_END:
-            return cartridge_.GetMapper().ReadChr(addr);
-        case PpuAddresses::NAMETABLE_START ... PpuAddresses::NAMETABLE_MIRROR_END:
-            return nametable_ram[MirrorNametableAddr(addr)];
-        case PpuAddresses::PALETTE_START ... PpuAddresses::VRAM_MASK:
-            return palette_ram[PaletteIndex(addr)];
-        default:
-            return 0x00;
+    const std::uint16_t addr = address & PpuAddresses::VRAM_MASK;
+    if (addr <= PpuAddresses::PATTERN_TABLE_END) {
+        return cartridge_.GetMapper().ReadChr(addr);
     }
+    if (addr <= PpuAddresses::NAMETABLE_MIRROR_END) {
+        return nametable_ram[MirrorNametableAddr(addr)];
+    }
+    return palette_ram[PaletteIndex(addr)];
 }
 
 void Ppu::WriteVram(const std::uint16_t address, const std::uint8_t value) {
-    switch (const std::uint16_t addr = address & PpuAddresses::VRAM_MASK) {
-        case PpuAddresses::PATTERN_TABLE_START ... PpuAddresses::PATTERN_TABLE_END:
-            cartridge_.GetMapper().WriteChr(addr, value);
-            break;
-        case PpuAddresses::NAMETABLE_START ... PpuAddresses::NAMETABLE_MIRROR_END:
-            nametable_ram[MirrorNametableAddr(addr)] = value;
-            break;
-        case PpuAddresses::PALETTE_START ... PpuAddresses::VRAM_MASK:
-            palette_ram[PaletteIndex(addr)] = value & PpuAddresses::COLOR_MASK;
-            break;
-        default:
-            break;
+    const std::uint16_t addr = address & PpuAddresses::VRAM_MASK;
+    if (addr <= PpuAddresses::PATTERN_TABLE_END) {
+        cartridge_.GetMapper().WriteChr(addr, value);
+        return;
     }
+    if (addr <= PpuAddresses::NAMETABLE_MIRROR_END) {
+        nametable_ram[MirrorNametableAddr(addr)] = value;
+        return;
+    }
+    palette_ram[PaletteIndex(addr)] = value & PpuAddresses::COLOR_MASK;
 }
 
 /// Nametable mirroring
