@@ -1,7 +1,7 @@
 #include "doctest.h"
 
-#include "../src/core/mappers/Mapper000.h"
-#include "../src/core/Cartridge.h"
+#include "../../src/core/mappers/Mapper000.h"
+#include "../../src/core/Cartridge.h"
 
 #include <vector>
 

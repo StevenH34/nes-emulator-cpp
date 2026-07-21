@@ -53,43 +53,45 @@ add_executable(nes_emulator_tests
         tests/TestBus.h
         tests/TestBus.cpp
         tests/Bus_tests.cpp
-        tests/Cpu_tests.cpp
         tests/Emulator_tests.cpp
         tests/Cartridge_tests.cpp
-        tests/Mapper000_tests.cpp
-        tests/Ppu_tests.cpp
-        tests/sta_tests.cpp
-        tests/addressing_mode_tests.cpp
-        tests/lda_tests.cpp
-        tests/ldx_tests.cpp
-        tests/ldy_tests.cpp
-        tests/stx_tests.cpp
-        tests/sty_tests.cpp
-        tests/branch_jump_tests.cpp
-        tests/stack_tests.cpp
-        tests/compare_tests.cpp
-        tests/asl_tests.cpp
-        tests/lsr_tests.cpp
-        tests/rol_tests.cpp
-        tests/ror_tests.cpp
-        tests/adc_tests.cpp
-        tests/and_tests.cpp
-        tests/ora_tests.cpp
-        tests/eor_tests.cpp
-        tests/register_increment_tests.cpp
-        tests/register_transfer_tests.cpp
-        tests/flag_instruction_tests.cpp
-        tests/sbc_tests.cpp
-        tests/inc_tests.cpp
-        tests/dec_tests.cpp
-        tests/bit_tests.cpp
-        tests/nop_tests.cpp
         tests/test_nestest.cpp
+        tests/cpu/Cpu_tests.cpp
+        tests/cpu/addressing_mode_tests.cpp
+        tests/cpu/opcodes/sta_tests.cpp
+        tests/cpu/opcodes/lda_tests.cpp
+        tests/cpu/opcodes/ldx_tests.cpp
+        tests/cpu/opcodes/ldy_tests.cpp
+        tests/cpu/opcodes/stx_tests.cpp
+        tests/cpu/opcodes/sty_tests.cpp
+        tests/cpu/opcodes/branch_jump_tests.cpp
+        tests/cpu/opcodes/stack_tests.cpp
+        tests/cpu/opcodes/compare_tests.cpp
+        tests/cpu/opcodes/asl_tests.cpp
+        tests/cpu/opcodes/lsr_tests.cpp
+        tests/cpu/opcodes/rol_tests.cpp
+        tests/cpu/opcodes/ror_tests.cpp
+        tests/cpu/opcodes/adc_tests.cpp
+        tests/cpu/opcodes/and_tests.cpp
+        tests/cpu/opcodes/ora_tests.cpp
+        tests/cpu/opcodes/eor_tests.cpp
+        tests/cpu/opcodes/register_increment_tests.cpp
+        tests/cpu/opcodes/register_transfer_tests.cpp
+        tests/cpu/opcodes/flag_instruction_tests.cpp
+        tests/cpu/opcodes/sbc_tests.cpp
+        tests/cpu/opcodes/inc_tests.cpp
+        tests/cpu/opcodes/dec_tests.cpp
+        tests/cpu/opcodes/bit_tests.cpp
+        tests/cpu/opcodes/nop_tests.cpp
+        tests/ppu/Ppu_tests.cpp
+        tests/mappers/Mapper000_tests.cpp
 )
 
 target_link_libraries(nes_emulator_tests PRIVATE nes_core)
 
-target_include_directories(nes_emulator_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/external)
+target_include_directories(nes_emulator_tests PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/external
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 
 target_compile_definitions(nes_emulator_tests PRIVATE
         TEST_ROMS_DIR="${CMAKE_CURRENT_SOURCE_DIR}/tests/roms/")

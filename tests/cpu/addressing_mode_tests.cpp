@@ -1,8 +1,8 @@
 #include "doctest.h"
 
-#include "../src/core/Bus.h"
+#include "../../src/core/Bus.h"
 #include "TestBus.h"
-#include "../src/core/cpu/Cpu.h"
+#include "../../src/core/cpu/Cpu.h"
 
 TEST_CASE("AddressAbsolute combines low and high bytes in little-endian order") {
     nes_test::TestBus bus;
