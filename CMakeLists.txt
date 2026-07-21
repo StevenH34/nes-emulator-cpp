@@ -22,15 +22,19 @@ add_library(nes_core STATIC
         src/mappers/Mapper000.h
         src/ppu/Ppu.cpp
         src/ppu/Ppu.h
-        "src/ppu/Ppu_Addresses.h")
+        "src/ppu/Ppu_Addresses.h"
+        src/Window.cpp
+        src/Window.h)
 
 target_include_directories(nes_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 find_package(SDL3 CONFIG REQUIRED)
 
+target_link_libraries(nes_core PUBLIC SDL3::SDL3)
+
 add_executable(nes_emulator_cpp src/main.cpp)
 
-target_link_libraries(nes_emulator_cpp PRIVATE nes_core SDL3::SDL3)
+target_link_libraries(nes_emulator_cpp PRIVATE nes_core)
 
 add_custom_command(TARGET nes_emulator_cpp POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
