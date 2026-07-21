@@ -24,7 +24,9 @@ add_library(nes_core STATIC
         src/ppu/Ppu.h
         "src/ppu/Ppu_Addresses.h"
         src/Window.cpp
-        src/Window.h)
+        src/Window.h
+        src/NesApp.cpp
+        src/NesApp.h)
 
 target_include_directories(nes_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
