@@ -155,6 +155,14 @@ public:
     void AdvanceCycle();
     void SetNmiCallback(std::function<void()> callback) { nmi_callback_ = std::move(callback); }
 
+    /// V register methods
+    /// Each getter ANDs with the corresponding mask and shifts down to 0 if necessary
+    [[nodiscard]] std::uint32_t GetCoarseX() const { return static_cast<std::uint32_t>(v_register_ & MASK_COARSE_X); }
+    [[nodiscard]] std::uint32_t GetCoarseY() const { return static_cast<std::uint32_t>((v_register_ & MASK_COARSE_Y) >> 5); }
+    [[nodiscard]] std::uint32_t GetFineY() const { return static_cast<std::uint32_t>((v_register_ & MASK_FINE_Y) >> 12); }
+    [[nodiscard]] std::uint32_t GetNametable() const { return static_cast<std::uint32_t>((v_register_ & MASK_NAMETABLE) >> 10); }
+
+
 
 private:
     /// Will read CHR ROM from Cartridge
