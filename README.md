@@ -5,7 +5,12 @@
 - ✅ Added nestest to verify all 151 opcodes are working correctly.
 - ✅ Added PPU registers.
 - ✅ Added an SDL3 window and app loop.
-- Next step: implement PPU background/sprite rendering.
+- ✅ Added PPU background rendering (no scrolling yet).
+- Next step: implement PPU sprite rendering and controls.
+
+<p style="text-align: center;">
+  <img src="./images/img.png" alt="emulator picture" width="300" />
+</p>
 
 ### Building and Running
 
