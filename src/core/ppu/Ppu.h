@@ -36,13 +36,17 @@ public:
     static constexpr int COLORS_PER_PALETTE = 4;
     static constexpr int BYTES_PER_PIXEL = 4;
 
+    struct Color {
+        std::uint8_t r, g, b;
+    };
+
     /// NES PPU has 64 fixed colors
     /// 4 rows of 16 colors:
     ///   Row 0: Dark
     ///   Row 1: Medium
     ///   Row 2: Bright
     ///   Row 3: Pastel
-    static constexpr std::array<std::array<int, 3>, 64> PALETTE = {{
+    static constexpr std::array<Color, 64> PALETTE = {{
     // $00-$0F: Dark
     {84, 84, 84},   {0, 30, 116},   {8, 16, 144},   {48, 0, 136},
     {68, 0, 100},   {92, 0, 48},    {84, 4, 0},     {60, 24, 0},
@@ -116,6 +120,7 @@ public:
     [[nodiscard]] std::uint16_t GetT() const { return t_register_; }
     [[nodiscard]] std::uint8_t GetX() const { return x_register_; }
     [[nodiscard]] const std::vector<std::uint8_t>& GetFrameBuffer() const { return frame_buffer_; }
+    [[nodiscard]] static constexpr Color GetColor(const std::uint8_t palette_index) { return PALETTE[palette_index & 0x3F]; }
 
     /// Latch methods
     [[nodiscard]] bool IsLatchOn() const { return w_register_; }
@@ -200,7 +205,7 @@ public:
     [[nodiscard]] std::int32_t TilePixel(std::uint8_t tile_index, std::int32_t tile_row, std::int32_t pixel_in_tile) const;
     [[nodiscard]] std::int32_t TilePalette(std::int32_t nametable_address, std::int32_t tile_column, std::int32_t tile_row) const;
     [[nodiscard]] std::uint8_t PaletteColor(std::int32_t palette, std::int32_t color) const;
-    void SetPixel(std::int32_t x, std::int32_t y, std::uint8_t color);
+    void SetPixel(std::int32_t x, std::int32_t y, std::uint8_t palette_index);
 
     void CoarseXIncrement();
     void FineYIncrement();

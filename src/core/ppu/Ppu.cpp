@@ -416,14 +416,14 @@ std::uint8_t Ppu::PaletteColor(const std::int32_t palette, const std::int32_t co
 }
 
 /// Set pixel to the frame buffer.
-void Ppu::SetPixel(const std::int32_t x, const std::int32_t y, const std::uint8_t color) {
+void Ppu::SetPixel(const std::int32_t x, const std::int32_t y, const std::uint8_t palette_index) {
     // Look up the RGB color in the master palette.
-    const std::array<int, 3> rgb = PALETTE[static_cast<std::int32_t>(color) & 0x3F];
+    const auto [r, g, b] = GetColor(palette_index);
     const int offset = (y * WIDTH + x) * BYTES_PER_PIXEL;
     // Write to frame buffer in RGBA format.
-    frame_buffer_[offset] = static_cast<std::uint8_t>(rgb[0]);
-    frame_buffer_[offset + 1] = static_cast<std::uint8_t>(rgb[1]);
-    frame_buffer_[offset + 2] = static_cast<std::uint8_t>(rgb[2]);
+    frame_buffer_[offset] = r;
+    frame_buffer_[offset + 1] = g;
+    frame_buffer_[offset + 2] = b;
     frame_buffer_[offset + 3] = 0xFF; // Alpha channel - opaque
 }
 
