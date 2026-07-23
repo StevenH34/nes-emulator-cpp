@@ -90,7 +90,7 @@ public:
     static constexpr std::uint16_t PATTERN_TABLE_0 = 0x0000;
     static constexpr std::uint16_t PATTERN_TABLE_1 = 0x1000;
     /// Status register constant
-    static constexpr std::uint8_t FLAG_VBLANK = 0x08;
+    static constexpr std::uint8_t FLAG_VBLANK = 0x80;
     /// Scroll register constant
     static constexpr std::uint8_t FINE_BITS = 0x07;
     /// PPUMASK

@@ -255,7 +255,7 @@ void Ppu::Step() {
 /// Checks if we're on a visible scanline (between 0 and 239) and if we're at the start of a new scanline (cycle 0).
 /// Actual NES hardware renders each pixel across the scanline, but for simplicity we render the entire scanline at once.
 void Ppu::RenderIfVisible() {
-    if (scanline_ >= HEIGHT || cycle_ != 0) {
+    if (scanline_ < HEIGHT && cycle_ == 0) {
         RenderScanline(scanline_);
     }
 }
@@ -331,13 +331,13 @@ void Ppu::AdvanceCycle() {
 }
 
 /// The main rendering logic loop
-void Ppu::RenderScanline(std::int32_t y) {
+void Ppu::RenderScanline(const std::int32_t y) {
     for (int pixel = 0; pixel < WIDTH; ++pixel) {
         auto [background_color, background_palette] = IsShowBackground()
             ? BackgroundPixel(pixel)
             : std::pair<int, int>{0, 0};
 
-        SetPixel(pixel, y, PaletteColor(background_color, background_palette));
+        SetPixel(pixel, y, PaletteColor(background_palette, background_color));
     }
 }
 
