@@ -207,7 +207,6 @@ public:
     [[nodiscard]] std::uint8_t PaletteColor(std::int32_t palette, std::int32_t color) const;
     void SetPixel(std::int32_t x, std::int32_t y, std::uint8_t palette_index);
 
-    void CoarseXIncrement();
     void FineYIncrement();
 
     void CopyHorizontal();

@@ -279,16 +279,6 @@ void Ppu::UpdateScrollRegisters() {
     }
 }
 
-void Ppu::CoarseXIncrement() {
-    // If we're in the last column (31) clear coarse X and flip the horizontal nametable.
-    // If not, just add 1.
-    if (GetCoarseX() == MAX_COARSE_X) {
-        v_register_ = (v_register_ & CLEAR_COARSE_X) ^ FLIP_NAMETABLE_H;
-    } else {
-        v_register_ = v_register_ + 0x0001;
-    }
-}
-
 void Ppu::FineYIncrement() {
     if (GetFineY() < MAX_FINE_Y) {
         v_register_ = v_register_ + FINE_Y_UNIT;
