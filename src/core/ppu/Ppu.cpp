@@ -266,4 +266,102 @@ void Ppu::AdvanceCycle() {
         }
     }
 }
+
+/// The main rendering logic loop
+void Ppu::RenderScanline(std::int32_t y) {
+    for (int pixel = 0; pixel < WIDTH; ++pixel) {
+        auto [background_color, background_palette] = IsShowBackground()
+            ? BackgroundPixel(pixel)
+            : std::pair<int, int>{0, 0};
+
+        SetPixel(pixel, y, PaletteColor(background_color, background_palette));
+    }
+}
+
+/// The full background pixel pipeline. Returns a pair of (color, palette) for the pixel at the given x position.
+std::pair<int, int> Ppu::BackgroundPixel(const std::int32_t pixel) const {
+    // Get X pos of pixel we want to draw
+    const int scroll_x = static_cast<std::int32_t>(x_register_) + pixel;
+    // The tile we land on
+    int tile_column = GetCoarseX() + scroll_x / PIXELS_PER_TILE;
+    // The pixel within that tile
+    int pixel_in_tile = scroll_x % PIXELS_PER_TILE;
+    int nametable = GetNametable();
+
+    // A nametable has 32 columns (tiles 0-31)
+    // If we go over 32 columns we need to subtract 32 to stay within range
+    // The low bit of the nametable needs to be XOR by 1 to switch nametables
+    if (tile_column >= TILES_PER_ROW) {
+        tile_column -= TILES_PER_ROW;
+        nametable ^= 1; // Switch horizontal nametable
+    }
+
+    // The nametable starts at $2000 + nametable * 1024 bytes
+    // Each row stores 32 bytes
+    // The tile's position is: row * 32 + column
+    const int nametable_address = static_cast<std::int32_t>(PpuAddresses::NAMETABLE_START) + nametable * static_cast<std::int32_t>(PpuAddresses::NAMETABLE_SIZE);
+    const int tile_address = nametable_address + GetCoarseY() * TILES_PER_ROW + tile_column;
+    // Read the byte from VRAM to get the tile index in the pattern table
+    const int tile_index = ReadVram(static_cast<std::uint16_t>(tile_address));
+    // Using the tile index, fetch the pixel from the bitplane. This returns a value from 0-3.
+    // 0 means the pixel is transparent and the tile doesn't matter.
+    const int color = TilePixel(tile_index, GetFineY(), pixel_in_tile);
+    const int palette = color != 0 ? TilePalette(nametable_address, tile_column, GetCoarseY()) : 0;
+
+    return {color, palette};
+}
+
+/// Reading the bitplanes
+std::int32_t Ppu::TilePixel(const std::uint8_t tile_index, const std::int32_t tile_row, const std::int32_t pixel_in_tile) const {
+    // Each tile is 16 bytes in the pattern table
+    // 8 bytes for the low bitplane, 8 bytes for the high bitplane.
+    // Each byte is one row of the 8 pixel tile.
+    const int bitplane_address = static_cast<std::int32_t>(BackgroundPatternTable()) + static_cast<std::int32_t>(tile_index) * BYTES_PER_TILE + tile_row;
+    const std::uint8_t low_bitplane = ReadVram(static_cast<std::uint16_t>(bitplane_address));
+    const std::uint8_t high_bitplane = ReadVram(static_cast<std::uint16_t>(bitplane_address + BITPLANE_OFFSET));
+
+    const int bit = (PIXELS_PER_TILE - 1) - pixel_in_tile;
+    const std::int32_t low_bit = (low_bitplane >> bit) & 1;
+    const std::int32_t high_bit = (high_bitplane >> bit) & 1;
+    return (high_bit << 1) | low_bit;
+}
+
+/// The attribute table
+std::int32_t Ppu::TilePalette(const std::int32_t nametable_address, const std::int32_t tile_column, const std::int32_t tile_row) const {
+    // Each byte in the attribute table corresponds to a 4x4 block of tiles.
+    // Subdivided into 2x2 blocks of tiles, each block uses 2 bits to select a palette.
+    const int attribute_column = tile_column / 4;
+    const int attribute_row = tile_row / 4;
+    const int attribute_address = nametable_address + ATTRIBUTE_TABLE_OFFSET + attribute_row * (TILES_PER_ROW / 4) + attribute_column;
+    const std::uint8_t attribute_byte = ReadVram(static_cast<std::uint16_t>(attribute_address));
+
+    const int right = (tile_column / 2) & 1;
+    const int bottom = (tile_row / 2) & 1;
+    const int shift = (bottom * 2 + right) * 2;
+
+    return (attribute_byte >> shift) & (COLORS_PER_PALETTE - 1);
+}
+
+/// The final color
+/// Returns an index form 0-63 from the NES master palette.
+std::uint8_t Ppu::PaletteColor(const std::int32_t palette, const std::int32_t color) const {
+    // If color is 0 this means it's transparent.
+    if (color == 0) {
+        return ReadVram(PpuAddresses::PALETTE_START);
+    }
+    return ReadVram(static_cast<std::uint16_t>(PpuAddresses::PALETTE_START + palette * COLORS_PER_PALETTE + color));
+}
+
+/// Set pixel to the frame buffer.
+void Ppu::SetPixel(const std::int32_t x, const std::int32_t y, const std::uint8_t color) {
+    // Look up the RGB color in the master palette.
+    const std::array<int, 3> rgb = PALETTE[static_cast<std::int32_t>(color) & 0x3F];
+    const int offset = (y * WIDTH + x) * BYTES_PER_PIXEL;
+    // Write to frame buffer in RGBA format.
+    frame_buffer_[offset] = static_cast<std::uint8_t>(rgb[0]);
+    frame_buffer_[offset + 1] = static_cast<std::uint8_t>(rgb[1]);
+    frame_buffer_[offset + 2] = static_cast<std::uint8_t>(rgb[2]);
+    frame_buffer_[offset + 3] = 0xFF; // Alpha channel - opaque
+}
+
 } // namespace nes

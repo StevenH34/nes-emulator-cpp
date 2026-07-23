@@ -16,14 +16,26 @@ public:
     /// Display
     static constexpr int WIDTH  = 256;
     static constexpr int HEIGHT = 240;
-    /// 341 cycles per scanline
+    // 341 cycles per scanline
     static constexpr int CYCLES_PER_SCANLINE = 341;
-    /// 262 scanlines per frame, 240 visible, 22 vblank, 1 pre-render
+    // 262 scanlines per frame, 240 visible, 22 vblank, 1 pre-render
     static constexpr int SCANLINES_PER_FRAME = 262;
-    /// VBlank scanlines starts a line 241
+    // VBlank scanlines starts a line 241
     static constexpr int VBLANK_SCANLINE = 241;
-    /// Pre-render scanline is line 261, the last scanline of the frame
+    // Pre-render scanline is line 261, the last scanline of the frame
     static constexpr int PRE_RENDER_SCANLINE = 261;
+    /// Tile constants
+    // 32 tiles per row, 8 pixels per tile, 16 bytes per tile (2 bitplanes)
+    static constexpr int TILES_PER_ROW = 32;
+    static constexpr int PIXELS_PER_TILE = 8;
+    static constexpr int BYTES_PER_TILE = 16;
+    static constexpr int BITPLANE_OFFSET = 8;
+    // The attribute table starts 960 bytes into each nametable
+    static constexpr int ATTRIBUTE_TABLE_OFFSET = 960;
+    // 4 colors per palette and 4 bytes per pixel in the frame buffer
+    static constexpr int COLORS_PER_PALETTE = 4;
+    static constexpr int BYTES_PER_PIXEL = 4;
+
     /// NES PPU has 64 fixed colors
     /// 4 rows of 16 colors:
     ///   Row 0: Dark
@@ -157,12 +169,18 @@ public:
 
     /// V register methods
     /// Each getter ANDs with the corresponding mask and shifts down to 0 if necessary
-    [[nodiscard]] std::uint32_t GetCoarseX() const { return static_cast<std::uint32_t>(v_register_ & MASK_COARSE_X); }
-    [[nodiscard]] std::uint32_t GetCoarseY() const { return static_cast<std::uint32_t>((v_register_ & MASK_COARSE_Y) >> 5); }
-    [[nodiscard]] std::uint32_t GetFineY() const { return static_cast<std::uint32_t>((v_register_ & MASK_FINE_Y) >> 12); }
-    [[nodiscard]] std::uint32_t GetNametable() const { return static_cast<std::uint32_t>((v_register_ & MASK_NAMETABLE) >> 10); }
+    [[nodiscard]] int GetCoarseX() const { return v_register_ & MASK_COARSE_X; }
+    [[nodiscard]] int GetCoarseY() const { return (v_register_ & MASK_COARSE_Y) >> 5; }
+    [[nodiscard]] int GetFineY() const { return (v_register_ & MASK_FINE_Y) >> 12; }
+    [[nodiscard]] int GetNametable() const { return (v_register_ & MASK_NAMETABLE) >> 10; }
 
-
+    /// Rendering logic
+    void RenderScanline(std::int32_t y);
+    [[nodiscard]] std::pair<int, int> BackgroundPixel(std::int32_t pixel) const;
+    [[nodiscard]] std::int32_t TilePixel(std::uint8_t tile_index, std::int32_t tile_row, std::int32_t pixel_in_tile) const;
+    [[nodiscard]] std::int32_t TilePalette(std::int32_t nametable_address, std::int32_t tile_column, std::int32_t tile_row) const;
+    [[nodiscard]] std::uint8_t PaletteColor(std::int32_t palette, std::int32_t color) const;
+    void SetPixel(std::int32_t x, std::int32_t y, std::uint8_t color);
 
 private:
     /// Will read CHR ROM from Cartridge
