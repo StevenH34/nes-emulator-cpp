@@ -237,17 +237,80 @@ std::uint16_t Ppu::PaletteIndex(const std::uint16_t address) {
     return index;
 }
 
-/// Timing
-/// Advances one cycle. Every 341 cycles a scanline ends.
-void Ppu::Step() {
-    AdvanceCycle();
-}
-
 void Ppu::TriggerNmi() const {
     if (!nmi_callback_) {
         throw std::runtime_error("nmi_callback_ is null");
     }
     nmi_callback_();
+}
+
+/// Timing
+/// Advances one cycle. Every 341 cycles a scanline ends.
+void Ppu::Step() {
+    RenderIfVisible();
+    UpdateScrollRegisters();
+    AdvanceCycle();
+}
+
+/// Checks if we're on a visible scanline (between 0 and 239) and if we're at the start of a new scanline (cycle 0).
+/// Actual NES hardware renders each pixel across the scanline, but for simplicity we render the entire scanline at once.
+void Ppu::RenderIfVisible() {
+    if (scanline_ >= HEIGHT || cycle_ != 0) {
+        RenderScanline(scanline_);
+    }
+}
+
+/// If rendering is enabled, and we're on a visible scanline, update the scroll registers.
+void Ppu::UpdateScrollRegisters() {
+    if (!IsRenderingEnabled()) return;
+    if (scanline_ >= HEIGHT && scanline_ != PRE_RENDER_SCANLINE) return;
+
+    if (cycle_ == DOT_FINE_Y_INCREMENT) {
+        // Cycle 256: after the row advance one pixel row down
+        FineYIncrement();
+    } else if (cycle_ == DOT_COPY_HORIZONTAL) {
+        // Cycle 257: reset the horizontal position from t register inbetween scanline.
+        // This ensures each scanline will start from the same X column.
+        CopyHorizontal();
+    } else if (scanline_ == PRE_RENDER_SCANLINE && cycle_ >= DOT_COPY_VERTICAL_START && cycle_ <= DOT_COPY_VERTICAL_END) {
+        // Cycles 280-304: reset the vertical position from t register after the frame.
+        // This will ensure the next frame will start from the same Y row.
+        CopyVertical();
+    }
+}
+
+void Ppu::CoarseXIncrement() {
+    // If we're in the last column (31) clear coarse X and flip the horizontal nametable.
+    // If not, just add 1.
+    if (GetCoarseX() == MAX_COARSE_X) {
+        v_register_ = (v_register_ & CLEAR_COARSE_X) ^ FLIP_NAMETABLE_H;
+    } else {
+        v_register_ = v_register_ + 0x0001;
+    }
+}
+
+void Ppu::FineYIncrement() {
+    if (GetFineY() < MAX_FINE_Y) {
+        v_register_ = v_register_ + FINE_Y_UNIT;
+        return;
+    }
+    v_register_ = v_register_ & ~MASK_FINE_Y; // Clear fine Y
+    auto y = GetCoarseY();
+    if (y == MAX_COARSE_Y) {
+        v_register_ = v_register_ & ~MASK_COARSE_Y ^ FLIP_NAMETABLE_V;
+    } else if (y == 31) {
+        v_register_ = v_register_ & ~MASK_COARSE_Y;
+    } else {
+        v_register_ = v_register_ & ~MASK_COARSE_Y | (y + 0x0001) << 5;
+    }
+}
+
+void Ppu::CopyHorizontal() {
+    v_register_ = v_register_ & ~MASK_HORIZONTAL | t_register_ & MASK_HORIZONTAL;
+}
+
+void Ppu::CopyVertical() {
+    v_register_ = v_register_ & ~MASK_VERTICAL | t_register_ & MASK_VERTICAL;
 }
 
 void Ppu::AdvanceCycle() {

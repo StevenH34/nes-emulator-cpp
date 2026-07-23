@@ -72,6 +72,10 @@ public:
     static constexpr std::uint16_t MASK_COARSE_Y   = 0x03E0;
     static constexpr std::uint16_t MASK_NAMETABLE  = 0x0C00;
     static constexpr std::uint16_t MASK_FINE_Y     = 0x7000;
+    // Horizontal bits: coarse X + horizontal nametable bit
+    static constexpr std::uint16_t MASK_HORIZONTAL = 0x041F;
+    // Vertical bits: coarse Y + find Y + vertical nametable bit
+    static constexpr std::uint16_t MASK_VERTICAL   = 0x07BE0;
     /// Clears bits
     static constexpr std::uint16_t CLEAR_NAMETABLE = 0xF3FF;
     static constexpr std::uint16_t CLEAR_COARSE_X  = 0xFFE0;
@@ -92,6 +96,20 @@ public:
     /// PPUMASK
     static constexpr std::uint8_t FLAG_SHOW_BG = 0x08;
     static constexpr std::uint8_t FLAG_SHOW_SPRITES = 0x10;
+    /// Scanline points of modification
+    static constexpr std::int32_t DOT_FINE_Y_INCREMENT = 256;
+    static constexpr std::int32_t DOT_COPY_HORIZONTAL  = 257;
+    static constexpr std::int32_t DOT_COPY_VERTICAL_START = 280;
+    static constexpr std::int32_t DOT_COPY_VERTICAL_END   = 304;
+    /// Use to flip the nametable bit in v register via XOR
+    static constexpr std::uint16_t FLIP_NAMETABLE_H = 0X0400;
+    static constexpr std::uint16_t FLIP_NAMETABLE_V = 0X0800;
+    // Add to v register, increments fine y by 1
+    static constexpr std::uint16_t FINE_Y_UNIT = 0X1000;
+    /// Boundary values
+    static constexpr std::int32_t MAX_COARSE_X = 31;
+    static constexpr std::int32_t MAX_COARSE_Y = 29;
+    static constexpr std::int32_t MAX_FINE_Y = 7;
 
     // Getters
     [[nodiscard]] std::uint16_t GetV() const { return v_register_; }
@@ -161,6 +179,8 @@ public:
 
     /// Timing
     void Step();
+    void RenderIfVisible();
+    void UpdateScrollRegisters();
     [[nodiscard]] bool IsFrameComplete() const { return frame_complete_; }
     void ClearFrameComplete() { frame_complete_ = false; }
     void TriggerNmi() const;
@@ -181,6 +201,12 @@ public:
     [[nodiscard]] std::int32_t TilePalette(std::int32_t nametable_address, std::int32_t tile_column, std::int32_t tile_row) const;
     [[nodiscard]] std::uint8_t PaletteColor(std::int32_t palette, std::int32_t color) const;
     void SetPixel(std::int32_t x, std::int32_t y, std::uint8_t color);
+
+    void CoarseXIncrement();
+    void FineYIncrement();
+
+    void CopyHorizontal();
+    void CopyVertical();
 
 private:
     /// Will read CHR ROM from Cartridge
