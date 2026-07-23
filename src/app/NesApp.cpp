@@ -23,7 +23,7 @@ NesApp::NesApp(const std::string &rom_path)
 
         texture_ = SDL_CreateTexture(
             renderer_,
-            SDL_PIXELFORMAT_ARGB8888,
+            SDL_PIXELFORMAT_RGBA32,
             SDL_TEXTUREACCESS_STREAMING,
             nes::Ppu::WIDTH,
             nes::Ppu::HEIGHT

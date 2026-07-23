@@ -56,3 +56,6 @@ Icon
 
 ### VisualStudioCode ###
 .vscode/*
+
+# Test ROMs (copyrighted, don't commit)
+roms/
