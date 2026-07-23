@@ -325,20 +325,20 @@ void Ppu::RenderScanline(const std::int32_t y) {
     for (int pixel = 0; pixel < WIDTH; ++pixel) {
         auto [background_color, background_palette] = IsShowBackground()
             ? BackgroundPixel(pixel)
-            : std::pair<int, int>{0, 0};
+            : Pixel{0, 0};
 
         SetPixel(pixel, y, PaletteColor(background_palette, background_color));
     }
 }
 
-/// The full background pixel pipeline. Returns a pair of (color, palette) for the pixel at the given x position.
-std::pair<int, int> Ppu::BackgroundPixel(const std::int32_t pixel) const {
+/// The full background pixel pipeline. Returns the (color, palette) for the pixel at the given x position.
+Ppu::Pixel Ppu::BackgroundPixel(const std::int32_t pixel) const {
     // Get X pos of pixel we want to draw
-    const int scroll_x = static_cast<std::int32_t>(x_register_) + pixel;
+    const int scroll_x = x_register_ + pixel;
     // The tile we land on
     int tile_column = GetCoarseX() + scroll_x / PIXELS_PER_TILE;
     // The pixel within that tile
-    int pixel_in_tile = scroll_x % PIXELS_PER_TILE;
+    const int pixel_in_tile = scroll_x % PIXELS_PER_TILE;
     int nametable = GetNametable();
 
     // A nametable has 32 columns (tiles 0-31)
@@ -352,14 +352,15 @@ std::pair<int, int> Ppu::BackgroundPixel(const std::int32_t pixel) const {
     // The nametable starts at $2000 + nametable * 1024 bytes
     // Each row stores 32 bytes
     // The tile's position is: row * 32 + column
-    const int nametable_address = static_cast<std::int32_t>(PpuAddresses::NAMETABLE_START) + nametable * static_cast<std::int32_t>(PpuAddresses::NAMETABLE_SIZE);
-    const int tile_address = nametable_address + GetCoarseY() * TILES_PER_ROW + tile_column;
+    const int coarse_y = GetCoarseY();
+    const int nametable_address = PpuAddresses::NAMETABLE_START + nametable * PpuAddresses::NAMETABLE_SIZE;
+    const int tile_address = nametable_address + coarse_y * TILES_PER_ROW + tile_column;
     // Read the byte from VRAM to get the tile index in the pattern table
     const int tile_index = ReadVram(static_cast<std::uint16_t>(tile_address));
     // Using the tile index, fetch the pixel from the bitplane. This returns a value from 0-3.
     // 0 means the pixel is transparent and the tile doesn't matter.
     const int color = TilePixel(tile_index, GetFineY(), pixel_in_tile);
-    const int palette = color != 0 ? TilePalette(nametable_address, tile_column, GetCoarseY()) : 0;
+    const int palette = color != 0 ? TilePalette(nametable_address, tile_column, coarse_y) : 0;
 
     return {color, palette};
 }

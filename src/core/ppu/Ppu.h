@@ -200,8 +200,9 @@ public:
     [[nodiscard]] int GetNametable() const { return (v_register_ & MASK_NAMETABLE) >> 10; }
 
     /// Rendering logic
+    struct Pixel { int color; int palette; };
     void RenderScanline(std::int32_t y);
-    [[nodiscard]] std::pair<int, int> BackgroundPixel(std::int32_t pixel) const;
+    [[nodiscard]] Pixel BackgroundPixel(std::int32_t pixel) const;
     [[nodiscard]] std::int32_t TilePixel(std::uint8_t tile_index, std::int32_t tile_row, std::int32_t pixel_in_tile) const;
     [[nodiscard]] std::int32_t TilePalette(std::int32_t nametable_address, std::int32_t tile_column, std::int32_t tile_row) const;
     [[nodiscard]] std::uint8_t PaletteColor(std::int32_t palette, std::int32_t color) const;
