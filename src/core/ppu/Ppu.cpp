@@ -320,64 +320,82 @@ void Ppu::AdvanceCycle() {
     }
 }
 
-/// The main rendering logic loop
+/// The main rendering logic loop.
+/// Walks the scanline one tile at a time (not one pixel at a time): everything that's
+/// constant for the whole scanline (coarse Y, fine Y, base coarse X/nametable) is read
+/// once up front, and everything that's constant per-tile (bitplanes, palette) is fetched
+/// once per 8 pixels via FetchBackgroundTile rather than once per pixel.
 void Ppu::RenderScanline(const std::int32_t y) {
-    for (int pixel = 0; pixel < WIDTH; ++pixel) {
-        auto [background_color, background_palette] = IsShowBackground()
-            ? BackgroundPixel(pixel)
-            : Pixel{0, 0};
+    if (!IsShowBackground()) {
+        for (int pixel = 0; pixel < WIDTH; ++pixel) {
+            SetPixel(pixel, y, PaletteColor(0, 0));
+        }
+        return;
+    }
 
-        SetPixel(pixel, y, PaletteColor(background_palette, background_color));
+    const int fine_y = GetFineY();
+    const int coarse_y = GetCoarseY();
+    const int base_coarse_x = GetCoarseX();
+    const int base_nametable = GetNametable();
+
+    int pixel = 0;
+    while (pixel < WIDTH) {
+        // Get X pos of the tile we land on
+        const int scroll_x = x_register_ + pixel;
+        int tile_column = base_coarse_x + scroll_x / PIXELS_PER_TILE;
+        int nametable = base_nametable;
+
+        // A nametable has 32 columns (tiles 0-31)
+        // If we go over 32 columns we need to subtract 32 to stay within range
+        // The low bit of the nametable needs to be XOR by 1 to switch nametables
+        if (tile_column >= TILES_PER_ROW) {
+            tile_column -= TILES_PER_ROW;
+            nametable ^= 1; // Switch horizontal nametable
+        }
+
+        const BackgroundTile tile = FetchBackgroundTile(tile_column, nametable, coarse_y, fine_y);
+
+        // Draw every pixel that falls within this tile before moving to the next one.
+        for (int pixel_in_tile = scroll_x % PIXELS_PER_TILE; pixel_in_tile < PIXELS_PER_TILE && pixel < WIDTH; ++pixel_in_tile, ++pixel) {
+            const auto [color, palette] = ExtractBackgroundPixel(tile, pixel_in_tile);
+            SetPixel(pixel, y, PaletteColor(palette, color));
+        }
     }
 }
 
-/// The full background pixel pipeline. Returns the (color, palette) for the pixel at the given x position.
-Ppu::Pixel Ppu::BackgroundPixel(const std::int32_t pixel) const {
-    // Get X pos of pixel we want to draw
-    const int scroll_x = x_register_ + pixel;
-    // The tile we land on
-    int tile_column = GetCoarseX() + scroll_x / PIXELS_PER_TILE;
-    // The pixel within that tile
-    const int pixel_in_tile = scroll_x % PIXELS_PER_TILE;
-    int nametable = GetNametable();
-
-    // A nametable has 32 columns (tiles 0-31)
-    // If we go over 32 columns we need to subtract 32 to stay within range
-    // The low bit of the nametable needs to be XOR by 1 to switch nametables
-    if (tile_column >= TILES_PER_ROW) {
-        tile_column -= TILES_PER_ROW;
-        nametable ^= 1; // Switch horizontal nametable
-    }
-
+/// Fetches the tile index, both pattern-table bitplanes, and the resolved palette for one
+/// tile. This is the only place background rendering touches VRAM, and it happens once per
+/// tile rather than once per pixel.
+Ppu::BackgroundTile Ppu::FetchBackgroundTile(const int tile_column, const int nametable, const int coarse_y, const int fine_y) const {
     // The nametable starts at $2000 + nametable * 1024 bytes
     // Each row stores 32 bytes
     // The tile's position is: row * 32 + column
-    const int coarse_y = GetCoarseY();
     const int nametable_address = PpuAddresses::NAMETABLE_START + nametable * PpuAddresses::NAMETABLE_SIZE;
     const int tile_address = nametable_address + coarse_y * TILES_PER_ROW + tile_column;
     // Read the byte from VRAM to get the tile index in the pattern table
     const int tile_index = ReadVram(static_cast<std::uint16_t>(tile_address));
-    // Using the tile index, fetch the pixel from the bitplane. This returns a value from 0-3.
-    // 0 means the pixel is transparent and the tile doesn't matter.
-    const int color = TilePixel(tile_index, GetFineY(), pixel_in_tile);
-    const int palette = color != 0 ? TilePalette(nametable_address, tile_column, coarse_y) : 0;
 
-    return {color, palette};
-}
-
-/// Reading the bitplanes
-std::int32_t Ppu::TilePixel(const std::uint8_t tile_index, const std::int32_t tile_row, const std::int32_t pixel_in_tile) const {
     // Each tile is 16 bytes in the pattern table
     // 8 bytes for the low bitplane, 8 bytes for the high bitplane.
     // Each byte is one row of the 8 pixel tile.
-    const int bitplane_address = static_cast<std::int32_t>(BackgroundPatternTable()) + static_cast<std::int32_t>(tile_index) * BYTES_PER_TILE + tile_row;
+    const int bitplane_address = static_cast<std::int32_t>(BackgroundPatternTable()) + tile_index * BYTES_PER_TILE + fine_y;
     const std::uint8_t low_bitplane = ReadVram(static_cast<std::uint16_t>(bitplane_address));
     const std::uint8_t high_bitplane = ReadVram(static_cast<std::uint16_t>(bitplane_address + BITPLANE_OFFSET));
 
+    const int palette = TilePalette(nametable_address, tile_column, coarse_y);
+
+    return {low_bitplane, high_bitplane, palette};
+}
+
+/// Reads one pixel out of an already-fetched tile's bitplanes. Pure bit math, no VRAM access.
+Ppu::Pixel Ppu::ExtractBackgroundPixel(const BackgroundTile& tile, const int pixel_in_tile) {
     const int bit = (PIXELS_PER_TILE - 1) - pixel_in_tile;
-    const std::int32_t low_bit = (low_bitplane >> bit) & 1;
-    const std::int32_t high_bit = (high_bitplane >> bit) & 1;
-    return (high_bit << 1) | low_bit;
+    const int low_bit = (tile.low_bitplane >> bit) & 1;
+    const int high_bit = (tile.high_bitplane >> bit) & 1;
+    // 0 means the pixel is transparent and the tile's palette doesn't matter.
+    const int color = (high_bit << 1) | low_bit;
+    const int palette = color != 0 ? tile.palette : 0;
+    return {color, palette};
 }
 
 /// The attribute table

@@ -201,9 +201,12 @@ public:
 
     /// Rendering logic
     struct Pixel { int color; int palette; };
+    /// The two bitplane rows and resolved palette for one tile, shared by all 8 pixels
+    /// in that tile so VRAM only needs to be read once per tile instead of once per pixel.
+    struct BackgroundTile { std::uint8_t low_bitplane; std::uint8_t high_bitplane; int palette; };
     void RenderScanline(std::int32_t y);
-    [[nodiscard]] Pixel BackgroundPixel(std::int32_t pixel) const;
-    [[nodiscard]] std::int32_t TilePixel(std::uint8_t tile_index, std::int32_t tile_row, std::int32_t pixel_in_tile) const;
+    [[nodiscard]] BackgroundTile FetchBackgroundTile(int tile_column, int nametable, int coarse_y, int fine_y) const;
+    [[nodiscard]] static Pixel ExtractBackgroundPixel(const BackgroundTile& tile, int pixel_in_tile);
     [[nodiscard]] std::int32_t TilePalette(std::int32_t nametable_address, std::int32_t tile_column, std::int32_t tile_row) const;
     [[nodiscard]] std::uint8_t PaletteColor(std::int32_t palette, std::int32_t color) const;
     void SetPixel(std::int32_t x, std::int32_t y, std::uint8_t palette_index);
