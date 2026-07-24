@@ -260,7 +260,7 @@ private:
     /// V (15 bits): Scroll position during rendering. Holds VRAM address during VBlank.
     /// T (15 bits): Specifies the starting coarse-x scroll for the next scanline and the starting y scroll for the screen.
     ///     Holds the scroll or VRAM address before transferring it to v during VBlank.
-    /// X (3 bits): the pixel offest within a tile.
+    /// X (3 bits): the pixel offset within a tile.
     ///     The fine-x position of the current scroll, used during rendering alongside v.
     /// W (1 bit): Toggles on each write to either PPUSCROLL or PPUADDR, indicating first or second write.
     ///     Clears on reads of PPUSTATUS.

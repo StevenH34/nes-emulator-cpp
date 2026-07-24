@@ -211,7 +211,7 @@ void Ppu::WriteVram(const std::uint16_t address, const std::uint8_t value) {
 std::uint16_t Ppu::MirrorNametableAddr(const std::uint16_t address) const {
     const std::uint16_t relative = address - PpuAddresses::NAMETABLE_START & PpuAddresses::NAMETABLE_AREA_MASK;
     const std::uint16_t nametable = relative / PpuAddresses::NAMETABLE_SIZE;
-    const std::uint16_t offest = relative % PpuAddresses::NAMETABLE_SIZE;
+    const std::uint16_t offset = relative % PpuAddresses::NAMETABLE_SIZE;
     const auto mirror = cartridge_.GetMirroring();
 
     const std::uint16_t physical = [&]() -> std::uint16_t {
@@ -229,7 +229,7 @@ std::uint16_t Ppu::MirrorNametableAddr(const std::uint16_t address) const {
         }
     }();
 
-    return physical * PpuAddresses::NAMETABLE_SIZE + offest;
+    return physical * PpuAddresses::NAMETABLE_SIZE + offset;
 }
 
 /// Palette mirroring
@@ -494,16 +494,16 @@ std::tuple<int32_t, int32_t, bool> Ppu::SpritePixel(const std::int32_t x, const 
     for (int i = 0; i < SPRITES_TOTAL; ++i ) {
         if (count >= MAX_SPRITES_PER_SCANLINE) break;
 
-        const int offest = i * SPRITE_BYTES;
-        const int sprite_y = static_cast<std::int32_t>(oam_[offest]) + SPRITE_Y_OFFSET;
+        const int offset = i * SPRITE_BYTES;
+        const int sprite_y = static_cast<std::int32_t>(oam_[offset]) + SPRITE_Y_OFFSET;
         if (!(y >= sprite_y && y < sprite_y + PIXELS_PER_TILE)) continue;
         count += 1;
 
-        const int sprite_x = static_cast<std::int32_t>(oam_[offest + 3]);
+        const int sprite_x = static_cast<std::int32_t>(oam_[offset + 3]);
         if (!(x >= sprite_x && x < sprite_x + PIXELS_PER_TILE)) continue;
 
-        const std::uint8_t sprite_tile = oam_[offest + 1];
-        const std::uint8_t sprite_attribute = oam_[offest + 2];
+        const std::uint8_t sprite_tile = oam_[offset + 1];
+        const std::uint8_t sprite_attribute = oam_[offset + 2];
 
         int row = y - sprite_y;
         int column = x - sprite_x;
