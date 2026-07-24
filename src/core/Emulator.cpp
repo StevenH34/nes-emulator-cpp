@@ -10,14 +10,10 @@ Emulator::Emulator(std::string path)
     cpu_.Reset();
 }
 
-void Emulator::Run() {
-    std::puts("Hello, World");
-}
-
 int Emulator::Step() {
     // Ticks the CPU forward
-    auto cycles = cpu_.Step();
-    for (size_t i = 0; i < cycles * 3; ++i) {
+    const int cycles = cpu_.Step();
+    for (std::size_t i = 0; i < cycles * 3; ++i) {
         ppu_.Step();
     }
     return cycles;
@@ -34,7 +30,7 @@ const std::vector<std::uint8_t>& Emulator::RunFrame() {
 }
 
 void Emulator::LoadProgram(const std::vector<std::uint8_t> &program, const std::uint16_t start_address) {
-    auto address = start_address;
+    std::uint16_t address = start_address;
 
     for (const auto byte : program) {
         bus_.WriteCpu(address, byte);

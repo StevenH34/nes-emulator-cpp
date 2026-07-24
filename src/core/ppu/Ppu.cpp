@@ -131,8 +131,12 @@ void Ppu::WriteData(const std::uint8_t value) {
 
 /// OAMDATA ($2004): Sprites
 void Ppu::WriteOamData(const std::uint8_t value) {
-    oam[oam_addr_register_] = value;
+    oam_[oam_addr_register_] = value;
     oam_addr_register_ += 1;
+}
+
+void Ppu::OamDma(std::array<std::uint8_t, 256> data) {
+    std::ranges::copy(data, oam_.begin());
 }
 
 /// Register router
@@ -185,9 +189,9 @@ std::uint8_t Ppu::ReadVram(const std::uint16_t address) const {
         return cartridge_.GetMapper().ReadChr(addr);
     }
     if (addr <= PpuAddresses::NAMETABLE_MIRROR_END) {
-        return nametable_ram[MirrorNametableAddr(addr)];
+        return nametable_ram_[MirrorNametableAddr(addr)];
     }
-    return palette_ram[PaletteIndex(addr)];
+    return palette_ram_[PaletteIndex(addr)];
 }
 
 void Ppu::WriteVram(const std::uint16_t address, const std::uint8_t value) {
@@ -197,10 +201,10 @@ void Ppu::WriteVram(const std::uint16_t address, const std::uint8_t value) {
         return;
     }
     if (addr <= PpuAddresses::NAMETABLE_MIRROR_END) {
-        nametable_ram[MirrorNametableAddr(addr)] = value;
+        nametable_ram_[MirrorNametableAddr(addr)] = value;
         return;
     }
-    palette_ram[PaletteIndex(addr)] = value & PpuAddresses::COLOR_MASK;
+    palette_ram_[PaletteIndex(addr)] = value & PpuAddresses::COLOR_MASK;
 }
 
 /// Nametable mirroring
@@ -314,6 +318,7 @@ void Ppu::AdvanceCycle() {
             if (isNmiEnabled()) TriggerNmi();
         } else if (scanline_ == PRE_RENDER_SCANLINE) {
             ClearVblank();
+            ClearSprite0Hit();
         } else if (scanline_ >= SCANLINES_PER_FRAME) {
             scanline_ = 0;
         }
@@ -360,6 +365,10 @@ void Ppu::RenderScanline(const std::int32_t y) {
             const auto [color, palette] = ExtractBackgroundPixel(tile, pixel_in_tile);
             SetPixel(pixel, y, PaletteColor(palette, color));
         }
+
+        if (IsShowBackground() && IsShowSprites()) {
+            CheckSprite0Hit(y);
+        }
     }
 }
 
@@ -387,6 +396,57 @@ Ppu::BackgroundTile Ppu::FetchBackgroundTile(const int tile_column, const int na
     return {low_bitplane, high_bitplane, palette};
 }
 
+void Ppu::CheckSprite0Hit(std::int32_t y) {
+    if ((status_register_ & FLAG_SPRITE_0_HIT) != 0) return;
+    const int sprite_y = oam_[0] + SPRITE_Y_OFFSET;
+    if (y < sprite_y || y >= sprite_y + PIXELS_PER_TILE) return;
+
+    const std::uint8_t sprite_tile = oam_[1];
+    const std::uint8_t sprite_attribute = oam_[2];
+    const auto sprite_x = static_cast<std::int32_t>(oam_[3]);
+
+    auto row = y - sprite_y;
+    if ((sprite_attribute & 0x80) != 0) {
+        row = PIXELS_PER_TILE - 1 - row; // Vertical flip
+    }
+
+    for (int col = 0; col < PIXELS_PER_TILE; ++col) {
+        const int screen_x = sprite_x + col;
+        if (screen_x >= 255) continue;
+
+        const int flip_col = ((sprite_attribute & 0x40) != 0) ? PIXELS_PER_TILE - 1 - col : col; // Horizontal flip
+        const std::uint8_t sprite_color = SpriteTilePixel(sprite_tile, row, flip_col);
+        if (sprite_color == 0) continue;
+
+        auto [background_color, background_palette] = BackgroundPixelAt(screen_x, y);
+        if (background_color == 0) continue;
+
+        SetSprite0Hit();
+        return;
+    }
+}
+
+/// Resolves the background pixel under an arbitrary screen coordinate, fetching the tile via
+/// VRAM. Used by sprite-0-hit detection, which needs to sample outside the tile currently being
+/// drawn by RenderScanline.
+Ppu::Pixel Ppu::BackgroundPixelAt(const std::int32_t screen_x, const std::int32_t /*y*/) const {
+    const int fine_y = GetFineY();
+    const int coarse_y = GetCoarseY();
+    const int base_coarse_x = GetCoarseX();
+    const int base_nametable = GetNametable();
+
+    const int scroll_x = x_register_ + screen_x;
+    int tile_column = base_coarse_x + scroll_x / PIXELS_PER_TILE;
+    int nametable = base_nametable;
+    if (tile_column >= TILES_PER_ROW) {
+        tile_column -= TILES_PER_ROW;
+        nametable ^= 1;
+    }
+
+    const BackgroundTile tile = FetchBackgroundTile(tile_column, nametable, coarse_y, fine_y);
+    return ExtractBackgroundPixel(tile, scroll_x % PIXELS_PER_TILE);
+}
+
 /// Reads one pixel out of an already-fetched tile's bitplanes. Pure bit math, no VRAM access.
 Ppu::Pixel Ppu::ExtractBackgroundPixel(const BackgroundTile& tile, const int pixel_in_tile) {
     const int bit = (PIXELS_PER_TILE - 1) - pixel_in_tile;
@@ -396,6 +456,17 @@ Ppu::Pixel Ppu::ExtractBackgroundPixel(const BackgroundTile& tile, const int pix
     const int color = (high_bit << 1) | low_bit;
     const int palette = color != 0 ? tile.palette : 0;
     return {color, palette};
+}
+
+std::int32_t Ppu::SpriteTilePixel(const std::uint8_t tile_index, const std::int32_t tile_row, const std::int32_t pixel_in_tile) const {
+    const auto bitplane_address = static_cast<std::int32_t>(SpritePatternTable()) + static_cast<std::int32_t>(tile_index) * BYTES_PER_TILE + tile_row;
+    const auto low_bitplane = ReadVram(static_cast<std::uint16_t>(bitplane_address));
+    const auto high_bitplane = ReadVram(static_cast<std::uint16_t>(bitplane_address + BITPLANE_OFFSET));
+
+    const auto bit = (PIXELS_PER_TILE - 1) - pixel_in_tile;
+    const auto low_bit = (low_bitplane >> bit) & 1;
+    const auto high_bit = (high_bitplane >> bit) & 1;
+    return (high_bit << 1) | low_bit;
 }
 
 /// The attribute table

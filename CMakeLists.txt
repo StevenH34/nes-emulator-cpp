@@ -26,7 +26,9 @@ add_library(nes_core STATIC
         src/app/Window.cpp
         src/app/Window.h
         src/app/NesApp.cpp
-        src/app/NesApp.h)
+        src/app/NesApp.h
+        src/core/Controller.cpp
+        src/core/Controller.h)
 
 target_include_directories(nes_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/src/core)
 
@@ -53,6 +55,7 @@ add_executable(nes_emulator_tests
         tests/TestBus.h
         tests/TestBus.cpp
         tests/Bus_tests.cpp
+        tests/Controller_tests.cpp
         tests/Emulator_tests.cpp
         tests/Cartridge_tests.cpp
         tests/test_nestest.cpp
