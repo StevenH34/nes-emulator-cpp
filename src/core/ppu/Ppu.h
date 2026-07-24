@@ -117,6 +117,14 @@ public:
     static constexpr std::int32_t MAX_FINE_Y = 7;
     /// Sprite constants
     static constexpr std::int32_t SPRITE_Y_OFFSET = 1;
+    static constexpr std::uint8_t SPRITE_PALETTE_MASK = 0x03;
+    static constexpr std::uint8_t SPRITE_BEHIND_BACKGROUND = 0x20;
+    static constexpr std::uint8_t SPRITE_FLIP_H = 0x40;
+    static constexpr std::uint8_t SPRITE_FLIP_V = 0x80;
+    static constexpr int SPRITE_PALETTE_OFFSET = 4;
+    static constexpr int MAX_SPRITES_PER_SCANLINE = 8;
+    static constexpr int SPRITES_TOTAL = 64;
+    static constexpr int SPRITE_BYTES = 4;
 
     // Getters
     [[nodiscard]] std::uint16_t GetV() const { return v_register_; }
@@ -217,8 +225,11 @@ public:
     [[nodiscard]] Pixel BackgroundPixelAt(std::int32_t screen_x, std::int32_t y) const;
     [[nodiscard]] std::int32_t TilePalette(std::int32_t nametable_address, std::int32_t tile_column, std::int32_t tile_row) const;
     [[nodiscard]] std::uint8_t PaletteColor(std::int32_t palette, std::int32_t color) const;
+    [[nodiscard]] std::uint8_t SpritePaletteColor(std::int32_t palette, std::int32_t color) const;
     void SetPixel(std::int32_t x, std::int32_t y, std::uint8_t palette_index);
     [[nodiscard]] std::int32_t SpriteTilePixel(std::uint8_t tile_index, std::int32_t tile_row, std::int32_t pixel_in_tile) const;
+    [[nodiscard]] std::tuple<int32_t, int32_t, bool> SpritePixel(std::int32_t x, std::int32_t y) const;
+
 
     void FineYIncrement();
 
