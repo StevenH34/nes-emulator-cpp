@@ -5,8 +5,11 @@
 - ✅ Added nestest to verify all 151 opcodes are working correctly.
 - ✅ Added PPU registers.
 - ✅ Added an SDL3 window and app loop.
-- ✅ Added PPU background rendering (no scrolling yet).
-- Next step: implement PPU sprite rendering and controls.
+- ✅ Added PPU background rendering and scrolling.
+- ✅ Added controls.
+- ✅ Added PPU sprite rendering.
+- TODO: Add APU
+- TODO: Add Mapper001 support.
 
 <p style="text-align: center;">
   <img src="./images/img.png" alt="emulator picture" width="300" />
