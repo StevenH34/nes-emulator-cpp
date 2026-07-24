@@ -332,8 +332,9 @@ void Ppu::AdvanceCycle() {
 /// once per 8 pixels via FetchBackgroundTile rather than once per pixel.
 void Ppu::RenderScanline(const std::int32_t y) {
     if (!IsShowBackground()) {
+        const std::uint8_t backdrop_color = PaletteColor(0, 0);
         for (int pixel = 0; pixel < WIDTH; ++pixel) {
-            std::uint8_t palette_index = PaletteColor(0, 0);
+            std::uint8_t palette_index = backdrop_color;
             if (IsShowSprites()) {
                 const auto [sprite_color, sprite_palette, behind_background] = SpritePixel(pixel, y);
                 if (sprite_color != 0) {
