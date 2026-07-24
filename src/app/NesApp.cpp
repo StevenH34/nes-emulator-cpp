@@ -1,6 +1,5 @@
 #include "NesApp.h"
 
-#include <cstdio>
 #include <stdexcept>
 
 namespace nes_app {
@@ -85,10 +84,8 @@ void NesApp::HandleEvents() {
             if (auto it = KEY_MAP.find(event.key.scancode); it != KEY_MAP.end()) {
                 if (event.type == SDL_EVENT_KEY_DOWN) {
                     emulator_.GetBus().GetController1().Press(it->second);
-                    std::printf("Press   button=0x%02X scancode=%d\n", it->second, event.key.scancode);
                 } else {
                     emulator_.GetBus().GetController1().Release(it->second);
-                    std::printf("Release button=0x%02X scancode=%d\n", it->second, event.key.scancode);
                 }
             }
         }
