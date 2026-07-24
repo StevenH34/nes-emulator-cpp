@@ -383,10 +383,10 @@ void Ppu::RenderScanline(const std::int32_t y) {
 
             SetPixel(pixel, y, palette_index);
         }
+    }
 
-        if (IsShowBackground() && IsShowSprites()) {
-            CheckSprite0Hit(y);
-        }
+    if (IsShowSprites()) {
+        CheckSprite0Hit(y);
     }
 }
 
