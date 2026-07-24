@@ -221,11 +221,13 @@ public:
     struct BackgroundTile { std::uint8_t low_bitplane; std::uint8_t high_bitplane; int palette; };
     void RenderScanline(std::int32_t y);
     [[nodiscard]] BackgroundTile FetchBackgroundTile(int tile_column, int nametable, int coarse_y, int fine_y) const;
+    [[nodiscard]] static int ColorFromBitplanes(std::uint8_t low_bitplane, std::uint8_t high_bitplane, int pixel_in_tile);
     [[nodiscard]] static Pixel ExtractBackgroundPixel(const BackgroundTile& tile, int pixel_in_tile);
     [[nodiscard]] Pixel BackgroundPixelAt(std::int32_t screen_x, std::int32_t y) const;
     [[nodiscard]] std::int32_t TilePalette(std::int32_t nametable_address, std::int32_t tile_column, std::int32_t tile_row) const;
     [[nodiscard]] std::uint8_t PaletteColor(std::int32_t palette, std::int32_t color) const;
     [[nodiscard]] std::uint8_t SpritePaletteColor(std::int32_t palette, std::int32_t color) const;
+    [[nodiscard]] std::uint8_t ResolvePaletteColor(std::int32_t palette_group_offset, std::int32_t palette, std::int32_t color) const;
     void SetPixel(std::int32_t x, std::int32_t y, std::uint8_t palette_index);
     [[nodiscard]] std::int32_t SpriteTilePixel(std::uint8_t tile_index, std::int32_t tile_row, std::int32_t pixel_in_tile) const;
     [[nodiscard]] std::tuple<int32_t, int32_t, bool> SpritePixel(std::int32_t x, std::int32_t y) const;

@@ -465,13 +465,19 @@ Ppu::Pixel Ppu::BackgroundPixelAt(const std::int32_t screen_x, const std::int32_
     return ExtractBackgroundPixel(tile, scroll_x % PIXELS_PER_TILE);
 }
 
+/// Combines the two bitplane bytes at a given pixel position into a 2-bit color index.
+/// Shared by background and sprite pixel fetching.
+int Ppu::ColorFromBitplanes(const std::uint8_t low_bitplane, const std::uint8_t high_bitplane, const int pixel_in_tile) {
+    const int bit = (PIXELS_PER_TILE - 1) - pixel_in_tile;
+    const int low_bit = (low_bitplane >> bit) & 1;
+    const int high_bit = (high_bitplane >> bit) & 1;
+    return (high_bit << 1) | low_bit;
+}
+
 /// Reads one pixel out of an already-fetched tile's bitplanes. Pure bit math, no VRAM access.
 Ppu::Pixel Ppu::ExtractBackgroundPixel(const BackgroundTile& tile, const int pixel_in_tile) {
-    const int bit = (PIXELS_PER_TILE - 1) - pixel_in_tile;
-    const int low_bit = (tile.low_bitplane >> bit) & 1;
-    const int high_bit = (tile.high_bitplane >> bit) & 1;
     // 0 means the pixel is transparent and the tile's palette doesn't matter.
-    const int color = (high_bit << 1) | low_bit;
+    const int color = ColorFromBitplanes(tile.low_bitplane, tile.high_bitplane, pixel_in_tile);
     const int palette = color != 0 ? tile.palette : 0;
     return {color, palette};
 }
@@ -481,10 +487,7 @@ std::int32_t Ppu::SpriteTilePixel(const std::uint8_t tile_index, const std::int3
     const auto low_bitplane = ReadVram(static_cast<std::uint16_t>(bitplane_address));
     const auto high_bitplane = ReadVram(static_cast<std::uint16_t>(bitplane_address + BITPLANE_OFFSET));
 
-    const auto bit = (PIXELS_PER_TILE - 1) - pixel_in_tile;
-    const auto low_bit = (low_bitplane >> bit) & 1;
-    const auto high_bit = (high_bitplane >> bit) & 1;
-    return (high_bit << 1) | low_bit;
+    return ColorFromBitplanes(low_bitplane, high_bitplane, static_cast<int>(pixel_in_tile));
 }
 
 /// Find the first opaque sprite pixel on the scanline.
@@ -544,18 +547,19 @@ std::int32_t Ppu::TilePalette(const std::int32_t nametable_address, const std::i
 /// The final color
 /// Returns an index form 0-63 from the NES master palette.
 std::uint8_t Ppu::PaletteColor(const std::int32_t palette, const std::int32_t color) const {
+    return ResolvePaletteColor(0, palette, color);
+}
+
+std::uint8_t Ppu::SpritePaletteColor(const std::int32_t palette, const std::int32_t color) const {
+    return ResolvePaletteColor(SPRITE_PALETTE_OFFSET, palette, color);
+}
+
+std::uint8_t Ppu::ResolvePaletteColor(const std::int32_t palette_group_offset, const std::int32_t palette, const std::int32_t color) const {
     // If color is 0 this means it's transparent.
     if (color == 0) {
         return ReadVram(PpuAddresses::PALETTE_START);
     }
-    return ReadVram(static_cast<std::uint16_t>(PpuAddresses::PALETTE_START + palette * COLORS_PER_PALETTE + color));
-}
-
-std::uint8_t Ppu::SpritePaletteColor(const std::int32_t palette, const std::int32_t color) const {
-    if (color == 0) {
-        return ReadVram(PpuAddresses::PALETTE_START);
-    }
-    return ReadVram(static_cast<std::uint16_t>(PpuAddresses::PALETTE_START + (SPRITE_PALETTE_OFFSET + palette) * COLORS_PER_PALETTE + color));
+    return ReadVram(static_cast<std::uint16_t>(PpuAddresses::PALETTE_START + (palette_group_offset + palette) * COLORS_PER_PALETTE + color));
 }
 
 /// Set pixel to the frame buffer.
