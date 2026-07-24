@@ -5,7 +5,6 @@
 
 #include "Emulator.h"
 #include "Window.h"
-#include <stdexcept>
 
 namespace nes_app {
 

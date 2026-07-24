@@ -1,6 +1,7 @@
 #include "NesApp.h"
 
 #include <cstdio>
+#include <stdexcept>
 
 namespace nes_app {
 
