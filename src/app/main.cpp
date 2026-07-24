@@ -1,11 +1,13 @@
 #include "NesApp.h"
 
 #include <cstdio>
+#include <cstdlib>
+#include <exception>
 
-int main(const int argc, char* argv[]) {
+int main(int argc, char* argv[]) {
     if (argc < 2) {
         std::fprintf(stderr, "Usage: %s <rom_path>\n", argv[0]);
-        return 1;
+        return EXIT_FAILURE;
     }
 
     try {
@@ -14,8 +16,8 @@ int main(const int argc, char* argv[]) {
     }
     catch (const std::exception& e) {
         std::fprintf(stderr, "Error: %s\n", e.what());
-        return 1;
+        return EXIT_FAILURE;
     }
 
-    return 0;
+    return EXIT_SUCCESS;
 }
