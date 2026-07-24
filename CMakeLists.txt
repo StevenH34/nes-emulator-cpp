@@ -55,6 +55,7 @@ add_executable(nes_emulator_tests
         tests/TestBus.h
         tests/TestBus.cpp
         tests/Bus_tests.cpp
+        tests/Controller_tests.cpp
         tests/Emulator_tests.cpp
         tests/Cartridge_tests.cpp
         tests/test_nestest.cpp
