@@ -7,7 +7,7 @@ namespace nes {
 Ppu::Ppu(Cartridge& cartridge) : cartridge_(cartridge) {}
 
 /// Latch methods
-/// Returns 1 or 32 depending on bit 2 of PPUCTRL.
+/// Advances v by 1 or 32 (per VramIncrement, based on bit 2 of PPUCTRL).
 /// The & VRAM_MASK makes sure v doesn't exceed 14 bits.
 void Ppu::IncrementVRegister() {
     v_register_ = v_register_ + VramIncrement() & PpuAddresses::VRAM_MASK;
@@ -430,6 +430,8 @@ void Ppu::CheckSprite0Hit(std::int32_t y) {
 
     for (int col = 0; col < PIXELS_PER_TILE; ++col) {
         const int screen_x = sprite_x + col;
+        // Hardware quirk: sprite 0 hit never fires for the pixel at x=255, even though it's
+        // otherwise a valid on-screen column.
         if (screen_x >= 255) continue;
 
         const int flip_col = ((sprite_attribute & 0x40) != 0) ? PIXELS_PER_TILE - 1 - col : col; // Horizontal flip
