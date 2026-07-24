@@ -38,7 +38,7 @@ void Bus::WriteCpu(const std::uint16_t address, const std::uint8_t value) {
         ppu_.WriteRegister(address, value);
     }
     if (address == OAM_DMA) {
-        // OamDma(value);
+        OamDma(value);
     }
     if (address == CONTROLLER_1) {
         // When the game writes to $4016, the strobe goes to both controllers.
@@ -57,4 +57,13 @@ void Bus::WriteRam(const std::uint16_t address, const std::uint8_t value) {
     ram_[mirrored_address] = value;
 }
 
+/// Copy 256 bytes from CPU page $XX00 to PPU OAM memory.
+void Bus::OamDma(const std::uint8_t page) const {
+    const auto base = static_cast<std::uint16_t>(page) << 8;
+    std::array<std::uint8_t, 256> data{};
+    for (std::size_t i = 0; i < 256; ++i) {
+        data[i] = ReadCpu(static_cast<std::uint16_t>(base) + i);
+    }
+    ppu_.OamDma(data);
+}
 } // nes

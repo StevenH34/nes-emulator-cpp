@@ -14,17 +14,18 @@ class Bus {
 public:
     explicit Bus(Cartridge& cartridge, Ppu& ppu);
     ~Bus() = default;
+    Bus(const Bus&) = delete;
+    Bus& operator=(const Bus&) = delete;
 
     Controller& GetController1() const { return controller_1_; }
     Controller& GetController2() const { return controller_2_; }
-
-    Bus(const Bus&) = delete;
-    Bus& operator=(const Bus&) = delete;
 
     [[nodiscard]] std::uint8_t ReadCpu( std::uint16_t address) const;
     void WriteCpu(std::uint16_t address, std::uint8_t value);
     [[nodiscard]] std::uint8_t ReadRam(std::uint16_t address) const;
     void WriteRam(std::uint16_t address, std::uint8_t value);
+
+    void OamDma(std::uint8_t page) const;
 
 private:
     // std::vector<std::uint8_t> ram_;

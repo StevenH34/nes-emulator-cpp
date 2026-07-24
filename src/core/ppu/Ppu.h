@@ -95,6 +95,7 @@ public:
     static constexpr std::uint16_t PATTERN_TABLE_1 = 0x1000;
     /// Status register constant
     static constexpr std::uint8_t FLAG_VBLANK = 0x80;
+    static constexpr std::uint8_t FLAG_SPRITE_0_HIT = 0x40;
     /// Scroll register constant
     static constexpr std::uint8_t FINE_BITS = 0x07;
     /// PPUMASK
@@ -114,6 +115,8 @@ public:
     static constexpr std::int32_t MAX_COARSE_X = 31;
     static constexpr std::int32_t MAX_COARSE_Y = 29;
     static constexpr std::int32_t MAX_FINE_Y = 7;
+    /// Sprite constants
+    static constexpr std::int32_t SPRITE_Y_OFFSET = 1;
 
     // Getters
     [[nodiscard]] std::uint16_t GetV() const { return v_register_; }
@@ -121,6 +124,9 @@ public:
     [[nodiscard]] std::uint8_t GetX() const { return x_register_; }
     [[nodiscard]] const std::vector<std::uint8_t>& GetFrameBuffer() const { return frame_buffer_; }
     [[nodiscard]] static constexpr Color GetColor(const std::uint8_t palette_index) { return PALETTE[palette_index & 0x3F]; }
+
+    void SetSprite0Hit() { status_register_ |= FLAG_SPRITE_0_HIT; }
+    void ClearSprite0Hit() { status_register_ &= ~FLAG_SPRITE_0_HIT; }
 
     /// Latch methods
     [[nodiscard]] bool IsLatchOn() const { return w_register_; }
@@ -167,8 +173,9 @@ public:
     void WriteOamAddr(const std::uint8_t value) {oam_addr_register_ = value;}
 
     /// OAMDATA ($2004): Sprites
-    [[nodiscard]] std::uint8_t ReadOamData() const { return oam[oam_addr_register_]; }
+    [[nodiscard]] std::uint8_t ReadOamData() const { return oam_[oam_addr_register_]; }
     void WriteOamData(std::uint8_t value);
+    void OamDma(std::array<std::uint8_t, 256> data);
 
     /// Register router
     std::uint8_t ReadRegister(std::uint16_t address);
@@ -207,14 +214,18 @@ public:
     void RenderScanline(std::int32_t y);
     [[nodiscard]] BackgroundTile FetchBackgroundTile(int tile_column, int nametable, int coarse_y, int fine_y) const;
     [[nodiscard]] static Pixel ExtractBackgroundPixel(const BackgroundTile& tile, int pixel_in_tile);
+    [[nodiscard]] Pixel BackgroundPixelAt(std::int32_t screen_x, std::int32_t y) const;
     [[nodiscard]] std::int32_t TilePalette(std::int32_t nametable_address, std::int32_t tile_column, std::int32_t tile_row) const;
     [[nodiscard]] std::uint8_t PaletteColor(std::int32_t palette, std::int32_t color) const;
     void SetPixel(std::int32_t x, std::int32_t y, std::uint8_t palette_index);
+    [[nodiscard]] std::int32_t SpriteTilePixel(std::uint8_t tile_index, std::int32_t tile_row, std::int32_t pixel_in_tile) const;
 
     void FineYIncrement();
 
     void CopyHorizontal();
     void CopyVertical();
+
+    void CheckSprite0Hit(std::int32_t y);
 
 private:
     /// Will read CHR ROM from Cartridge
@@ -226,9 +237,9 @@ private:
     /// @frame_buffer_ 256 x 240 pixels, 4 bytes per pixel (RGBA)
     std::vector<std::uint8_t> frame_buffer_ = std::vector<std::uint8_t>(WIDTH * HEIGHT * 4, 0);
     std::uint8_t vram_buffer_{0};
-    std::vector<std::uint8_t> nametable_ram = std::vector<std::uint8_t>(PpuAddresses::NAMETABLE_RAM_SIZE, 0);
-    std::vector<std::uint8_t> palette_ram = std::vector<std::uint8_t>(PpuAddresses::PALETTE_RAM_SIZE, 0);
-    std::vector<std::uint8_t> oam = std::vector<std::uint8_t>(PpuAddresses::OAM_SIZE, 0);
+    std::vector<std::uint8_t> nametable_ram_ = std::vector<std::uint8_t>(PpuAddresses::NAMETABLE_RAM_SIZE, 0);
+    std::vector<std::uint8_t> palette_ram_ = std::vector<std::uint8_t>(PpuAddresses::PALETTE_RAM_SIZE, 0);
+    std::vector<std::uint8_t> oam_ = std::vector<std::uint8_t>(PpuAddresses::OAM_SIZE, 0);
     std::uint8_t ctrl_register_{0};
     std::uint8_t mask_register_{0};
     std::uint8_t status_register_{0};
