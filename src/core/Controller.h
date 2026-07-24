@@ -20,8 +20,9 @@ public:
     static constexpr std::uint8_t BUTTON_DOWN   = 0x20;
     static constexpr std::uint8_t BUTTON_LEFT   = 0x40;
     static constexpr std::uint8_t BUTTON_RIGHT  = 0x80;
-
+    // Turns a bit on with OR
     void Press(const std::uint8_t button) { buttons_ |= button; }
+    // Turns a bit off with complement AND
     void Release(const std::uint8_t button) { buttons_ &= ~button; }
     std::uint8_t Read();
     void Write(std::uint8_t value);

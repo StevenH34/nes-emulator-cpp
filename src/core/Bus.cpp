@@ -17,6 +17,15 @@ std::uint8_t Bus::ReadCpu(const std::uint16_t address) const {
     if (address >= PRG_ROM_START && address <= PRG_ROM_END) {
         return cartridge_.GetMapper().ReadPrg(address);
     }
+    if (address == CONTROLLER_1) {
+        return controller_1_.Read();
+    }
+    if (address == CONTROLLER_2) {
+        return controller_2_.Read();
+    }
+    if (address >= PRG_ROM_START && address <= PRG_ROM_END) {
+        return cartridge_.GetMapper().ReadPrg(address);
+    }
 
     return 0;
 }
@@ -27,6 +36,14 @@ void Bus::WriteCpu(const std::uint16_t address, const std::uint8_t value) {
     }
     if (address >= PPU_START && address <= PPU_MIRROR_END) {
         ppu_.WriteRegister(address, value);
+    }
+    if (address == OAM_DMA) {
+        // OamDma(value);
+    }
+    if (address == CONTROLLER_1) {
+        // When the game writes to $4016, the strobe goes to both controllers.
+        controller_1_.Write(value);
+        controller_2_.Write(value);
     }
 }
 
