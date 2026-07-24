@@ -4,6 +4,11 @@
 
 namespace nes_app {
 
+namespace {
+// NTSC NES PPU runs at ~60.0988 Hz.
+constexpr double kFrameTimeMs = 1000.0 / 60.0988;
+}  // namespace
+
 NesApp::SdlLifetime::SdlLifetime() {
     if (!SDL_Init(SDL_INIT_VIDEO)) {
         throw std::runtime_error("SDL_Init failed: " + std::string(SDL_GetError()));
@@ -66,9 +71,10 @@ void NesApp::Run() {
         SDL_RenderTexture(renderer_, texture_, nullptr, nullptr);
         SDL_RenderPresent(renderer_);
 
-        // 60 FPS
-        if (const std::uint64_t elapsed_time = SDL_GetTicks() - frame_start; elapsed_time < 16) {
-            SDL_Delay(static_cast<std::uint32_t>(16 - elapsed_time));
+        // ~60 FPS (NTSC)
+        if (const double elapsed_time = static_cast<double>(SDL_GetTicks() - frame_start);
+            elapsed_time < kFrameTimeMs) {
+            SDL_Delay(static_cast<std::uint32_t>(kFrameTimeMs - elapsed_time));
         }
     }
 }
