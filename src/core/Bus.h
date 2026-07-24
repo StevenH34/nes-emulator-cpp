@@ -14,6 +14,10 @@ class Bus {
 public:
     explicit Bus(Cartridge& cartridge, Ppu& ppu);
     ~Bus() = default;
+
+    Controller& GetController1() const { return controller_1_; }
+    Controller& GetController2() const { return controller_2_; }
+
     Bus(const Bus&) = delete;
     Bus& operator=(const Bus&) = delete;
 

@@ -1,5 +1,7 @@
 #include "NesApp.h"
 
+#include <cstdio>
+
 namespace nes_app {
 
 NesApp::SdlLifetime::SdlLifetime() {
@@ -65,8 +67,7 @@ void NesApp::Run() {
         SDL_RenderPresent(renderer_);
 
         // 60 FPS
-        const std::uint64_t elapsed_time = SDL_GetTicks() - frame_start;
-        if (elapsed_time < 16) {
+        if (const std::uint64_t elapsed_time = SDL_GetTicks() - frame_start; elapsed_time < 16) {
             SDL_Delay(static_cast<std::uint32_t>(16 - elapsed_time));
         }
     }
@@ -74,12 +75,23 @@ void NesApp::Run() {
 
 void NesApp::HandleEvents() {
     SDL_Event event;
-    // TODO: Add key events
     while (SDL_PollEvent(&event)) {
         if (event.type == SDL_EVENT_QUIT ||
             (event.type == SDL_EVENT_KEY_DOWN && event.key.scancode == SDL_SCANCODE_ESCAPE)) {
             running_ = false;
         }
+        if (event.type == SDL_EVENT_KEY_DOWN || event.type == SDL_EVENT_KEY_UP) {
+            if (auto it = KEY_MAP.find(event.key.scancode); it != KEY_MAP.end()) {
+                if (event.type == SDL_EVENT_KEY_DOWN) {
+                    emulator_.GetBus().GetController1().Press(it->second);
+                    std::printf("Press   button=0x%02X scancode=%d\n", it->second, event.key.scancode);
+                } else {
+                    emulator_.GetBus().GetController1().Release(it->second);
+                    std::printf("Release button=0x%02X scancode=%d\n", it->second, event.key.scancode);
+                }
+            }
+        }
     }
 }
-}
+
+} // namespace nes
