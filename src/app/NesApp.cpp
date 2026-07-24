@@ -1,8 +1,13 @@
 #include "NesApp.h"
 
-#include <cstdio>
+#include <stdexcept>
 
 namespace nes_app {
+
+namespace {
+// NTSC NES PPU runs at ~60.0988 Hz.
+constexpr double kFrameTimeMs = 1000.0 / 60.0988;
+}  // namespace
 
 NesApp::SdlLifetime::SdlLifetime() {
     if (!SDL_Init(SDL_INIT_VIDEO)) {
@@ -45,10 +50,16 @@ NesApp::~NesApp() {
     Cleanup();
 }
 
-void NesApp::Cleanup() const {
+void NesApp::Cleanup() {
     // TODO: Destroy audio
-    if (texture_) SDL_DestroyTexture(texture_);
-    if (renderer_) SDL_DestroyRenderer(renderer_);
+    if (texture_) {
+        SDL_DestroyTexture(texture_);
+        texture_ = nullptr;
+    }
+    if (renderer_) {
+        SDL_DestroyRenderer(renderer_);
+        renderer_ = nullptr;
+    }
 }
 
 void NesApp::Run() {
@@ -66,9 +77,10 @@ void NesApp::Run() {
         SDL_RenderTexture(renderer_, texture_, nullptr, nullptr);
         SDL_RenderPresent(renderer_);
 
-        // 60 FPS
-        if (const std::uint64_t elapsed_time = SDL_GetTicks() - frame_start; elapsed_time < 16) {
-            SDL_Delay(static_cast<std::uint32_t>(16 - elapsed_time));
+        // ~60 FPS (NTSC)
+        if (const double elapsed_time = static_cast<double>(SDL_GetTicks() - frame_start);
+            elapsed_time < kFrameTimeMs) {
+            SDL_Delay(static_cast<std::uint32_t>(kFrameTimeMs - elapsed_time));
         }
     }
 }
@@ -84,10 +96,8 @@ void NesApp::HandleEvents() {
             if (auto it = KEY_MAP.find(event.key.scancode); it != KEY_MAP.end()) {
                 if (event.type == SDL_EVENT_KEY_DOWN) {
                     emulator_.GetBus().GetController1().Press(it->second);
-                    std::printf("Press   button=0x%02X scancode=%d\n", it->second, event.key.scancode);
                 } else {
                     emulator_.GetBus().GetController1().Release(it->second);
-                    std::printf("Release button=0x%02X scancode=%d\n", it->second, event.key.scancode);
                 }
             }
         }

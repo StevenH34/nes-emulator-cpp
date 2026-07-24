@@ -5,7 +5,6 @@
 
 #include "Emulator.h"
 #include "Window.h"
-#include <stdexcept>
 
 namespace nes_app {
 
@@ -45,7 +44,7 @@ private:
     };
 
     void HandleEvents();
-    void Cleanup() const;
+    void Cleanup();
 
     nes::Emulator emulator_;
     bool running_{true};
