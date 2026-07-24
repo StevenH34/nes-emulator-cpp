@@ -50,10 +50,16 @@ NesApp::~NesApp() {
     Cleanup();
 }
 
-void NesApp::Cleanup() const {
+void NesApp::Cleanup() {
     // TODO: Destroy audio
-    if (texture_) SDL_DestroyTexture(texture_);
-    if (renderer_) SDL_DestroyRenderer(renderer_);
+    if (texture_) {
+        SDL_DestroyTexture(texture_);
+        texture_ = nullptr;
+    }
+    if (renderer_) {
+        SDL_DestroyRenderer(renderer_);
+        renderer_ = nullptr;
+    }
 }
 
 void NesApp::Run() {

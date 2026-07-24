@@ -44,7 +44,7 @@ private:
     };
 
     void HandleEvents();
-    void Cleanup() const;
+    void Cleanup();
 
     nes::Emulator emulator_;
     bool running_{true};
