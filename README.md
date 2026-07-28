@@ -19,6 +19,21 @@
   <img src="./images/img.png" alt="emulator picture" width="300" />
 </p>
 
+### Controls
+
+| NES Button | Keyboard          |
+|------------|-------------------|
+| A          | Z                 |
+| B          | X                 |
+| Select     | Left/Right Shift  |
+| Start      | Enter             |
+| Up         | Up Arrow          |
+| Down       | Down Arrow        |
+| Left       | Left Arrow        |
+| Right      | Right Arrow       |
+
+Press `ESC` to exit the emulator.
+
 ### Building and Running
 
 Rendering uses SDL3, installed via [vcpkg](https://github.com/microsoft/vcpkg).
@@ -39,11 +54,9 @@ Rendering uses SDL3, installed via [vcpkg](https://github.com/microsoft/vcpkg).
 
 SDL3 itself does **not** need to be installed manually — it's declared in `vcpkg.json` and vcpkg installs it automatically on first configure.
 
-On Windows, run these from a "Developer Command Prompt/PowerShell for VS" (or after running `vcvars64.bat`) so `cl.exe` and `ninja` are on `PATH`. On macOS, a normal terminal is fine as long as the Command Line Tools are installed.
-
 Configure Build dir: `cmake --preset default` \
-Build app target: `cmake --build cmake-build-debug --target nes_emulator_cpp` \
-Run Emulator: `./cmake-build-debug/nes_emulator_cpp <rom_path>` (e.g. `./cmake-build-debug/nes_emulator_cpp tests/roms/nestest.nes`)
+Build app target: `cmake --build cmake-build-debug --target nes_emulator` \
+Run Emulator: `./cmake-build-debug/nes_emulator <rom_path>`
 
 ### Testing
 
