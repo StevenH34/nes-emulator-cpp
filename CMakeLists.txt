@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 4.2)
-project(nes_emulator_cpp)
+cmake_minimum_required(VERSION 3.21)
+project(nes_emulator)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -22,7 +22,7 @@ add_library(nes_core STATIC
         src/core/mappers/Mapper000.h
         src/core/ppu/Ppu.cpp
         src/core/ppu/Ppu.h
-        "src/core/ppu/Ppu_Addresses.h"
+        src/core/ppu/Ppu_Addresses.h
         src/app/Window.cpp
         src/app/Window.h
         src/app/NesApp.cpp
@@ -30,20 +30,20 @@ add_library(nes_core STATIC
         src/core/Controller.cpp
         src/core/Controller.h)
 
-target_include_directories(nes_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/src/core)
+target_include_directories(nes_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/core)
 
 find_package(SDL3 CONFIG REQUIRED)
 
 target_link_libraries(nes_core PUBLIC SDL3::SDL3)
 
-add_executable(nes_emulator_cpp src/app/main.cpp)
+add_executable(nes_emulator src/app/main.cpp)
 
-target_link_libraries(nes_emulator_cpp PRIVATE nes_core)
+target_link_libraries(nes_emulator PRIVATE nes_core)
 
-add_custom_command(TARGET nes_emulator_cpp POST_BUILD
+add_custom_command(TARGET nes_emulator POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "$<TARGET_RUNTIME_DLLS:nes_emulator_cpp>"
-        "$<TARGET_FILE_DIR:nes_emulator_cpp>"
+        "$<TARGET_RUNTIME_DLLS:nes_emulator>"
+        "$<TARGET_FILE_DIR:nes_emulator>"
         COMMAND_EXPAND_LISTS)
 
 enable_testing()
@@ -98,6 +98,12 @@ target_include_directories(nes_emulator_tests PRIVATE
 
 target_compile_definitions(nes_emulator_tests PRIVATE
         TEST_ROMS_DIR="${CMAKE_CURRENT_SOURCE_DIR}/tests/roms/")
+
+add_custom_command(TARGET nes_emulator_tests POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "$<TARGET_RUNTIME_DLLS:nes_emulator_tests>"
+        "$<TARGET_FILE_DIR:nes_emulator_tests>"
+        COMMAND_EXPAND_LISTS)
 
 add_test(NAME nes_emulator_tests COMMAND nes_emulator_tests)
 
