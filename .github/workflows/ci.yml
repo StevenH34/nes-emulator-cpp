@@ -26,6 +26,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y \
             build-essential git make pkg-config ninja-build \
+            gcc-14 g++-14 \
             autoconf autoconf-archive automake libtool libltdl-dev \
             gnome-desktop-testing libasound2-dev libpulse-dev libaudio-dev libfribidi-dev \
             libjack-dev libsndio-dev \
@@ -54,8 +55,11 @@ jobs:
           fi
           "${{ env.VCPKG_ROOT }}/bootstrap-vcpkg.sh"
 
+      # ubuntu-latest's default g++ (13) predates <print>/std::print support (added in GCC 14's
+      # libstdc++); point our own project sources at g++-14. SDL3 is a C library built by vcpkg
+      # with the default system compiler above, so this doesn't affect that step.
       - name: Configure (asan preset)
-        run: cmake --preset asan
+        run: cmake --preset asan -DCMAKE_C_COMPILER=gcc-14 -DCMAKE_CXX_COMPILER=g++-14
 
       - name: Build tests
         run: cmake --build cmake-build-asan --target nes_emulator_tests
