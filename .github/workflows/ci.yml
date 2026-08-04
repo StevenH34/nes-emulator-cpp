@@ -15,8 +15,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Ninja
-        run: sudo apt-get update && sudo apt-get install -y ninja-build
+      # SDL3's default vcpkg features on x64-linux (dbus, ibus, wayland, x11) pull in a chunk
+      # of the Linux desktop stack. Some of it (dbus, libsystemd, libxcrypt, libmount, ...) is
+      # built from source by vcpkg and needs autotools/meson on the PATH; the rest (X11/Wayland/
+      # EGL/audio headers) is expected to already be present on the system and is linked against
+      # directly, not built by vcpkg.
+      - name: Install native build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            ninja-build pkg-config \
+            autoconf autoconf-archive automake libtool libltdl-dev \
+            libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxi-dev \
+            libxinerama-dev libxxf86vm-dev libxss-dev libxft-dev \
+            libwayland-dev wayland-protocols libxkbcommon-dev \
+            libibus-1.0-dev libdbus-1-dev \
+            libgl1-mesa-dev libegl1-mesa-dev \
+            libasound2-dev libpulse-dev
 
       - name: Cache vcpkg
         uses: actions/cache@v4
