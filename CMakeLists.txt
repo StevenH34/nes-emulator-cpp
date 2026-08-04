@@ -5,6 +5,23 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+option(NES_ENABLE_SANITIZERS "Build with AddressSanitizer + UndefinedBehaviorSanitizer instrumentation" OFF)
+
+add_library(nes_sanitizers INTERFACE)
+if(NES_ENABLE_SANITIZERS)
+    if(MSVC)
+        message(WARNING "NES_ENABLE_SANITIZERS is not supported with MSVC; ignoring")
+    else()
+        target_compile_options(nes_sanitizers INTERFACE
+                -fsanitize=address,undefined
+                -fno-sanitize-recover=all
+                -fno-omit-frame-pointer
+                -g)
+        target_link_options(nes_sanitizers INTERFACE
+                -fsanitize=address,undefined)
+    endif()
+endif()
+
 add_library(nes_core STATIC
         src/core/Emulator.cpp
         src/core/Emulator.h
@@ -34,17 +51,19 @@ target_include_directories(nes_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/core)
 
 find_package(SDL3 CONFIG REQUIRED)
 
-target_link_libraries(nes_core PUBLIC SDL3::SDL3)
+target_link_libraries(nes_core PUBLIC SDL3::SDL3 nes_sanitizers)
 
 add_executable(nes_emulator src/app/main.cpp)
 
 target_link_libraries(nes_emulator PRIVATE nes_core)
 
-add_custom_command(TARGET nes_emulator POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "$<TARGET_RUNTIME_DLLS:nes_emulator>"
-        "$<TARGET_FILE_DIR:nes_emulator>"
-        COMMAND_EXPAND_LISTS)
+if(WIN32)
+    add_custom_command(TARGET nes_emulator POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "$<TARGET_RUNTIME_DLLS:nes_emulator>"
+            "$<TARGET_FILE_DIR:nes_emulator>"
+            COMMAND_EXPAND_LISTS)
+endif()
 
 enable_testing()
 
@@ -99,11 +118,13 @@ target_include_directories(nes_emulator_tests PRIVATE
 target_compile_definitions(nes_emulator_tests PRIVATE
         TEST_ROMS_DIR="${CMAKE_CURRENT_SOURCE_DIR}/tests/roms/")
 
-add_custom_command(TARGET nes_emulator_tests POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "$<TARGET_RUNTIME_DLLS:nes_emulator_tests>"
-        "$<TARGET_FILE_DIR:nes_emulator_tests>"
-        COMMAND_EXPAND_LISTS)
+if(WIN32)
+    add_custom_command(TARGET nes_emulator_tests POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "$<TARGET_RUNTIME_DLLS:nes_emulator_tests>"
+            "$<TARGET_FILE_DIR:nes_emulator_tests>"
+            COMMAND_EXPAND_LISTS)
+endif()
 
 add_test(NAME nes_emulator_tests COMMAND nes_emulator_tests)
 

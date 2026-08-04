@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+env:
+  VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+
+jobs:
+  sanitizers:
+    name: ASan/UBSan tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Ninja
+        run: sudo apt-get update && sudo apt-get install -y ninja-build
+
+      - name: Cache vcpkg
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ env.VCPKG_ROOT }}
+            !${{ env.VCPKG_ROOT }}/buildtrees
+            !${{ env.VCPKG_ROOT }}/downloads
+            !${{ env.VCPKG_ROOT }}/packages
+          key: vcpkg-${{ runner.os }}-${{ hashFiles('vcpkg.json') }}
+          restore-keys: |
+            vcpkg-${{ runner.os }}-
+
+      - name: Bootstrap vcpkg
+        run: |
+          if [ ! -f "${{ env.VCPKG_ROOT }}/vcpkg" ]; then
+            git clone https://github.com/microsoft/vcpkg "${{ env.VCPKG_ROOT }}"
+          fi
+          "${{ env.VCPKG_ROOT }}/bootstrap-vcpkg.sh"
+
+      - name: Configure (asan preset)
+        run: cmake --preset asan
+
+      - name: Build tests
+        run: cmake --build cmake-build-asan --target nes_emulator_tests
+
+      - name: Run tests under ASan/UBSan
+        working-directory: cmake-build-asan
+        env:
+          ASAN_OPTIONS: detect_leaks=1
+          UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
+        run: ./nes_emulator_tests
