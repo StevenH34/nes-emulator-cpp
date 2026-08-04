@@ -15,23 +15,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # SDL3's default vcpkg features on x64-linux (dbus, ibus, wayland, x11) pull in a chunk
-      # of the Linux desktop stack. Some of it (dbus, libsystemd, libxcrypt, libmount, ...) is
-      # built from source by vcpkg and needs autotools/meson on the PATH; the rest (X11/Wayland/
-      # EGL/audio headers) is expected to already be present on the system and is linked against
-      # directly, not built by vcpkg.
+      # SDL3's default vcpkg features on x64-linux (dbus, ibus, wayland, x11) pull in a chunk of
+      # the Linux desktop stack. Some of it (dbus, libsystemd, libxcrypt, libmount, ...) is built
+      # from source by vcpkg and needs autotools on the PATH; SDL3 itself is built by vcpkg too,
+      # but links its X11/Wayland/EGL/audio backends directly against system dev packages rather
+      # than vcpkg-built ones. Package list below is SDL's own documented Linux build-dependency
+      # list (https://wiki.libsdl.org/SDL3/README-linux), plus autotools for the vcpkg-built pieces.
       - name: Install native build dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            ninja-build pkg-config \
+            build-essential git make pkg-config ninja-build \
             autoconf autoconf-archive automake libtool libltdl-dev \
-            libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxi-dev \
-            libxinerama-dev libxxf86vm-dev libxss-dev libxft-dev \
-            libwayland-dev wayland-protocols libxkbcommon-dev \
-            libibus-1.0-dev libdbus-1-dev \
-            libgl1-mesa-dev libegl1-mesa-dev \
-            libasound2-dev libpulse-dev
+            gnome-desktop-testing libasound2-dev libpulse-dev libaudio-dev libfribidi-dev \
+            libjack-dev libsndio-dev \
+            libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev \
+            libxss-dev libxtst-dev \
+            libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev libegl1-mesa-dev \
+            libdbus-1-dev libibus-1.0-dev libudev-dev libthai-dev libusb-1.0-0-dev \
+            libpipewire-0.3-dev libwayland-dev wayland-protocols libdecor-0-dev liburing-dev
 
       - name: Cache vcpkg
         uses: actions/cache@v4
