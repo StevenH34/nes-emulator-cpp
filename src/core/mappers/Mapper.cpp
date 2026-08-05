@@ -6,8 +6,8 @@
 
 namespace nes {
 
-std::unique_ptr<Mapper> Mapper::Create(const std::uint8_t id, std::span<const std::uint8_t> prg_rom,
-                                       std::span<const std::uint8_t> chr_rom) {
+std::unique_ptr<Mapper> Mapper::Create(const uint8_t id, std::span<const uint8_t> prg_rom,
+                                       std::span<const uint8_t> chr_rom) {
   switch (id) {
   case 0:
     return std::make_unique<Mapper000>(prg_rom, chr_rom);

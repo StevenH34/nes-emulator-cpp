@@ -8,7 +8,7 @@
 TEST_CASE("Emulator::LoadProgram copies bytes into RAM") {
   const nes_test::TempRomFile rom(nes_test::MakeMinimalRom(0x0200));
   nes::Emulator emulator(rom.path());
-  const std::vector<std::uint8_t> program{0xA9, 0x42, 0xE8};
+  const std::vector<uint8_t> program{0xA9, 0x42, 0xE8};
   constexpr auto start_address = 0x0200;
   emulator.LoadProgram(program, start_address);
 
@@ -27,7 +27,7 @@ TEST_CASE("Emulator constructor resets the CPU using the cartridge's reset vecto
 TEST_CASE("Emulator::Step executes the loaded program starting at the reset vector") {
   const nes_test::TempRomFile rom(nes_test::MakeMinimalRom(0x0200));
   nes::Emulator emulator(rom.path());
-  const std::vector<std::uint8_t> program{0xA9, 0x42, 0xE8}; // LDA #0x42, INX
+  const std::vector<uint8_t> program{0xA9, 0x42, 0xE8}; // LDA #0x42, INX
   emulator.LoadProgram(program, 0x0200);
 
   emulator.Step(); // LDA #0x42

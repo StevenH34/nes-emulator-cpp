@@ -54,7 +54,7 @@ void NesApp::Cleanup() {
 
 void NesApp::Run() {
   while (running_) {
-    const std::uint64_t frame_start = SDL_GetTicks();
+    const uint64_t frame_start = SDL_GetTicks();
 
     HandleEvents();
 
@@ -69,7 +69,7 @@ void NesApp::Run() {
 
     // ~60 FPS (NTSC)
     if (const double elapsed_time = static_cast<double>(SDL_GetTicks() - frame_start); elapsed_time < kFrameTimeMs) {
-      SDL_Delay(static_cast<std::uint32_t>(kFrameTimeMs - elapsed_time));
+      SDL_Delay(static_cast<uint32_t>(kFrameTimeMs - elapsed_time));
     }
   }
 }

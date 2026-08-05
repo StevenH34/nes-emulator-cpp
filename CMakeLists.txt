@@ -22,6 +22,16 @@ if(NES_ENABLE_SANITIZERS)
     endif()
 endif()
 
+add_library(nes_warnings INTERFACE)
+if(MSVC)
+    target_compile_options(nes_warnings INTERFACE /W4)
+else()
+    target_compile_options(nes_warnings INTERFACE -Wall -Wextra -Wsign-compare -Wsign-conversion -Wconversion)
+    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        target_compile_options(nes_warnings INTERFACE -Wshorten-64-to-32)
+    endif()
+endif()
+
 add_library(nes_core STATIC
         src/core/Emulator.cpp
         src/core/Emulator.h
@@ -52,6 +62,7 @@ target_include_directories(nes_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/core)
 find_package(SDL3 CONFIG REQUIRED)
 
 target_link_libraries(nes_core PUBLIC SDL3::SDL3 nes_sanitizers)
+target_link_libraries(nes_core PRIVATE nes_warnings)
 
 add_executable(nes_emulator src/app/main.cpp)
 
@@ -109,7 +120,7 @@ add_executable(nes_emulator_tests
         tests/mappers/Mapper000_tests.cpp
 )
 
-target_link_libraries(nes_emulator_tests PRIVATE nes_core)
+target_link_libraries(nes_emulator_tests PRIVATE nes_core nes_warnings)
 
 target_include_directories(nes_emulator_tests PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/external

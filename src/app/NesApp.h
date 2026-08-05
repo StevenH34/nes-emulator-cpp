@@ -23,7 +23,7 @@ public:
   void Run();
 
   // Key bindings
-  static inline const std::unordered_map<SDL_Scancode, std::uint8_t> KEY_MAP = {{
+  static inline const std::unordered_map<SDL_Scancode, uint8_t> KEY_MAP = {{
       {SDL_SCANCODE_Z, nes::Controller::BUTTON_A},
       {SDL_SCANCODE_X, nes::Controller::BUTTON_B},
       {SDL_SCANCODE_LSHIFT, nes::Controller::BUTTON_SELECT},

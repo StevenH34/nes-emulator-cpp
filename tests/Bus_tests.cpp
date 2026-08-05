@@ -69,7 +69,7 @@ TEST_CASE("Bus ignores writes to the unmapped region between RAM and PRG-ROM") {
 }
 
 TEST_CASE("Bus reads PRG-ROM through the cartridge mapper at 0x8000-0xFFFF") {
-  std::vector<std::uint8_t> data{0x4E, 0x45, 0x53, 0x1A, 0x01, 0x01, 0x00, 0x00, 0, 0, 0, 0, 0, 0, 0, 0};
+  std::vector<uint8_t> data{0x4E, 0x45, 0x53, 0x1A, 0x01, 0x01, 0x00, 0x00, 0, 0, 0, 0, 0, 0, 0, 0};
   data.resize(data.size() + nes::Cartridge::PRG_BLOCK_SIZE + nes::Cartridge::CHR_BLOCK_SIZE, 0);
   // Marker byte at PRG offset 0, mirrored by Mapper000's 16 KB mask onto both
   // CPU 0x8000 and 0xC000, so this proves the read comes from the mapper and

@@ -22,8 +22,8 @@ TEST_CASE("Controller reports a single pressed button in the correct bit positio
   controller.Write(1);
   controller.Write(0);
 
-  const std::uint8_t expected[8] = {0, 0, 0, 1, 0, 0, 0, 0};
-  for (const std::uint8_t bit : expected) {
+  const uint8_t expected[8] = {0, 0, 0, 1, 0, 0, 0, 0};
+  for (const uint8_t bit : expected) {
     CHECK(controller.Read() == bit);
   }
 }
@@ -38,8 +38,8 @@ TEST_CASE("Controller reports multiple pressed buttons in the correct bit "
   controller.Write(1);
   controller.Write(0);
 
-  const std::uint8_t expected[8] = {1, 0, 0, 1, 0, 0, 0, 1};
-  for (const std::uint8_t bit : expected) {
+  const uint8_t expected[8] = {1, 0, 0, 1, 0, 0, 0, 1};
+  for (const uint8_t bit : expected) {
     CHECK(controller.Read() == bit);
   }
 }
@@ -148,8 +148,8 @@ TEST_CASE("Bus strobes and reads controller 1 through $4016") {
   bus.WriteCpu(0x4016, 1);
   bus.WriteCpu(0x4016, 0);
 
-  const std::uint8_t expected[8] = {0, 0, 0, 1, 0, 0, 0, 0};
-  for (const std::uint8_t bit : expected) {
+  const uint8_t expected[8] = {0, 0, 0, 1, 0, 0, 0, 0};
+  for (const uint8_t bit : expected) {
     CHECK(bus.ReadCpu(0x4016) == bit);
   }
 }
@@ -174,8 +174,8 @@ TEST_CASE("Bus reads controller 2 independently of controller 1 through $4017") 
   bus.WriteCpu(0x4016, 1);
   bus.WriteCpu(0x4016, 0);
 
-  const std::uint8_t expected[8] = {0, 0, 1, 0, 0, 0, 0, 0};
-  for (const std::uint8_t bit : expected) {
+  const uint8_t expected[8] = {0, 0, 1, 0, 0, 0, 0, 0};
+  for (const uint8_t bit : expected) {
     CHECK(bus.ReadCpu(0x4017) == bit);
   }
 }

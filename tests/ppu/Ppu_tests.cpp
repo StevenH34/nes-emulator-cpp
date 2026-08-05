@@ -9,15 +9,15 @@
 
 namespace {
 
-std::vector<std::uint8_t> MakeHeader(const std::uint8_t prg_blocks, const std::uint8_t chr_blocks,
-                                     const std::uint8_t flags_6, const std::uint8_t flags_7) {
+std::vector<uint8_t> MakeHeader(const uint8_t prg_blocks, const uint8_t chr_blocks, const uint8_t flags_6,
+                                const uint8_t flags_7) {
   return {0x4E, 0x45, 0x53, 0x1A, prg_blocks, chr_blocks, flags_6, flags_7, 0, 0, 0, 0, 0, 0, 0, 0};
 }
 
 // Builds a mapper-0 cartridge with the given CHR-ROM bytes (padded to 8KB) and
 // mirroring flag, so PPU tests can rely on known CHR content and a chosen
 // mirroring mode.
-nes::Cartridge MakeCartridge(std::vector<std::uint8_t> chr_bytes = {}, const std::uint8_t flags_6 = 0) {
+nes::Cartridge MakeCartridge(std::vector<uint8_t> chr_bytes = {}, const uint8_t flags_6 = 0) {
   auto data = MakeHeader(1, 1, flags_6, 0);
   data.resize(data.size() + nes::Cartridge::PRG_BLOCK_SIZE, 0);
   chr_bytes.resize(nes::Cartridge::CHR_BLOCK_SIZE, 0);
@@ -27,9 +27,9 @@ nes::Cartridge MakeCartridge(std::vector<std::uint8_t> chr_bytes = {}, const std
 }
 
 // Mimics a CPU writing PPUADDR ($2006) twice: high byte first, then low byte.
-void SetVAddress(nes::Ppu& ppu, const std::uint16_t address) {
-  ppu.WriteAddr(static_cast<std::uint8_t>(address >> 8));
-  ppu.WriteAddr(static_cast<std::uint8_t>(address & 0xFF));
+void SetVAddress(nes::Ppu& ppu, const uint16_t address) {
+  ppu.WriteAddr(static_cast<uint8_t>(address >> 8));
+  ppu.WriteAddr(static_cast<uint8_t>(address & 0xFF));
 }
 
 void StepN(nes::Ppu& ppu, const int cycles) {
@@ -186,8 +186,8 @@ TEST_CASE("ReadStatusRegister clears the VBlank flag as a side effect") {
   nes::Ppu ppu(cart);
   ppu.SetVblank();
 
-  const std::uint8_t first = ppu.ReadStatusRegister();
-  const std::uint8_t second = ppu.ReadStatusRegister();
+  const uint8_t first = ppu.ReadStatusRegister();
+  const uint8_t second = ppu.ReadStatusRegister();
 
   CHECK((first & nes::Ppu::FLAG_VBLANK) != 0);
   CHECK((second & nes::Ppu::FLAG_VBLANK) == 0);
@@ -283,8 +283,8 @@ TEST_CASE("ReadDataRegister buffers reads below the palette range by one read") 
   ppu.WriteData(0xAB);
 
   SetVAddress(ppu, 0x2010);
-  const std::uint8_t first = ppu.ReadDataRegister();
-  const std::uint8_t second = ppu.ReadDataRegister();
+  const uint8_t first = ppu.ReadDataRegister();
+  const uint8_t second = ppu.ReadDataRegister();
 
   CHECK(first == 0x00); // stale buffer from before the address was set
   CHECK(second == 0xAB); // buffer filled by the first read
@@ -297,7 +297,7 @@ TEST_CASE("ReadDataRegister returns palette reads immediately, without buffering
   ppu.WriteData(0x24);
 
   SetVAddress(ppu, 0x3F00);
-  const std::uint8_t result = ppu.ReadDataRegister();
+  const uint8_t result = ppu.ReadDataRegister();
 
   CHECK(result == 0x24);
 }
@@ -314,7 +314,7 @@ TEST_CASE("ReadDataRegister on a palette address refills the buffer from "
 
   SetVAddress(ppu,
               0x2123); // any non-palette address; read returns the stale buffer first
-  const std::uint8_t buffered = ppu.ReadDataRegister();
+  const uint8_t buffered = ppu.ReadDataRegister();
 
   CHECK(buffered == 0x77);
 }
@@ -438,7 +438,7 @@ TEST_CASE("The register router mirrors every 8 bytes") {
 // --- VRAM routing ---
 
 TEST_CASE("ReadVram routes pattern-table addresses to the cartridge's CHR-ROM") {
-  std::vector<std::uint8_t> chr(nes::Cartridge::CHR_BLOCK_SIZE, 0);
+  std::vector<uint8_t> chr(nes::Cartridge::CHR_BLOCK_SIZE, 0);
   chr.front() = 0x11;
   chr.back() = 0x22;
   auto cart = MakeCartridge(chr);

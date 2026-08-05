@@ -9,205 +9,205 @@ namespace nes {
 /// CPU OpCodes
 struct Opcodes {
   /// LDA Opcodes
-  static constexpr std::uint8_t LDA_IMMEDIATE = 0xA9;
-  static constexpr std::uint8_t LDA_ZERO_PAGE = 0xA5;
-  static constexpr std::uint8_t LDA_ZERO_PAGE_X = 0xB5;
-  static constexpr std::uint8_t LDA_ABSOLUTE = 0xAD;
-  static constexpr std::uint8_t LDA_ABSOLUTE_X = 0xBD;
-  static constexpr std::uint8_t LDA_ABSOLUTE_Y = 0xB9;
-  static constexpr std::uint8_t LDA_INDIRECT_X = 0xA1;
-  static constexpr std::uint8_t LDA_INDIRECT_Y = 0xB1;
+  static constexpr uint8_t LDA_IMMEDIATE = 0xA9;
+  static constexpr uint8_t LDA_ZERO_PAGE = 0xA5;
+  static constexpr uint8_t LDA_ZERO_PAGE_X = 0xB5;
+  static constexpr uint8_t LDA_ABSOLUTE = 0xAD;
+  static constexpr uint8_t LDA_ABSOLUTE_X = 0xBD;
+  static constexpr uint8_t LDA_ABSOLUTE_Y = 0xB9;
+  static constexpr uint8_t LDA_INDIRECT_X = 0xA1;
+  static constexpr uint8_t LDA_INDIRECT_Y = 0xB1;
 
   /// LDX Opcodes
-  static constexpr std::uint8_t LDX_IMMEDIATE = 0xA2;
-  static constexpr std::uint8_t LDX_ZERO_PAGE = 0xA6;
-  static constexpr std::uint8_t LDX_ZERO_PAGE_Y = 0xB6;
-  static constexpr std::uint8_t LDX_ABSOLUTE = 0xAE;
-  static constexpr std::uint8_t LDX_ABSOLUTE_Y = 0xBE;
+  static constexpr uint8_t LDX_IMMEDIATE = 0xA2;
+  static constexpr uint8_t LDX_ZERO_PAGE = 0xA6;
+  static constexpr uint8_t LDX_ZERO_PAGE_Y = 0xB6;
+  static constexpr uint8_t LDX_ABSOLUTE = 0xAE;
+  static constexpr uint8_t LDX_ABSOLUTE_Y = 0xBE;
 
   /// LDY Opcodes
-  static constexpr std::uint8_t LDY_IMMEDIATE = 0xA0;
-  static constexpr std::uint8_t LDY_ZERO_PAGE = 0xA4;
-  static constexpr std::uint8_t LDY_ZERO_PAGE_X = 0xB4;
-  static constexpr std::uint8_t LDY_ABSOLUTE = 0xAC;
-  static constexpr std::uint8_t LDY_ABSOLUTE_X = 0xBC;
+  static constexpr uint8_t LDY_IMMEDIATE = 0xA0;
+  static constexpr uint8_t LDY_ZERO_PAGE = 0xA4;
+  static constexpr uint8_t LDY_ZERO_PAGE_X = 0xB4;
+  static constexpr uint8_t LDY_ABSOLUTE = 0xAC;
+  static constexpr uint8_t LDY_ABSOLUTE_X = 0xBC;
 
   /// STA Opcodes
-  static constexpr std::uint8_t STA_ZERO_PAGE = 0x85;
-  static constexpr std::uint8_t STA_ZERO_PAGE_X = 0x95;
-  static constexpr std::uint8_t STA_ABSOLUTE = 0x8D;
-  static constexpr std::uint8_t STA_ABSOLUTE_X = 0x9D;
-  static constexpr std::uint8_t STA_ABSOLUTE_Y = 0x99;
-  static constexpr std::uint8_t STA_INDIRECT_X = 0x81;
-  static constexpr std::uint8_t STA_INDIRECT_Y = 0x91;
+  static constexpr uint8_t STA_ZERO_PAGE = 0x85;
+  static constexpr uint8_t STA_ZERO_PAGE_X = 0x95;
+  static constexpr uint8_t STA_ABSOLUTE = 0x8D;
+  static constexpr uint8_t STA_ABSOLUTE_X = 0x9D;
+  static constexpr uint8_t STA_ABSOLUTE_Y = 0x99;
+  static constexpr uint8_t STA_INDIRECT_X = 0x81;
+  static constexpr uint8_t STA_INDIRECT_Y = 0x91;
 
   /// STX Opcodes
-  static constexpr std::uint8_t STX_ZERO_PAGE = 0x86;
-  static constexpr std::uint8_t STX_ZERO_PAGE_Y = 0x96;
-  static constexpr std::uint8_t STX_ABSOLUTE = 0x8E;
+  static constexpr uint8_t STX_ZERO_PAGE = 0x86;
+  static constexpr uint8_t STX_ZERO_PAGE_Y = 0x96;
+  static constexpr uint8_t STX_ABSOLUTE = 0x8E;
 
   /// STY Opcodes
-  static constexpr std::uint8_t STY_ZERO_PAGE = 0x84;
-  static constexpr std::uint8_t STY_ZERO_PAGE_X = 0x94;
-  static constexpr std::uint8_t STY_ABSOLUTE = 0x8C;
+  static constexpr uint8_t STY_ZERO_PAGE = 0x84;
+  static constexpr uint8_t STY_ZERO_PAGE_X = 0x94;
+  static constexpr uint8_t STY_ABSOLUTE = 0x8C;
 
   /// Register Increment Opcode
-  static constexpr std::uint8_t INX = 0xE8;
-  static constexpr std::uint8_t INY = 0xC8;
-  static constexpr std::uint8_t DEX = 0xCA;
-  static constexpr std::uint8_t DEY = 0x88;
+  static constexpr uint8_t INX = 0xE8;
+  static constexpr uint8_t INY = 0xC8;
+  static constexpr uint8_t DEX = 0xCA;
+  static constexpr uint8_t DEY = 0x88;
 
   /// Jump Opcodes
-  static constexpr std::uint8_t JMP_ABSOLUTE = 0x4C;
-  static constexpr std::uint8_t JMP_INDIRECT = 0x6C;
-  static constexpr std::uint8_t JMP_JSR = 0x20;
-  static constexpr std::uint8_t JMP_RTS = 0x60;
-  static constexpr std::uint8_t JMP_BRK = 0x00;
-  static constexpr std::uint8_t JMP_RTI = 0x40;
+  static constexpr uint8_t JMP_ABSOLUTE = 0x4C;
+  static constexpr uint8_t JMP_INDIRECT = 0x6C;
+  static constexpr uint8_t JMP_JSR = 0x20;
+  static constexpr uint8_t JMP_RTS = 0x60;
+  static constexpr uint8_t JMP_BRK = 0x00;
+  static constexpr uint8_t JMP_RTI = 0x40;
 
   /// AND (bitwise AND with Accumulator)
-  static constexpr std::uint8_t AND_IMMEDIATE = 0x29;
-  static constexpr std::uint8_t AND_ZERO_PAGE = 0x25;
-  static constexpr std::uint8_t AND_ZERO_PAGE_X = 0x35;
-  static constexpr std::uint8_t AND_ABSOLUTE = 0x2D;
-  static constexpr std::uint8_t AND_ABSOLUTE_X = 0x3D;
-  static constexpr std::uint8_t AND_ABSOLUTE_Y = 0x39;
-  static constexpr std::uint8_t AND_INDIRECT_X = 0x21;
-  static constexpr std::uint8_t AND_INDIRECT_Y = 0x31;
+  static constexpr uint8_t AND_IMMEDIATE = 0x29;
+  static constexpr uint8_t AND_ZERO_PAGE = 0x25;
+  static constexpr uint8_t AND_ZERO_PAGE_X = 0x35;
+  static constexpr uint8_t AND_ABSOLUTE = 0x2D;
+  static constexpr uint8_t AND_ABSOLUTE_X = 0x3D;
+  static constexpr uint8_t AND_ABSOLUTE_Y = 0x39;
+  static constexpr uint8_t AND_INDIRECT_X = 0x21;
+  static constexpr uint8_t AND_INDIRECT_Y = 0x31;
 
   /// ORA (bitwise OR with Accumulator)
-  static constexpr std::uint8_t ORA_IMMEDIATE = 0x09;
-  static constexpr std::uint8_t ORA_ZERO_PAGE = 0x05;
-  static constexpr std::uint8_t ORA_ZERO_PAGE_X = 0x15;
-  static constexpr std::uint8_t ORA_ABSOLUTE = 0x0D;
-  static constexpr std::uint8_t ORA_ABSOLUTE_X = 0x1D;
-  static constexpr std::uint8_t ORA_ABSOLUTE_Y = 0x19;
-  static constexpr std::uint8_t ORA_INDIRECT_X = 0x01;
-  static constexpr std::uint8_t ORA_INDIRECT_Y = 0x11;
+  static constexpr uint8_t ORA_IMMEDIATE = 0x09;
+  static constexpr uint8_t ORA_ZERO_PAGE = 0x05;
+  static constexpr uint8_t ORA_ZERO_PAGE_X = 0x15;
+  static constexpr uint8_t ORA_ABSOLUTE = 0x0D;
+  static constexpr uint8_t ORA_ABSOLUTE_X = 0x1D;
+  static constexpr uint8_t ORA_ABSOLUTE_Y = 0x19;
+  static constexpr uint8_t ORA_INDIRECT_X = 0x01;
+  static constexpr uint8_t ORA_INDIRECT_Y = 0x11;
 
   /// EOR
-  static constexpr std::uint8_t EOR_IMMEDIATE = 0x49;
-  static constexpr std::uint8_t EOR_ZERO_PAGE = 0x45;
-  static constexpr std::uint8_t EOR_ZERO_PAGE_X = 0x55;
-  static constexpr std::uint8_t EOR_ABSOLUTE = 0x4D;
-  static constexpr std::uint8_t EOR_ABSOLUTE_X = 0x5D;
-  static constexpr std::uint8_t EOR_ABSOLUTE_Y = 0x59;
-  static constexpr std::uint8_t EOR_INDIRECT_X = 0x41;
-  static constexpr std::uint8_t EOR_INDIRECT_Y = 0x51;
+  static constexpr uint8_t EOR_IMMEDIATE = 0x49;
+  static constexpr uint8_t EOR_ZERO_PAGE = 0x45;
+  static constexpr uint8_t EOR_ZERO_PAGE_X = 0x55;
+  static constexpr uint8_t EOR_ABSOLUTE = 0x4D;
+  static constexpr uint8_t EOR_ABSOLUTE_X = 0x5D;
+  static constexpr uint8_t EOR_ABSOLUTE_Y = 0x59;
+  static constexpr uint8_t EOR_INDIRECT_X = 0x41;
+  static constexpr uint8_t EOR_INDIRECT_Y = 0x51;
 
   /// Stack Opcodes
-  static constexpr std::uint8_t PHA = 0x48;
-  static constexpr std::uint8_t PHP = 0x08;
-  static constexpr std::uint8_t PLA = 0x68;
-  static constexpr std::uint8_t PLP = 0x28;
+  static constexpr uint8_t PHA = 0x48;
+  static constexpr uint8_t PHP = 0x08;
+  static constexpr uint8_t PLA = 0x68;
+  static constexpr uint8_t PLP = 0x28;
 
   /// Flag Opcodes
-  static constexpr std::uint8_t CLC = 0x18;
-  static constexpr std::uint8_t SEC = 0x38;
-  static constexpr std::uint8_t CLI = 0x58;
-  static constexpr std::uint8_t SEI = 0x78;
-  static constexpr std::uint8_t CLV = 0xB8;
-  static constexpr std::uint8_t CLD = 0xD8;
-  static constexpr std::uint8_t SED = 0xF8;
+  static constexpr uint8_t CLC = 0x18;
+  static constexpr uint8_t SEC = 0x38;
+  static constexpr uint8_t CLI = 0x58;
+  static constexpr uint8_t SEI = 0x78;
+  static constexpr uint8_t CLV = 0xB8;
+  static constexpr uint8_t CLD = 0xD8;
+  static constexpr uint8_t SED = 0xF8;
 
   /// Register Transfer Opcodes
-  static constexpr std::uint8_t TAX = 0xAA;
-  static constexpr std::uint8_t TAY = 0xA8;
-  static constexpr std::uint8_t TXA = 0x8A;
-  static constexpr std::uint8_t TYA = 0x98;
-  static constexpr std::uint8_t TSX = 0xBA;
-  static constexpr std::uint8_t TXS = 0x9A;
+  static constexpr uint8_t TAX = 0xAA;
+  static constexpr uint8_t TAY = 0xA8;
+  static constexpr uint8_t TXA = 0x8A;
+  static constexpr uint8_t TYA = 0x98;
+  static constexpr uint8_t TSX = 0xBA;
+  static constexpr uint8_t TXS = 0x9A;
 
   /// CMP Opcodes
-  static constexpr std::uint8_t CMP_IMMEDIATE = 0xC9;
-  static constexpr std::uint8_t CMP_ZERO_PAGE = 0xC5;
-  static constexpr std::uint8_t CMP_ZERO_PAGE_X = 0xD5;
-  static constexpr std::uint8_t CMP_ABSOLUTE = 0xCD;
-  static constexpr std::uint8_t CMP_ABSOLUTE_X = 0xDD;
-  static constexpr std::uint8_t CMP_ABSOLUTE_Y = 0xD9;
-  static constexpr std::uint8_t CMP_INDIRECT_X = 0xC1;
-  static constexpr std::uint8_t CMP_INDIRECT_Y = 0xD1;
+  static constexpr uint8_t CMP_IMMEDIATE = 0xC9;
+  static constexpr uint8_t CMP_ZERO_PAGE = 0xC5;
+  static constexpr uint8_t CMP_ZERO_PAGE_X = 0xD5;
+  static constexpr uint8_t CMP_ABSOLUTE = 0xCD;
+  static constexpr uint8_t CMP_ABSOLUTE_X = 0xDD;
+  static constexpr uint8_t CMP_ABSOLUTE_Y = 0xD9;
+  static constexpr uint8_t CMP_INDIRECT_X = 0xC1;
+  static constexpr uint8_t CMP_INDIRECT_Y = 0xD1;
   /// CPX Opcodes
-  static constexpr std::uint8_t CPX_IMMEDIATE = 0xE0;
-  static constexpr std::uint8_t CPX_ZERO_PAGE = 0xE4;
-  static constexpr std::uint8_t CPX_ABSOLUTE = 0xEC;
+  static constexpr uint8_t CPX_IMMEDIATE = 0xE0;
+  static constexpr uint8_t CPX_ZERO_PAGE = 0xE4;
+  static constexpr uint8_t CPX_ABSOLUTE = 0xEC;
   /// CPY Opcodes
-  static constexpr std::uint8_t CPY_IMMEDIATE = 0xC0;
-  static constexpr std::uint8_t CPY_ZERO_PAGE = 0xC4;
-  static constexpr std::uint8_t CPY_ABSOLUTE = 0xCC;
+  static constexpr uint8_t CPY_IMMEDIATE = 0xC0;
+  static constexpr uint8_t CPY_ZERO_PAGE = 0xC4;
+  static constexpr uint8_t CPY_ABSOLUTE = 0xCC;
 
   /// Branch Opcodes
-  static constexpr std::uint8_t BEQ = 0xF0;
-  static constexpr std::uint8_t BNE = 0xD0;
-  static constexpr std::uint8_t BCS = 0xB0;
-  static constexpr std::uint8_t BCC = 0x90;
-  static constexpr std::uint8_t BMI = 0x30;
-  static constexpr std::uint8_t BPL = 0x10;
-  static constexpr std::uint8_t BVS = 0x70;
-  static constexpr std::uint8_t BVC = 0x50;
+  static constexpr uint8_t BEQ = 0xF0;
+  static constexpr uint8_t BNE = 0xD0;
+  static constexpr uint8_t BCS = 0xB0;
+  static constexpr uint8_t BCC = 0x90;
+  static constexpr uint8_t BMI = 0x30;
+  static constexpr uint8_t BPL = 0x10;
+  static constexpr uint8_t BVS = 0x70;
+  static constexpr uint8_t BVC = 0x50;
 
   /// Shift Opcodes
   /// ASL
-  static constexpr std::uint8_t ASL_ACCUMULATOR = 0x0A;
-  static constexpr std::uint8_t ASL_ZERO_PAGE = 0x06;
-  static constexpr std::uint8_t ASL_ZERO_PAGE_X = 0x16;
-  static constexpr std::uint8_t ASL_ABSOLUTE = 0x0E;
-  static constexpr std::uint8_t ASL_ABSOLUTE_X = 0x1E;
+  static constexpr uint8_t ASL_ACCUMULATOR = 0x0A;
+  static constexpr uint8_t ASL_ZERO_PAGE = 0x06;
+  static constexpr uint8_t ASL_ZERO_PAGE_X = 0x16;
+  static constexpr uint8_t ASL_ABSOLUTE = 0x0E;
+  static constexpr uint8_t ASL_ABSOLUTE_X = 0x1E;
   /// LSR
-  static constexpr std::uint8_t LSR_ACCUMULATOR = 0x4A;
-  static constexpr std::uint8_t LSR_ZERO_PAGE = 0x46;
-  static constexpr std::uint8_t LSR_ZERO_PAGE_X = 0x56;
-  static constexpr std::uint8_t LSR_ABSOLUTE = 0x4E;
-  static constexpr std::uint8_t LSR_ABSOLUTE_X = 0x5E;
+  static constexpr uint8_t LSR_ACCUMULATOR = 0x4A;
+  static constexpr uint8_t LSR_ZERO_PAGE = 0x46;
+  static constexpr uint8_t LSR_ZERO_PAGE_X = 0x56;
+  static constexpr uint8_t LSR_ABSOLUTE = 0x4E;
+  static constexpr uint8_t LSR_ABSOLUTE_X = 0x5E;
   /// ROL
-  static constexpr std::uint8_t ROL_ACCUMULATOR = 0x2A;
-  static constexpr std::uint8_t ROL_ZERO_PAGE = 0x26;
-  static constexpr std::uint8_t ROL_ZERO_PAGE_X = 0x36;
-  static constexpr std::uint8_t ROL_ABSOLUTE = 0x2E;
-  static constexpr std::uint8_t ROL_ABSOLUTE_X = 0x3E;
+  static constexpr uint8_t ROL_ACCUMULATOR = 0x2A;
+  static constexpr uint8_t ROL_ZERO_PAGE = 0x26;
+  static constexpr uint8_t ROL_ZERO_PAGE_X = 0x36;
+  static constexpr uint8_t ROL_ABSOLUTE = 0x2E;
+  static constexpr uint8_t ROL_ABSOLUTE_X = 0x3E;
   /// ROR
-  static constexpr std::uint8_t ROR_ACCUMULATOR = 0x6A;
-  static constexpr std::uint8_t ROR_ZERO_PAGE = 0x66;
-  static constexpr std::uint8_t ROR_ZERO_PAGE_X = 0x76;
-  static constexpr std::uint8_t ROR_ABSOLUTE = 0x6E;
-  static constexpr std::uint8_t ROR_ABSOLUTE_X = 0x7E;
+  static constexpr uint8_t ROR_ACCUMULATOR = 0x6A;
+  static constexpr uint8_t ROR_ZERO_PAGE = 0x66;
+  static constexpr uint8_t ROR_ZERO_PAGE_X = 0x76;
+  static constexpr uint8_t ROR_ABSOLUTE = 0x6E;
+  static constexpr uint8_t ROR_ABSOLUTE_X = 0x7E;
 
   /// ADC
-  static constexpr std::uint8_t ADC_IMMEDIATE = 0x69;
-  static constexpr std::uint8_t ADC_ZERO_PAGE = 0x65;
-  static constexpr std::uint8_t ADC_ZERO_PAGE_X = 0x75;
-  static constexpr std::uint8_t ADC_ABSOLUTE = 0x6D;
-  static constexpr std::uint8_t ADC_ABSOLUTE_X = 0x7D;
-  static constexpr std::uint8_t ADC_ABSOLUTE_Y = 0x79;
-  static constexpr std::uint8_t ADC_INDIRECT_X = 0x61;
-  static constexpr std::uint8_t ADC_INDIRECT_Y = 0x71;
+  static constexpr uint8_t ADC_IMMEDIATE = 0x69;
+  static constexpr uint8_t ADC_ZERO_PAGE = 0x65;
+  static constexpr uint8_t ADC_ZERO_PAGE_X = 0x75;
+  static constexpr uint8_t ADC_ABSOLUTE = 0x6D;
+  static constexpr uint8_t ADC_ABSOLUTE_X = 0x7D;
+  static constexpr uint8_t ADC_ABSOLUTE_Y = 0x79;
+  static constexpr uint8_t ADC_INDIRECT_X = 0x61;
+  static constexpr uint8_t ADC_INDIRECT_Y = 0x71;
 
   /// SBC
-  static constexpr std::uint8_t SBC_IMMEDIATE = 0xE9;
-  static constexpr std::uint8_t SBC_ZERO_PAGE = 0xE5;
-  static constexpr std::uint8_t SBC_ZERO_PAGE_X = 0xF5;
-  static constexpr std::uint8_t SBC_ABSOLUTE = 0xED;
-  static constexpr std::uint8_t SBC_ABSOLUTE_X = 0xFD;
-  static constexpr std::uint8_t SBC_ABSOLUTE_Y = 0xF9;
-  static constexpr std::uint8_t SBC_INDIRECT_X = 0xE1;
-  static constexpr std::uint8_t SBC_INDIRECT_Y = 0xF1;
+  static constexpr uint8_t SBC_IMMEDIATE = 0xE9;
+  static constexpr uint8_t SBC_ZERO_PAGE = 0xE5;
+  static constexpr uint8_t SBC_ZERO_PAGE_X = 0xF5;
+  static constexpr uint8_t SBC_ABSOLUTE = 0xED;
+  static constexpr uint8_t SBC_ABSOLUTE_X = 0xFD;
+  static constexpr uint8_t SBC_ABSOLUTE_Y = 0xF9;
+  static constexpr uint8_t SBC_INDIRECT_X = 0xE1;
+  static constexpr uint8_t SBC_INDIRECT_Y = 0xF1;
 
   /// Misc Opcodes
   /// INC
-  static constexpr std::uint8_t INC_ZERO_PAGE = 0xE6;
-  static constexpr std::uint8_t INC_ZERO_PAGE_X = 0xF6;
-  static constexpr std::uint8_t INC_ABSOLUTE = 0xEE;
-  static constexpr std::uint8_t INC_ABSOLUTE_X = 0xFE;
+  static constexpr uint8_t INC_ZERO_PAGE = 0xE6;
+  static constexpr uint8_t INC_ZERO_PAGE_X = 0xF6;
+  static constexpr uint8_t INC_ABSOLUTE = 0xEE;
+  static constexpr uint8_t INC_ABSOLUTE_X = 0xFE;
   /// DEC
-  static constexpr std::uint8_t DEC_ZERO_PAGE = 0xC6;
-  static constexpr std::uint8_t DEC_ZERO_PAGE_X = 0xD6;
-  static constexpr std::uint8_t DEC_ABSOLUTE = 0xCE;
-  static constexpr std::uint8_t DEC_ABSOLUTE_X = 0xDE;
+  static constexpr uint8_t DEC_ZERO_PAGE = 0xC6;
+  static constexpr uint8_t DEC_ZERO_PAGE_X = 0xD6;
+  static constexpr uint8_t DEC_ABSOLUTE = 0xCE;
+  static constexpr uint8_t DEC_ABSOLUTE_X = 0xDE;
   /// BIT
-  static constexpr std::uint8_t BIT_ZERO_PAGE = 0x24;
-  static constexpr std::uint8_t BIT_ABSOLUTE = 0x2C;
+  static constexpr uint8_t BIT_ZERO_PAGE = 0x24;
+  static constexpr uint8_t BIT_ABSOLUTE = 0x2C;
   /// NOP
-  static constexpr std::uint8_t NOP = 0xEA;
+  static constexpr uint8_t NOP = 0xEA;
 
   static constexpr std::array<int, 256> CYCLES = [] {
     std::array<int, 256> cycles{};

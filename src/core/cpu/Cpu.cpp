@@ -30,91 +30,91 @@ std::string Cpu::StatusString() const {
 }
 
 void Cpu::Reset() {
-  const std::uint8_t low = ReadByte(RESET_VECTOR_);
-  const std::uint8_t high = ReadByte(RESET_VECTOR_ + 1);
-  program_counter_ = static_cast<std::uint16_t>(high) << 8 | low;
+  const uint8_t low = ReadByte(RESET_VECTOR_);
+  const uint8_t high = ReadByte(RESET_VECTOR_ + 1);
+  program_counter_ = static_cast<uint16_t>(high << 8) | static_cast<uint16_t>(low);
 }
 
 // Reads byte at the current Program Counter, then increments Program Counter
-std::uint8_t Cpu::FetchByte() {
+uint8_t Cpu::FetchByte() {
   const auto value = ReadByte(program_counter_);
   program_counter_ += 1;
   return value;
 }
 
-std::uint8_t Cpu::ReadByte(const std::uint16_t address) const { return bus_.ReadCpu(address); }
+uint8_t Cpu::ReadByte(const uint16_t address) const { return bus_.ReadCpu(address); }
 
-void Cpu::WriteByte(const std::uint16_t address, const std::uint8_t value) const { bus_.WriteCpu(address, value); }
+void Cpu::WriteByte(const uint16_t address, const uint8_t value) const { bus_.WriteCpu(address, value); }
 
 /// Addressing Modes
 // Read a byte and convert it to a 16-bit address
-std::uint16_t Cpu::AddressZeroPage() { return FetchByte(); }
+uint16_t Cpu::AddressZeroPage() { return FetchByte(); }
 
 // Zero Page + X offset
-std::uint16_t Cpu::AddressZeroPageX() {
+uint16_t Cpu::AddressZeroPageX() {
   const auto base = FetchByte();
-  return static_cast<std::uint8_t>(base + x_register_);
+  return static_cast<uint8_t>(base + x_register_);
 }
 
 // Zero Page + Y offset
-std::uint16_t Cpu::AddressZeroPageY() {
+uint16_t Cpu::AddressZeroPageY() {
   const auto base = FetchByte();
-  return static_cast<std::uint8_t>(base + y_register_);
+  return static_cast<uint8_t>(base + y_register_);
 }
 
 // Read two bytes then combine them
-std::uint16_t Cpu::AddressAbsolute() {
+uint16_t Cpu::AddressAbsolute() {
   const auto low_byte = FetchByte();
   const auto high_byte = FetchByte();
   // Move high_byte because of little endian
-  return high_byte << 8 | low_byte;
+  return static_cast<uint16_t>(high_byte << 8) | static_cast<uint16_t>(low_byte);
 }
 
 // Absolute + X offset
-std::uint16_t Cpu::AddressAbsoluteX() { return AddressAbsolute() + x_register_; }
+uint16_t Cpu::AddressAbsoluteX() { return AddressAbsolute() + x_register_; }
 
 // Absolute + Y offset
-std::uint16_t Cpu::AddressAbsoluteY() { return AddressAbsolute() + y_register_; }
+uint16_t Cpu::AddressAbsoluteY() { return AddressAbsolute() + y_register_; }
 
 // Relative addressing is used for branch instructions.
 // It provides a signed offset (-128 to 127) to the current Program Counter.
-std::uint16_t Cpu::AddressRelative() {
-  const auto offest = static_cast<std::int8_t>(FetchByte());
-  return program_counter_ + offest;
+uint16_t Cpu::AddressRelative() {
+  const auto offest = static_cast<int8_t>(FetchByte());
+  return static_cast<uint16_t>(program_counter_ + offest);
 }
 
 // Indirect: JMP ($nnnn)
 // Reads a 16-bit address from the pointer location, then jumps to that address.
-std::uint16_t Cpu::AddressIndirect() {
-  const std::uint16_t pointer_address = AddressAbsolute();
-  const std::uint8_t low_byte = ReadByte(pointer_address);
+uint16_t Cpu::AddressIndirect() {
+  const uint16_t pointer_address = AddressAbsolute();
+  const uint8_t low_byte = ReadByte(pointer_address);
 
   // Emulate the 6502-page-boundary bug
-  const std::uint16_t high_byte_address = (pointer_address & 0xFF) == 0xFF
-                                              ? pointer_address & 0xFF00 // Wrap around to the start of the page $xx00
-                                              : pointer_address + 1; // Normal case
+  const uint16_t high_byte_address = (pointer_address & 0xFF) == 0xFF
+                                         ? pointer_address & 0xFF00 // Wrap around to the start of the page $xx00
+                                         : pointer_address + 1; // Normal case
 
-  const std::uint8_t high_byte = ReadByte(high_byte_address);
-  return static_cast<uint16_t>(high_byte) << 8 | static_cast<uint16_t>(low_byte);
+  const uint8_t high_byte = ReadByte(high_byte_address);
+  return static_cast<uint16_t>(high_byte << 8) | static_cast<uint16_t>(low_byte);
 }
 
 // Indexed Indirect: LDA ($nn,X)
 // Adds X to Zero-Page address, then reads a 16-bit pointer address
-std::uint16_t Cpu::AddressIndirectX() {
-  const std::uint8_t base = FetchByte();
+uint16_t Cpu::AddressIndirectX() {
+  const uint8_t base = FetchByte();
   const auto pointer = static_cast<uint8_t>(base + x_register_);
-  const std::uint8_t low_byte = ReadByte(pointer);
+  const uint8_t low_byte = ReadByte(pointer);
   // The high-byte pointer also wraps within the zero page
-  const std::uint8_t high_byte = ReadByte(static_cast<std::uint8_t>(pointer + 1));
-  return static_cast<std::uint16_t>(high_byte << 8) | static_cast<uint16_t>(low_byte);
+  const uint8_t high_byte = ReadByte(static_cast<uint8_t>(pointer + 1));
+  return static_cast<uint16_t>(high_byte << 8) | static_cast<uint16_t>(low_byte);
 }
 
-std::uint16_t Cpu::AddressIndirectY() {
-  const std::uint8_t base = FetchByte();
-  const std::uint8_t low_byte = ReadByte(base);
+uint16_t Cpu::AddressIndirectY() {
+  const uint8_t base = FetchByte();
+  const uint8_t low_byte = ReadByte(base);
   // The high-byte pointer wraps within the zero page
-  const std::uint8_t high_byte = ReadByte(static_cast<std::uint8_t>(base + 1));
-  const std::uint16_t address = static_cast<std::uint16_t>(high_byte << 8) | static_cast<std::uint16_t>(low_byte);
+  const uint8_t high_byte = ReadByte(static_cast<uint8_t>(base + 1));
+  const uint16_t address = static_cast<uint16_t>(high_byte << 8) | static_cast<uint16_t>(low_byte);
   return address + y_register_;
 }
 
@@ -156,7 +156,7 @@ void Cpu::StaIndirectY() {
 }
 
 /// LDA Instructions
-void Cpu::Lda(const std::uint8_t value) {
+void Cpu::Lda(const uint8_t value) {
   accumulator_ = value;
   SetZFlag(accumulator_);
   SetNFlag(accumulator_);
@@ -210,7 +210,7 @@ void Cpu::LdaIndirectY() {
 }
 
 /// LDX Instructions
-void Cpu::Ldx(const std::uint8_t value) {
+void Cpu::Ldx(const uint8_t value) {
   x_register_ = value;
   SetZFlag(x_register_);
   SetNFlag(x_register_);
@@ -246,7 +246,7 @@ void Cpu::LdxAbsoluteY() {
 }
 
 /// LDY Instructions
-void Cpu::Ldy(const std::uint8_t value) {
+void Cpu::Ldy(const uint8_t value) {
   y_register_ = value;
   SetZFlag(y_register_);
   SetNFlag(y_register_);
@@ -338,23 +338,23 @@ void Cpu::Dey() {
 
 /// Flag Methods
 void Cpu::SetFlag(const StatusFlag flag, const bool is_on) {
-  const auto mask = static_cast<std::uint8_t>(flag);
+  const auto mask = static_cast<uint8_t>(flag);
   if (is_on) {
     // Use OR to turn the bit on.
     status_register_ |= mask;
   } else {
     // Use AND with inverted mask to turn the bit off.
-    status_register_ &= static_cast<std::uint8_t>(~mask);
+    status_register_ &= static_cast<uint8_t>(~mask);
   }
 }
 
-bool Cpu::IsFlagSet(const std::uint8_t mask) const { return (status_register_ & mask) != 0; }
+bool Cpu::IsFlagSet(const uint8_t mask) const { return (status_register_ & mask) != 0; }
 
 // Turns the Zero Flag on when the Most Significant Bit (bit 7) is 1.
 // This means the number is negative in two's complement.
-void Cpu::SetZFlag(const std::uint8_t register_value) { SetFlag(StatusFlag::Z, register_value == 0); }
+void Cpu::SetZFlag(const uint8_t register_value) { SetFlag(StatusFlag::Z, register_value == 0); }
 
-void Cpu::SetNFlag(const std::uint8_t register_value) {
+void Cpu::SetNFlag(const uint8_t register_value) {
   SetFlag(StatusFlag::N,
           (register_value >> 7 & 1) == 1); // Most Significant Bit
 };
@@ -385,21 +385,21 @@ void Cpu::BranchIf(const bool condition) {
     program_counter_ = target;
 }
 
-void Cpu::Beq() { BranchIf(IsFlagSet(static_cast<std::uint8_t>(StatusFlag::Z))); }
+void Cpu::Beq() { BranchIf(IsFlagSet(static_cast<uint8_t>(StatusFlag::Z))); }
 
-void Cpu::Bne() { BranchIf(!IsFlagSet(static_cast<std::uint8_t>(StatusFlag::Z))); }
+void Cpu::Bne() { BranchIf(!IsFlagSet(static_cast<uint8_t>(StatusFlag::Z))); }
 
-void Cpu::Bcs() { BranchIf(IsFlagSet(static_cast<std::uint8_t>(StatusFlag::C))); }
+void Cpu::Bcs() { BranchIf(IsFlagSet(static_cast<uint8_t>(StatusFlag::C))); }
 
-void Cpu::Bcc() { BranchIf(!IsFlagSet(static_cast<std::uint8_t>(StatusFlag::C))); }
+void Cpu::Bcc() { BranchIf(!IsFlagSet(static_cast<uint8_t>(StatusFlag::C))); }
 
-void Cpu::Bmi() { BranchIf(IsFlagSet(static_cast<std::uint8_t>(StatusFlag::N))); }
+void Cpu::Bmi() { BranchIf(IsFlagSet(static_cast<uint8_t>(StatusFlag::N))); }
 
-void Cpu::Bpl() { BranchIf(!IsFlagSet(static_cast<std::uint8_t>(StatusFlag::N))); }
+void Cpu::Bpl() { BranchIf(!IsFlagSet(static_cast<uint8_t>(StatusFlag::N))); }
 
-void Cpu::Bvs() { BranchIf(IsFlagSet(static_cast<std::uint8_t>(StatusFlag::V))); }
+void Cpu::Bvs() { BranchIf(IsFlagSet(static_cast<uint8_t>(StatusFlag::V))); }
 
-void Cpu::Bvc() { BranchIf(!IsFlagSet(static_cast<std::uint8_t>(StatusFlag::V))); }
+void Cpu::Bvc() { BranchIf(!IsFlagSet(static_cast<uint8_t>(StatusFlag::V))); }
 
 /// Jump Instructions
 void Cpu::JmpAbsolute() {
@@ -414,7 +414,7 @@ void Cpu::JmpIndirect() {
 
 void Cpu::Jsr() {
   // Read the destination address
-  const std::uint16_t target = AddressAbsolute();
+  const uint16_t target = AddressAbsolute();
   // Push PC - 1 onto the stack
   StackPushWord(program_counter_ - 1);
   // Set PC to the destination address - the jump
@@ -430,45 +430,44 @@ void Cpu::Brk() {
   // Push Program Counter + 1 to the stack - the return address
   StackPushWord(program_counter_ + 1);
   // Save the flags - push Status Register to the stack
-  StackPushByte(status_register_ | static_cast<std::uint8_t>(StatusFlag::B) | static_cast<std::uint8_t>(StatusFlag::U));
+  StackPushByte(status_register_ | static_cast<uint8_t>(StatusFlag::B) | static_cast<uint8_t>(StatusFlag::U));
   // Set I Flag to disable interrupts
   SetFlag(StatusFlag::I, true);
   // Read address from IRQ/BRK and jump to address
-  const std::uint8_t low_byte = ReadByte(IRQ_VECTOR_);
-  const std::uint8_t high_byte = ReadByte(IRQ_VECTOR_ + 1);
-  program_counter_ = high_byte << 8 | low_byte;
+  const uint8_t low_byte = ReadByte(IRQ_VECTOR_);
+  const uint8_t high_byte = ReadByte(IRQ_VECTOR_ + 1);
+  program_counter_ = static_cast<uint16_t>(high_byte << 8) | static_cast<uint16_t>(low_byte);
 }
 
 void Cpu::Rti() {
   // Restore flags - clear B, force U
-  status_register_ =
-      StackPullByte() & ~static_cast<std::uint8_t>(StatusFlag::B) | static_cast<std::uint8_t>(StatusFlag::U);
+  status_register_ = (StackPullByte() & ~static_cast<uint8_t>(StatusFlag::B)) | static_cast<uint8_t>(StatusFlag::U);
   // Restore Program Counter
   program_counter_ = StackPullWord();
 }
 
 /// Stack Methods
-void Cpu::StackPushByte(const std::uint8_t value) {
+void Cpu::StackPushByte(const uint8_t value) {
   // Write current value at stack address then decrement stack pointer
-  WriteByte(STACK_BASE_ | static_cast<std::uint16_t>(stack_pointer_), value);
+  WriteByte(STACK_BASE_ | static_cast<uint16_t>(stack_pointer_), value);
   stack_pointer_ -= 1;
 }
 
-std::uint8_t Cpu::StackPullByte() {
+uint8_t Cpu::StackPullByte() {
   // Decrements stack pointer then reads address
   stack_pointer_ += 1;
-  return ReadByte(STACK_BASE_ | static_cast<std::uint16_t>(stack_pointer_));
+  return ReadByte(STACK_BASE_ | static_cast<uint16_t>(stack_pointer_));
 }
 
-void Cpu::StackPushWord(const std::uint16_t value) {
-  StackPushByte(static_cast<std::uint8_t>(value >> 8)); // High byte
-  StackPushByte(static_cast<std::uint8_t>(value & 0xFF)); // Low byte
+void Cpu::StackPushWord(const uint16_t value) {
+  StackPushByte(static_cast<uint8_t>(value >> 8)); // High byte
+  StackPushByte(static_cast<uint8_t>(value & 0xFF)); // Low byte
 }
 
-std::uint16_t Cpu::StackPullWord() {
-  const std::uint8_t low_byte = StackPullByte();
-  const std::uint8_t high_byte = StackPullByte();
-  return high_byte << 8 | low_byte;
+uint16_t Cpu::StackPullWord() {
+  const uint8_t low_byte = StackPullByte();
+  const uint8_t high_byte = StackPullByte();
+  return static_cast<uint16_t>(high_byte << 8) | static_cast<uint16_t>(low_byte);
 }
 
 /// Stack Instructions
@@ -481,17 +480,16 @@ void Cpu::Pla() {
 }
 
 void Cpu::Php() {
-  StackPushByte(status_register_ | static_cast<std::uint8_t>(StatusFlag::B) | static_cast<std::uint8_t>(StatusFlag::U));
+  StackPushByte(status_register_ | static_cast<uint8_t>(StatusFlag::B) | static_cast<uint8_t>(StatusFlag::U));
 }
 
 void Cpu::Plp() {
-  status_register_ =
-      StackPullByte() & ~static_cast<std::uint8_t>(StatusFlag::B) | static_cast<std::uint8_t>(StatusFlag::U);
+  status_register_ = (StackPullByte() & ~static_cast<uint8_t>(StatusFlag::B)) | static_cast<uint8_t>(StatusFlag::U);
 }
 
 /// Comparison Instructions
-void Cpu::Compare(const std::uint8_t register_value, const std::uint8_t operand) {
-  const std::uint8_t result = register_value - operand;
+void Cpu::Compare(const uint8_t register_value, const uint8_t operand) {
+  const uint8_t result = register_value - operand;
   // If register >= operand, not borrow, so C = 1, else C = 0
   SetCFlag(register_value >= operand);
   // If result = 0, Z = 1
@@ -578,9 +576,9 @@ void Cpu::CpyAbsolute() {
  * ASL (Arithmetic Shift Left), moves all bits one position to the left.
  * Bit 7 goes to Carry flag
  */
-std::uint8_t Cpu::Asl(const std::uint8_t value) {
+uint8_t Cpu::Asl(const uint8_t value) {
   SetCFlag((value >> 7 & 1) == 1); // 7-bit falls off and goes to the C flag
-  const std::uint8_t result = value << 1;
+  const uint8_t result = static_cast<uint8_t>(value << 1);
   SetZFlag(result);
   SetNFlag(result);
   return result;
@@ -589,26 +587,26 @@ std::uint8_t Cpu::Asl(const std::uint8_t value) {
 void Cpu::AslAccumulator() { accumulator_ = Asl(accumulator_); }
 
 void Cpu::AslZeroPage() {
-  const std::uint16_t address = AddressZeroPage();
-  const std::uint8_t value = ReadByte(address);
+  const uint16_t address = AddressZeroPage();
+  const uint8_t value = ReadByte(address);
   WriteByte(address, Asl(value));
 }
 
 void Cpu::AslZeroPageX() {
-  const std::uint16_t address = AddressZeroPageX();
-  const std::uint8_t value = ReadByte(address);
+  const uint16_t address = AddressZeroPageX();
+  const uint8_t value = ReadByte(address);
   WriteByte(address, Asl(value));
 }
 
 void Cpu::AslAbsolute() {
-  const std::uint16_t address = AddressAbsolute();
-  const std::uint8_t value = ReadByte(address);
+  const uint16_t address = AddressAbsolute();
+  const uint8_t value = ReadByte(address);
   WriteByte(address, Asl(value));
 }
 
 void Cpu::AslAbsoluteX() {
-  const std::uint16_t address = AddressAbsoluteX();
-  const std::uint8_t value = ReadByte(address);
+  const uint16_t address = AddressAbsoluteX();
+  const uint8_t value = ReadByte(address);
   WriteByte(address, Asl(value));
 }
 
@@ -616,9 +614,9 @@ void Cpu::AslAbsoluteX() {
  * LSR (Logical Shift Right), moves all bits one position to the right.
  * Bit 0 goes to the Carry flag
  */
-std::uint8_t Cpu::Lsr(const std::uint8_t value) {
+uint8_t Cpu::Lsr(const uint8_t value) {
   SetCFlag((value & 1) == 1); // 0-bit falls off and goes to the C flag
-  const std::uint8_t result = value >> 1;
+  const uint8_t result = value >> 1;
   SetZFlag(result);
   SetNFlag(result);
   return result;
@@ -627,26 +625,26 @@ std::uint8_t Cpu::Lsr(const std::uint8_t value) {
 void Cpu::LsrAccumulator() { accumulator_ = Lsr(accumulator_); }
 
 void Cpu::LsrZeroPage() {
-  const std::uint16_t address = AddressZeroPage();
-  const std::uint8_t value = ReadByte(address);
+  const uint16_t address = AddressZeroPage();
+  const uint8_t value = ReadByte(address);
   WriteByte(address, Lsr(value));
 }
 
 void Cpu::LsrZeroPageX() {
-  const std::uint16_t address = AddressZeroPageX();
-  const std::uint8_t value = ReadByte(address);
+  const uint16_t address = AddressZeroPageX();
+  const uint8_t value = ReadByte(address);
   WriteByte(address, Lsr(value));
 }
 
 void Cpu::LsrAbsolute() {
-  const std::uint16_t address = AddressAbsolute();
-  const std::uint8_t value = ReadByte(address);
+  const uint16_t address = AddressAbsolute();
+  const uint8_t value = ReadByte(address);
   WriteByte(address, Lsr(value));
 }
 
 void Cpu::LsrAbsoluteX() {
-  const std::uint16_t address = AddressAbsoluteX();
-  const std::uint8_t value = ReadByte(address);
+  const uint16_t address = AddressAbsoluteX();
+  const uint8_t value = ReadByte(address);
   WriteByte(address, Lsr(value));
 }
 
@@ -654,10 +652,10 @@ void Cpu::LsrAbsoluteX() {
  * ROL (ROtate Left)
  * Bit 7 goes to Carry, old Carry goes to bit 0
  */
-std::uint8_t Cpu::Rol(const std::uint8_t value) {
-  const std::uint8_t carry_in = IsFlagSet(static_cast<std::uint8_t>(StatusFlag::C)) ? 1 : 0;
+uint8_t Cpu::Rol(const uint8_t value) {
+  const uint8_t carry_in = IsFlagSet(static_cast<uint8_t>(StatusFlag::C)) ? 1 : 0;
   SetCFlag((value >> 7 & 1) == 1); // 7-bit falls off and goes to the C flag
-  const std::uint8_t result = value << 1 | carry_in;
+  const uint8_t result = static_cast<uint8_t>((value << 1) | carry_in);
   SetZFlag(result);
   SetNFlag(result);
   return result;
@@ -666,26 +664,26 @@ std::uint8_t Cpu::Rol(const std::uint8_t value) {
 void Cpu::RolAccumulator() { accumulator_ = Rol(accumulator_); }
 
 void Cpu::RolZeroPage() {
-  const std::uint16_t address = AddressZeroPage();
-  const std::uint8_t value = ReadByte(address);
+  const uint16_t address = AddressZeroPage();
+  const uint8_t value = ReadByte(address);
   WriteByte(address, Rol(value));
 }
 
 void Cpu::RolZeroPageX() {
-  const std::uint16_t address = AddressZeroPageX();
-  const std::uint8_t value = ReadByte(address);
+  const uint16_t address = AddressZeroPageX();
+  const uint8_t value = ReadByte(address);
   WriteByte(address, Rol(value));
 }
 
 void Cpu::RolAbsolute() {
-  const std::uint16_t address = AddressAbsolute();
-  const std::uint8_t value = ReadByte(address);
+  const uint16_t address = AddressAbsolute();
+  const uint8_t value = ReadByte(address);
   WriteByte(address, Rol(value));
 }
 
 void Cpu::RolAbsoluteX() {
-  const std::uint16_t address = AddressAbsoluteX();
-  const std::uint8_t value = ReadByte(address);
+  const uint16_t address = AddressAbsoluteX();
+  const uint8_t value = ReadByte(address);
   WriteByte(address, Rol(value));
 }
 
@@ -694,10 +692,10 @@ void Cpu::RolAbsoluteX() {
  * Bit 0 goes to Carry, old Carry goes to bit 7
  */
 
-std::uint8_t Cpu::Ror(const std::uint8_t value) {
-  const std::uint8_t carry = IsFlagSet(static_cast<std::uint8_t>(StatusFlag::C)) ? 0x80 : 0x00;
+uint8_t Cpu::Ror(const uint8_t value) {
+  const uint8_t carry = IsFlagSet(static_cast<uint8_t>(StatusFlag::C)) ? 0x80 : 0x00;
   SetCFlag((value >> 0 & 1) == 1); // 0-bit falls off and goes to the C flag
-  const std::uint8_t result = value >> 1 | carry;
+  const uint8_t result = value >> 1 | carry;
   SetZFlag(result);
   SetNFlag(result);
   return result;
@@ -706,35 +704,35 @@ std::uint8_t Cpu::Ror(const std::uint8_t value) {
 void Cpu::RorAccumulator() { accumulator_ = Ror(accumulator_); }
 
 void Cpu::RorZeroPage() {
-  const std::uint16_t address = AddressZeroPage();
-  const std::uint8_t value = ReadByte(address);
+  const uint16_t address = AddressZeroPage();
+  const uint8_t value = ReadByte(address);
   WriteByte(address, Ror(value));
 }
 
 void Cpu::RorZeroPageX() {
-  const std::uint16_t address = AddressZeroPageX();
-  const std::uint8_t value = ReadByte(address);
+  const uint16_t address = AddressZeroPageX();
+  const uint8_t value = ReadByte(address);
   WriteByte(address, Ror(value));
 }
 
 void Cpu::RorAbsolute() {
-  const std::uint16_t address = AddressAbsolute();
-  const std::uint8_t value = ReadByte(address);
+  const uint16_t address = AddressAbsolute();
+  const uint8_t value = ReadByte(address);
   WriteByte(address, Ror(value));
 }
 
 void Cpu::RorAbsoluteX() {
-  const std::uint16_t address = AddressAbsoluteX();
-  const std::uint8_t value = ReadByte(address);
+  const uint16_t address = AddressAbsoluteX();
+  const uint8_t value = ReadByte(address);
   WriteByte(address, Ror(value));
 }
 
 /// ADC (Add with Carry)
-void Cpu::Adc(const std::uint8_t value) {
+void Cpu::Adc(const uint8_t value) {
   // Get current value of the carry flag
-  const std::uint16_t carry_in = IsFlagSet(static_cast<std::uint8_t>(StatusFlag::C)) ? 1 : 0;
-  const std::uint16_t sum = static_cast<std::uint16_t>(accumulator_) + static_cast<std::uint16_t>(value) + carry_in;
-  const auto result = static_cast<std::uint8_t>(sum);
+  const uint16_t carry_in = IsFlagSet(static_cast<uint8_t>(StatusFlag::C)) ? 1 : 0;
+  const uint16_t sum = static_cast<uint16_t>(accumulator_) + static_cast<uint16_t>(value) + carry_in;
+  const auto result = static_cast<uint8_t>(sum);
 
   // Check for unsigned overflow
   SetCFlag(sum > MAX_8_BIT_UINT_);
@@ -798,8 +796,8 @@ void Cpu::AdcIndirectY() {
 }
 
 /// SBC (Subtract with Carry)
-void Cpu::Sbc(const std::uint8_t value) {
-  Adc(~value); // Subtracting is the same as adding the one's complement
+void Cpu::Sbc(const uint8_t value) {
+  Adc(static_cast<uint8_t>(~value)); // Subtracting is the same as adding the one's complement
 }
 
 void Cpu::SbcImmediate() {
@@ -1028,32 +1026,32 @@ void Cpu::EorIndirectY() {
  * and negative flags as appropriate.
  */
 void Cpu::IncZeroPage() {
-  const std::uint16_t address = AddressZeroPage();
-  const std::uint8_t value = ReadByte(address) + 1;
+  const uint16_t address = AddressZeroPage();
+  const uint8_t value = ReadByte(address) + 1;
   WriteByte(address, value);
   SetZFlag(value);
   SetNFlag(value);
 }
 
 void Cpu::IncZeroPageX() {
-  const std::uint16_t address = AddressZeroPageX();
-  const std::uint8_t value = ReadByte(address) + 1;
+  const uint16_t address = AddressZeroPageX();
+  const uint8_t value = ReadByte(address) + 1;
   WriteByte(address, value);
   SetZFlag(value);
   SetNFlag(value);
 }
 
 void Cpu::IncAbsolute() {
-  const std::uint16_t address = AddressAbsolute();
-  const std::uint8_t value = ReadByte(address) + 1;
+  const uint16_t address = AddressAbsolute();
+  const uint8_t value = ReadByte(address) + 1;
   WriteByte(address, value);
   SetZFlag(value);
   SetNFlag(value);
 }
 
 void Cpu::IncAbsoluteX() {
-  const std::uint16_t address = AddressAbsoluteX();
-  const std::uint8_t value = ReadByte(address) + 1;
+  const uint16_t address = AddressAbsoluteX();
+  const uint8_t value = ReadByte(address) + 1;
   WriteByte(address, value);
   SetZFlag(value);
   SetNFlag(value);
@@ -1065,32 +1063,32 @@ void Cpu::IncAbsoluteX() {
  * zero and negative flags as appropriate.
  */
 void Cpu::DecZeroPage() {
-  const std::uint16_t address = AddressZeroPage();
-  const std::uint8_t value = ReadByte(address) - 1;
+  const uint16_t address = AddressZeroPage();
+  const uint8_t value = ReadByte(address) - 1;
   WriteByte(address, value);
   SetZFlag(value);
   SetNFlag(value);
 }
 
 void Cpu::DecZeroPageX() {
-  const std::uint16_t address = AddressZeroPageX();
-  const std::uint8_t value = ReadByte(address) - 1;
+  const uint16_t address = AddressZeroPageX();
+  const uint8_t value = ReadByte(address) - 1;
   WriteByte(address, value);
   SetZFlag(value);
   SetNFlag(value);
 }
 
 void Cpu::DecAbsolute() {
-  const std::uint16_t address = AddressAbsolute();
-  const std::uint8_t value = ReadByte(address) - 1;
+  const uint16_t address = AddressAbsolute();
+  const uint8_t value = ReadByte(address) - 1;
   WriteByte(address, value);
   SetZFlag(value);
   SetNFlag(value);
 }
 
 void Cpu::DecAbsoluteX() {
-  const std::uint16_t address = AddressAbsoluteX();
-  const std::uint8_t value = ReadByte(address) - 1;
+  const uint16_t address = AddressAbsoluteX();
+  const uint8_t value = ReadByte(address) - 1;
   WriteByte(address, value);
   SetZFlag(value);
   SetNFlag(value);
@@ -1098,14 +1096,14 @@ void Cpu::DecAbsoluteX() {
 
 /// BIT
 void Cpu::BitZeroPage() {
-  const std::uint8_t value = ReadByte(AddressZeroPage());
+  const uint8_t value = ReadByte(AddressZeroPage());
   SetZFlag(accumulator_ & value);
   SetNFlag(value);
   SetVFlag((value >> 6 & 1) == 1); // Bit 6 goes to V flag
 }
 
 void Cpu::BitAbsolute() {
-  const std::uint8_t value = ReadByte(AddressAbsolute());
+  const uint8_t value = ReadByte(AddressAbsolute());
   SetZFlag(accumulator_ & value);
   SetNFlag(value);
   SetVFlag((value >> 6 & 1) == 1);
@@ -1118,12 +1116,11 @@ void Cpu::Nop() {
 
 void Cpu::Nmi() {
   StackPushWord(program_counter_);
-  StackPushByte((status_register_ | static_cast<std::uint8_t>(StatusFlag::U)) &
-                ~static_cast<std::uint8_t>(StatusFlag::B));
+  StackPushByte((status_register_ | static_cast<uint8_t>(StatusFlag::U)) & ~static_cast<uint8_t>(StatusFlag::B));
   SetFlag(StatusFlag::I, true);
-  const std::uint8_t low_byte = ReadByte(NMI_VECTOR_);
-  const std::uint8_t high_byte = ReadByte(NMI_VECTOR_ + 1);
-  program_counter_ = static_cast<std::uint16_t>(high_byte) << 8 | static_cast<std::uint16_t>(low_byte);
+  const uint8_t low_byte = ReadByte(NMI_VECTOR_);
+  const uint8_t high_byte = ReadByte(NMI_VECTOR_ + 1);
+  program_counter_ = static_cast<uint16_t>(high_byte << 8) | static_cast<uint16_t>(low_byte);
 }
 
 } // namespace nes

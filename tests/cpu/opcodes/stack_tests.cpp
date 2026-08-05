@@ -76,7 +76,7 @@ TEST_CASE("Stack pointer wraps from 0x00 to 0xFF when pushing past the bottom "
   // Drive the stack pointer down to 0x00 by pushing 0xFD bytes (starts at
   // 0xFD).
   for (int i = 0; i < 0xFD; ++i) {
-    cpu.StackPushByte(static_cast<std::uint8_t>(i));
+    cpu.StackPushByte(static_cast<uint8_t>(i));
   }
 
   cpu.StackPushByte(0x99); // stack pointer wraps from 0x00 to 0xFF
@@ -135,8 +135,8 @@ TEST_CASE("Pla pops a value from the stack into the accumulator and updates "
   bus.WriteCpu(0x05, 0x68); // PLA
   CHECK(cpu.Step() == 4);
   CHECK(cpu.GetAccumulator() == 0x80);
-  CHECK(cpu.IsFlagSet(static_cast<std::uint8_t>(nes::Cpu::StatusFlag::N)));
-  CHECK_FALSE(cpu.IsFlagSet(static_cast<std::uint8_t>(nes::Cpu::StatusFlag::Z)));
+  CHECK(cpu.IsFlagSet(static_cast<uint8_t>(nes::Cpu::StatusFlag::N)));
+  CHECK_FALSE(cpu.IsFlagSet(static_cast<uint8_t>(nes::Cpu::StatusFlag::Z)));
 
   bus.WriteCpu(0x06, 0xBA); // TSX - confirms the stack pointer was restored
   CHECK(cpu.Step() == 2);
@@ -161,8 +161,8 @@ TEST_CASE("Pla sets the Zero flag when popping a zero value") {
   bus.WriteCpu(0x05, 0x68); // PLA
   CHECK(cpu.Step() == 4);
   CHECK(cpu.GetAccumulator() == 0x00);
-  CHECK(cpu.IsFlagSet(static_cast<std::uint8_t>(nes::Cpu::StatusFlag::Z)));
-  CHECK_FALSE(cpu.IsFlagSet(static_cast<std::uint8_t>(nes::Cpu::StatusFlag::N)));
+  CHECK(cpu.IsFlagSet(static_cast<uint8_t>(nes::Cpu::StatusFlag::Z)));
+  CHECK_FALSE(cpu.IsFlagSet(static_cast<uint8_t>(nes::Cpu::StatusFlag::N)));
 }
 
 TEST_CASE("Php pushes the status register with the Break and Unused flags "
@@ -178,8 +178,8 @@ TEST_CASE("Php pushes the status register with the Break and Unused flags "
   bus.WriteCpu(0x00, 0x08); // PHP
   CHECK(cpu.Step() == 3);
 
-  const std::uint8_t expected = status_before | static_cast<std::uint8_t>(nes::Cpu::StatusFlag::B) |
-                                static_cast<std::uint8_t>(nes::Cpu::StatusFlag::U);
+  const uint8_t expected =
+      status_before | static_cast<uint8_t>(nes::Cpu::StatusFlag::B) | static_cast<uint8_t>(nes::Cpu::StatusFlag::U);
   CHECK(bus.ReadCpu(0x01FD) == expected);
   CHECK(cpu.GetStatusRegister() == status_before); // Php does not modify the live status register
 
@@ -207,11 +207,11 @@ TEST_CASE("Plp restores flags from the stack while forcing Unused on and Break o
   bus.WriteCpu(0x01, 0x28); // PLP
   CHECK(cpu.Step() == 4);
 
-  CHECK(cpu.IsFlagSet(static_cast<std::uint8_t>(nes::Cpu::StatusFlag::C)));
-  CHECK(cpu.IsFlagSet(static_cast<std::uint8_t>(nes::Cpu::StatusFlag::N)));
-  CHECK(cpu.IsFlagSet(static_cast<std::uint8_t>(nes::Cpu::StatusFlag::V)));
-  CHECK(cpu.IsFlagSet(static_cast<std::uint8_t>(nes::Cpu::StatusFlag::U))); // Always forced on
-  CHECK_FALSE(cpu.IsFlagSet(static_cast<std::uint8_t>(nes::Cpu::StatusFlag::B))); // Always forced off
+  CHECK(cpu.IsFlagSet(static_cast<uint8_t>(nes::Cpu::StatusFlag::C)));
+  CHECK(cpu.IsFlagSet(static_cast<uint8_t>(nes::Cpu::StatusFlag::N)));
+  CHECK(cpu.IsFlagSet(static_cast<uint8_t>(nes::Cpu::StatusFlag::V)));
+  CHECK(cpu.IsFlagSet(static_cast<uint8_t>(nes::Cpu::StatusFlag::U))); // Always forced on
+  CHECK_FALSE(cpu.IsFlagSet(static_cast<uint8_t>(nes::Cpu::StatusFlag::B))); // Always forced off
 
   bus.WriteCpu(0x02, 0xBA); // TSX - confirms the stack pointer was restored
   CHECK(cpu.Step() == 2);
