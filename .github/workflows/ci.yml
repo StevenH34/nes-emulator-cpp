@@ -7,6 +7,9 @@ on:
 
 env:
   VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+  # Tells vcpkg to use the GitHub Actions cache as its binary cache, so already-built packages
+  # (SDL3 and its from-source dependencies) are restored instead of rebuilt on every run.
+  VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
 
 jobs:
   sanitizers:
@@ -14,6 +17,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      # Required by vcpkg's x-gha binary cache provider to authenticate against the GitHub
+      # Actions cache service. See https://learn.microsoft.com/vcpkg/consume/binary-caching-github-actions
+      - name: Export GitHub Actions cache variables
+        uses: actions/github-script@v7
+        with:
+          script: |
+            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
 
       # SDL3's default vcpkg features on x64-linux (dbus, ibus, wayland, x11) pull in a chunk of
       # the Linux desktop stack. Some of it (dbus, libsystemd, libxcrypt, libmount, ...) is built
@@ -36,7 +48,9 @@ jobs:
             libdbus-1-dev libibus-1.0-dev libudev-dev libthai-dev libusb-1.0-0-dev \
             libpipewire-0.3-dev libwayland-dev wayland-protocols libdecor-0-dev liburing-dev
 
-      - name: Cache vcpkg
+      # Caches the vcpkg tool itself (its git clone + bootstrapped binary), separate from the
+      # x-gha binary cache above which handles the packages vcpkg builds.
+      - name: Cache vcpkg tool
         uses: actions/cache@v4
         with:
           path: |
