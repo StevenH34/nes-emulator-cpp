@@ -11,6 +11,15 @@
         "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
         "CMAKE_BUILD_TYPE": "Debug"
       }
+    },
+    {
+      "name": "asan",
+      "displayName": "vcpkg (Ninja) + ASan/UBSan",
+      "inherits": "default",
+      "binaryDir": "${sourceDir}/cmake-build-asan",
+      "cacheVariables": {
+        "NES_ENABLE_SANITIZERS": "ON"
+      }
     }
   ]
 }
