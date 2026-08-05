@@ -1,0 +1,14 @@
+Checks: >
+  -*,
+  bugprone-*,
+  cppcoreguidelines-narrowing-conversions,
+  cppcoreguidelines-pro-type-member-init,
+  performance-*,
+  modernize-use-override,
+  modernize-use-nullptr,
+  readability-implicit-bool-conversion,
+  readability-else-after-return,
+  readability-redundant-*
+WarningsAsErrors: ''
+HeaderFilterRegex: '/(src|tests)/'
+FormatStyle: file

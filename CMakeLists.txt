@@ -32,7 +32,7 @@ else()
     endif()
 endif()
 
-add_library(nes_core STATIC
+set(NES_CORE_SOURCES
         src/core/Emulator.cpp
         src/core/Emulator.h
         src/core/cpu/Cpu.cpp
@@ -56,6 +56,8 @@ add_library(nes_core STATIC
         src/app/NesApp.h
         src/core/Controller.cpp
         src/core/Controller.h)
+
+add_library(nes_core STATIC ${NES_CORE_SOURCES})
 
 target_include_directories(nes_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/core)
 
@@ -145,3 +147,29 @@ add_custom_target(run_tests
         DEPENDS nes_emulator_tests
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         COMMENT "Running nes_emulator_tests")
+
+# Static analysis via .clang-tidy: cmake --build cmake-build-debug --target clang-tidy
+find_program(CLANG_TIDY_EXE
+        NAMES clang-tidy
+        HINTS /opt/homebrew/opt/llvm/bin /usr/local/opt/llvm/bin)
+
+if(CLANG_TIDY_EXE)
+    set(NES_TIDY_SOURCES ${NES_CORE_SOURCES})
+    list(FILTER NES_TIDY_SOURCES INCLUDE REGEX "\\.cpp$")
+
+    set(NES_TIDY_EXTRA_ARGS "")
+    if(APPLE)
+        # Homebrew's clang-tidy doesn't discover the Xcode SDK on its own.
+        execute_process(COMMAND xcrun --show-sdk-path
+                OUTPUT_VARIABLE NES_APPLE_SDK_PATH
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
+        list(APPEND NES_TIDY_EXTRA_ARGS "--extra-arg=-isysroot${NES_APPLE_SDK_PATH}")
+    endif()
+
+    add_custom_target(clang-tidy
+            COMMAND ${CLANG_TIDY_EXE} -p ${CMAKE_BINARY_DIR} ${NES_TIDY_EXTRA_ARGS} ${NES_TIDY_SOURCES}
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            COMMENT "Running clang-tidy over nes_core sources")
+else()
+    message(STATUS "clang-tidy not found; 'clang-tidy' target will be unavailable")
+endif()
