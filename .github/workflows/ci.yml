@@ -12,6 +12,24 @@ env:
   VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
 
 jobs:
+  format:
+    name: clang-format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Pull from the official LLVM apt repo instead of the distro's.
+      - name: Install clang-format
+        run: |
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh 19
+          sudo apt-get install -y clang-format-19
+
+      - name: Check formatting
+        run: |
+          find src tests -name '*.cpp' -o -name '*.h' -o -name '*.hpp' \
+            | xargs clang-format-19 --dry-run --Werror
+
   sanitizers:
     name: ASan/UBSan tests
     runs-on: ubuntu-latest
@@ -27,12 +45,8 @@ jobs:
             core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
             core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
 
-      # SDL3's default vcpkg features on x64-linux (dbus, ibus, wayland, x11) pull in a chunk of
-      # the Linux desktop stack. Some of it (dbus, libsystemd, libxcrypt, libmount, ...) is built
-      # from source by vcpkg and needs autotools on the PATH; SDL3 itself is built by vcpkg too,
-      # but links its X11/Wayland/EGL/audio backends directly against system dev packages rather
-      # than vcpkg-built ones. Package list below is SDL's own documented Linux build-dependency
-      # list (https://wiki.libsdl.org/SDL3/README-linux), plus autotools for the vcpkg-built pieces.
+      # Package list below is SDL's own documented Linux build-dependency list (https://wiki.libsdl.org/SDL3/README-linux),
+      # plus autotools for the vcpkg-built pieces.
       - name: Install native build dependencies
         run: |
           sudo apt-get update
@@ -69,9 +83,6 @@ jobs:
           fi
           "${{ env.VCPKG_ROOT }}/bootstrap-vcpkg.sh"
 
-      # ubuntu-latest's default g++ (13) predates <print>/std::print support (added in GCC 14's
-      # libstdc++); point our own project sources at g++-14. SDL3 is a C library built by vcpkg
-      # with the default system compiler above, so this doesn't affect that step.
       - name: Configure (asan preset)
         run: cmake --preset asan -DCMAKE_C_COMPILER=gcc-14 -DCMAKE_CXX_COMPILER=g++-14
 

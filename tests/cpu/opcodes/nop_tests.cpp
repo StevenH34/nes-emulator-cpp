@@ -1,25 +1,25 @@
 #include "doctest.h"
 
 #include "../../../src/core/Bus.h"
-#include "TestBus.h"
 #include "../../../src/core/cpu/Cpu.h"
+#include "TestBus.h"
 
 TEST_CASE("Nop leaves registers, flags, and the program counter unchanged") {
-    nes_test::TestBus bus;
-    nes::Cpu cpu(bus);
+  nes_test::TestBus bus;
+  nes::Cpu cpu(bus);
 
-    cpu.Lda(0x42);
-    cpu.SetXRegister(0x11);
-    cpu.SetYRegister(0x22);
+  cpu.Lda(0x42);
+  cpu.SetXRegister(0x11);
+  cpu.SetYRegister(0x22);
 
-    const auto status_before = cpu.GetStatusRegister();
-    const auto pc_before = cpu.GetProgramCounter();
+  const auto status_before = cpu.GetStatusRegister();
+  const auto pc_before = cpu.GetProgramCounter();
 
-    cpu.Nop();
+  cpu.Nop();
 
-    CHECK(cpu.GetAccumulator() == 0x42);
-    CHECK(cpu.GetXRegister() == 0x11);
-    CHECK(cpu.GetYRegister() == 0x22);
-    CHECK(cpu.GetStatusRegister() == status_before);
-    CHECK(cpu.GetProgramCounter() == pc_before);
+  CHECK(cpu.GetAccumulator() == 0x42);
+  CHECK(cpu.GetXRegister() == 0x11);
+  CHECK(cpu.GetYRegister() == 0x22);
+  CHECK(cpu.GetStatusRegister() == status_before);
+  CHECK(cpu.GetProgramCounter() == pc_before);
 }
