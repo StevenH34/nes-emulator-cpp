@@ -448,13 +448,13 @@ void Ppu::CheckSprite0Hit(int32_t y) {
 /// Resolves the background pixel under an arbitrary screen coordinate, fetching
 /// the tile via VRAM. Used by sprite-0-hit detection, which needs to sample
 /// outside the tile currently being drawn by RenderScanline.
-Ppu::Pixel Ppu::BackgroundPixelAt(const int32_t screen_x, const int32_t /*y*/) const {
+Ppu::Pixel Ppu::BackgroundPixelAt(const int32_t x, const int32_t /*y*/) const {
   const int fine_y = GetFineY();
   const int coarse_y = GetCoarseY();
   const int base_coarse_x = GetCoarseX();
   const int base_nametable = GetNametable();
 
-  const int scroll_x = x_register_ + screen_x;
+  const int scroll_x = x_register_ + x;
   int tile_column = base_coarse_x + scroll_x / PIXELS_PER_TILE;
   int nametable = base_nametable;
   if (tile_column >= TILES_PER_ROW) {

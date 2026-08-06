@@ -280,7 +280,7 @@ public:
   [[nodiscard]] BackgroundTile FetchBackgroundTile(int tile_column, int nametable, int coarse_y, int fine_y) const;
   [[nodiscard]] static int ColorFromBitplanes(uint8_t low_bitplane, uint8_t high_bitplane, int pixel_in_tile);
   [[nodiscard]] static Pixel ExtractBackgroundPixel(const BackgroundTile& tile, int pixel_in_tile);
-  [[nodiscard]] Pixel BackgroundPixelAt(int32_t screen_x, int32_t y) const;
+  [[nodiscard]] Pixel BackgroundPixelAt(int32_t x, int32_t y) const;
   [[nodiscard]] int32_t TilePalette(int32_t nametable_address, int32_t tile_column, int32_t tile_row) const;
   [[nodiscard]] uint8_t PaletteColor(int32_t palette, int32_t color) const;
   [[nodiscard]] uint8_t SpritePaletteColor(int32_t palette, int32_t color) const;
