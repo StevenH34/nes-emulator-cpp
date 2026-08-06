@@ -19,6 +19,13 @@ if(NES_ENABLE_SANITIZERS)
                 -g)
         target_link_options(nes_sanitizers INTERFACE
                 -fsanitize=address,undefined)
+
+        # implicit-conversion/integer are Clang-specific sanitizer groups; GCC
+        # (used by the CI asan preset) doesn't recognize them.
+        if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+            target_compile_options(nes_sanitizers INTERFACE -fsanitize=implicit-conversion,integer)
+            target_link_options(nes_sanitizers INTERFACE -fsanitize=implicit-conversion,integer)
+        endif()
     endif()
 endif()
 
