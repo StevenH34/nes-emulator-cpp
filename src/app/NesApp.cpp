@@ -21,13 +21,13 @@ NesApp::NesApp(const std::string& rom_path)
     : emulator_(rom_path), window_("NES Emulator", WINDOW_WIDTH, WINDOW_HEIGHT) {
   try {
     renderer_ = SDL_CreateRenderer(static_cast<SDL_Window *>(window_), nullptr);
-    if (!renderer_) {
+    if (renderer_ == nullptr) {
       throw std::runtime_error("SDL_CreateRenderer failed: " + std::string(SDL_GetError()));
     }
 
     texture_ = SDL_CreateTexture(renderer_, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING, nes::Ppu::WIDTH,
                                  nes::Ppu::HEIGHT);
-    if (!texture_) {
+    if (texture_ == nullptr) {
       throw std::runtime_error("SDL_CreateTexture failed: " + std::string(SDL_GetError()));
     }
 
@@ -42,11 +42,11 @@ NesApp::~NesApp() { Cleanup(); }
 
 void NesApp::Cleanup() {
   // TODO: Destroy audio
-  if (texture_) {
+  if (texture_ != nullptr) {
     SDL_DestroyTexture(texture_);
     texture_ = nullptr;
   }
-  if (renderer_) {
+  if (renderer_ != nullptr) {
     SDL_DestroyRenderer(renderer_);
     renderer_ = nullptr;
   }
