@@ -32,7 +32,7 @@ public:
   /// CPU writes to mapper ($8000-$FFFF)
   /// @param address The address to write to
   /// @param value The value to write
-  virtual void WritePrg(uint16_t /*address*/, uint8_t /*value*/) {
+  virtual void WritePrg([[maybe_unused]] uint16_t address, [[maybe_unused]] uint8_t value) {
     // Default: ignore writes (e.g. Mapper 0 has no registers)
   }
 
@@ -44,19 +44,19 @@ public:
   /// PPU writes to CHR if CHR-RAM is present
   /// @param address The address to write to
   /// @param value The value to write
-  virtual void WriteChr(uint16_t /*address*/, uint8_t /*value*/) {
+  virtual void WriteChr([[maybe_unused]] uint16_t address, [[maybe_unused]] uint8_t value) {
     // Default: ignore writes (most mappers don't have CHR-RAM)
   }
 
   /// CPU reads from WRAM ($6000-$7FFF)
   /// @param address The address to read from
   /// @return The byte read from the WRAM
-  [[nodiscard]] virtual uint8_t ReadWram(uint16_t /*address*/) const { return 0; }
+  [[nodiscard]] virtual uint8_t ReadWram([[maybe_unused]] uint16_t address) const { return 0; }
 
   /// CPU writes to WRAM
   /// @param address The address to write to
   /// @param value The value to write
-  virtual void WriteWram(uint16_t /*address*/, uint8_t /*value*/) {
+  virtual void WriteWram([[maybe_unused]] uint16_t address, [[maybe_unused]] uint8_t value) {
     // Default: ignore writes (no WRAM is present)
   }
 };
