@@ -120,7 +120,7 @@ void Ppu::WriteData(const uint8_t value) {
 /// OAMDATA ($2004): Sprites
 void Ppu::WriteOamData(const uint8_t value) {
   oam_[oam_addr_register_] = value;
-  oam_addr_register_ += 1;
+  oam_addr_register_ = static_cast<uint8_t>(oam_addr_register_ + 1);
 }
 
 void Ppu::OamDma(std::array<uint8_t, 256> data) { std::ranges::copy(data, oam_.begin()); }

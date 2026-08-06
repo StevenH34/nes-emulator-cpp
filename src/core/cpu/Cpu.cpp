@@ -38,7 +38,7 @@ void Cpu::Reset() {
 // Reads byte at the current Program Counter, then increments Program Counter
 uint8_t Cpu::FetchByte() {
   const auto value = ReadByte(program_counter_);
-  program_counter_ += 1;
+  program_counter_ = static_cast<uint16_t>(program_counter_ + 1);
   return value;
 }
 
@@ -71,10 +71,10 @@ uint16_t Cpu::AddressAbsolute() {
 }
 
 // Absolute + X offset
-uint16_t Cpu::AddressAbsoluteX() { return AddressAbsolute() + x_register_; }
+uint16_t Cpu::AddressAbsoluteX() { return static_cast<uint16_t>(AddressAbsolute() + x_register_); }
 
 // Absolute + Y offset
-uint16_t Cpu::AddressAbsoluteY() { return AddressAbsolute() + y_register_; }
+uint16_t Cpu::AddressAbsoluteY() { return static_cast<uint16_t>(AddressAbsolute() + y_register_); }
 
 // Relative addressing is used for branch instructions.
 // It provides a signed offset (-128 to 127) to the current Program Counter.
@@ -115,7 +115,7 @@ uint16_t Cpu::AddressIndirectY() {
   // The high-byte pointer wraps within the zero page
   const uint8_t high_byte = ReadByte(static_cast<uint8_t>(base + 1));
   const uint16_t address = static_cast<uint16_t>(high_byte << 8) | static_cast<uint16_t>(low_byte);
-  return address + y_register_;
+  return static_cast<uint16_t>(address + y_register_);
 }
 
 /// STA Instructions
@@ -313,25 +313,25 @@ void Cpu::StyAbsolute() {
 
 /// Register Increment Instructions
 void Cpu::Inx() {
-  x_register_ += 1;
+  x_register_ = static_cast<uint8_t>(x_register_ + 1);
   SetZFlag(x_register_);
   SetNFlag(x_register_);
 }
 
 void Cpu::Iny() {
-  y_register_ += 1;
+  y_register_ = static_cast<uint8_t>(y_register_ + 1);
   SetZFlag(y_register_);
   SetNFlag(y_register_);
 }
 
 void Cpu::Dex() {
-  x_register_ -= 1;
+  x_register_ = static_cast<uint8_t>(x_register_ - 1);
   SetZFlag(x_register_);
   SetNFlag(x_register_);
 }
 
 void Cpu::Dey() {
-  y_register_ -= 1;
+  y_register_ = static_cast<uint8_t>(y_register_ - 1);
   SetZFlag(y_register_);
   SetNFlag(y_register_);
 }
@@ -450,12 +450,12 @@ void Cpu::Rti() {
 void Cpu::StackPushByte(const uint8_t value) {
   // Write current value at stack address then decrement stack pointer
   WriteByte(STACK_BASE_ | static_cast<uint16_t>(stack_pointer_), value);
-  stack_pointer_ -= 1;
+  stack_pointer_ = static_cast<uint8_t>(stack_pointer_ - 1);
 }
 
 uint8_t Cpu::StackPullByte() {
   // Decrements stack pointer then reads address
-  stack_pointer_ += 1;
+  stack_pointer_ = static_cast<uint8_t>(stack_pointer_ + 1);
   return ReadByte(STACK_BASE_ | static_cast<uint16_t>(stack_pointer_));
 }
 
@@ -489,7 +489,7 @@ void Cpu::Plp() {
 
 /// Comparison Instructions
 void Cpu::Compare(const uint8_t register_value, const uint8_t operand) {
-  const uint8_t result = register_value - operand;
+  const uint8_t result = static_cast<uint8_t>(register_value - operand);
   // If register >= operand, not borrow, so C = 1, else C = 0
   SetCFlag(register_value >= operand);
   // If result = 0, Z = 1
@@ -1027,7 +1027,7 @@ void Cpu::EorIndirectY() {
  */
 void Cpu::IncZeroPage() {
   const uint16_t address = AddressZeroPage();
-  const uint8_t value = ReadByte(address) + 1;
+  const uint8_t value = static_cast<uint8_t>(ReadByte(address) + 1);
   WriteByte(address, value);
   SetZFlag(value);
   SetNFlag(value);
@@ -1035,7 +1035,7 @@ void Cpu::IncZeroPage() {
 
 void Cpu::IncZeroPageX() {
   const uint16_t address = AddressZeroPageX();
-  const uint8_t value = ReadByte(address) + 1;
+  const uint8_t value = static_cast<uint8_t>(ReadByte(address) + 1);
   WriteByte(address, value);
   SetZFlag(value);
   SetNFlag(value);
@@ -1043,7 +1043,7 @@ void Cpu::IncZeroPageX() {
 
 void Cpu::IncAbsolute() {
   const uint16_t address = AddressAbsolute();
-  const uint8_t value = ReadByte(address) + 1;
+  const uint8_t value = static_cast<uint8_t>(ReadByte(address) + 1);
   WriteByte(address, value);
   SetZFlag(value);
   SetNFlag(value);
@@ -1051,7 +1051,7 @@ void Cpu::IncAbsolute() {
 
 void Cpu::IncAbsoluteX() {
   const uint16_t address = AddressAbsoluteX();
-  const uint8_t value = ReadByte(address) + 1;
+  const uint8_t value = static_cast<uint8_t>(ReadByte(address) + 1);
   WriteByte(address, value);
   SetZFlag(value);
   SetNFlag(value);
@@ -1064,7 +1064,7 @@ void Cpu::IncAbsoluteX() {
  */
 void Cpu::DecZeroPage() {
   const uint16_t address = AddressZeroPage();
-  const uint8_t value = ReadByte(address) - 1;
+  const uint8_t value = static_cast<uint8_t>(ReadByte(address) - 1);
   WriteByte(address, value);
   SetZFlag(value);
   SetNFlag(value);
@@ -1072,7 +1072,7 @@ void Cpu::DecZeroPage() {
 
 void Cpu::DecZeroPageX() {
   const uint16_t address = AddressZeroPageX();
-  const uint8_t value = ReadByte(address) - 1;
+  const uint8_t value = static_cast<uint8_t>(ReadByte(address) - 1);
   WriteByte(address, value);
   SetZFlag(value);
   SetNFlag(value);
@@ -1080,7 +1080,7 @@ void Cpu::DecZeroPageX() {
 
 void Cpu::DecAbsolute() {
   const uint16_t address = AddressAbsolute();
-  const uint8_t value = ReadByte(address) - 1;
+  const uint8_t value = static_cast<uint8_t>(ReadByte(address) - 1);
   WriteByte(address, value);
   SetZFlag(value);
   SetNFlag(value);
@@ -1088,7 +1088,7 @@ void Cpu::DecAbsolute() {
 
 void Cpu::DecAbsoluteX() {
   const uint16_t address = AddressAbsoluteX();
-  const uint8_t value = ReadByte(address) - 1;
+  const uint8_t value = static_cast<uint8_t>(ReadByte(address) - 1);
   WriteByte(address, value);
   SetZFlag(value);
   SetNFlag(value);
