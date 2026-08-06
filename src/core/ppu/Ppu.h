@@ -304,7 +304,7 @@ private:
   int scanline_{0};
   bool frame_complete_{false};
   /// @frame_buffer_ 256 x 240 pixels, 4 bytes per pixel (RGBA)
-  std::vector<uint8_t> frame_buffer_ = std::vector<uint8_t>(WIDTH * HEIGHT * 4, 0);
+  std::vector<uint8_t> frame_buffer_ = std::vector<uint8_t>(static_cast<std::size_t>(WIDTH) * HEIGHT * 4, 0);
   uint8_t vram_buffer_{0};
   std::vector<uint8_t> nametable_ram_ = std::vector<uint8_t>(PpuAddresses::NAMETABLE_RAM_SIZE, 0);
   std::vector<uint8_t> palette_ram_ = std::vector<uint8_t>(PpuAddresses::PALETTE_RAM_SIZE, 0);
