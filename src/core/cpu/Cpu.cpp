@@ -17,14 +17,14 @@ std::string Cpu::StatusString() const {
   std::string output;
   output.reserve(8);
 
-  output += s >> 7 & 1 ? 'N' : 'n';
-  output += s >> 6 & 1 ? 'V' : 'v';
-  output += s >> 5 & 1 ? 'U' : 'u';
-  output += s >> 4 & 1 ? 'B' : 'b';
-  output += s >> 3 & 1 ? 'D' : 'd';
-  output += s >> 2 & 1 ? 'I' : 'i';
-  output += s >> 1 & 1 ? 'Z' : 'z';
-  output += s >> 0 & 1 ? 'C' : 'c';
+  output += (s >> 7 & 1) != 0 ? 'N' : 'n';
+  output += (s >> 6 & 1) != 0 ? 'V' : 'v';
+  output += (s >> 5 & 1) != 0 ? 'U' : 'u';
+  output += (s >> 4 & 1) != 0 ? 'B' : 'b';
+  output += (s >> 3 & 1) != 0 ? 'D' : 'd';
+  output += (s >> 2 & 1) != 0 ? 'I' : 'i';
+  output += (s >> 1 & 1) != 0 ? 'Z' : 'z';
+  output += (s >> 0 & 1) != 0 ? 'C' : 'c';
 
   return output;
 }

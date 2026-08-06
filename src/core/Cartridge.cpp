@@ -56,12 +56,12 @@ uint8_t Cartridge::ParseMapperId(const uint8_t flags_6, const uint8_t flags_7) {
 
 Cartridge::Mirroring Cartridge::ParseMirroring(const uint8_t flags_6) {
   // Four-screen mask takes priority
-  if (flags_6 & FOUR_SCREEN_MASK) {
+  if ((flags_6 & FOUR_SCREEN_MASK) != 0) {
     return Mirroring::FourScreen;
   }
   // Check the mirror bit
   // 1 = vertical, 0 = horizontal
-  if (flags_6 & MIRROR_MASK) {
+  if ((flags_6 & MIRROR_MASK) != 0) {
     return Mirroring::Vertical;
   }
   return Mirroring::Horizontal;
@@ -83,9 +83,9 @@ void Cartridge::Parse(std::span<const uint8_t> data) {
   // Parse the mirroring type
   mirroring_ = ParseMirroring(flags_6);
   // Check for battery-backed RAM
-  battery_ = flags_6 & BATTERY_MASK;
+  battery_ = (flags_6 & BATTERY_MASK) != 0;
   // Check for trainer
-  const bool has_trainer = flags_6 & TRAINER_MASK;
+  const bool has_trainer = (flags_6 & TRAINER_MASK) != 0;
   // Calculate the offsets
   // If there’s a 512 byte trainer PRG starts 512 bytes after the header
   // Trainers are not common, but still must be accounted for
