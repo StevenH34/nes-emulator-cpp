@@ -50,7 +50,7 @@ public:
   // Flags 7 masks
   static constexpr uint8_t MAPPER_HIGH_MASK = 0b1111'0000; // Mapper number bits 4-7
 
-  enum class Mirroring { Horizontal, Vertical, FourScreen };
+  enum class Mirroring : uint8_t { Horizontal, Vertical, FourScreen };
 
   [[nodiscard]] std::string GetPath() const { return path_; }
   [[nodiscard]] const std::vector<uint8_t>& GetPrgRom() const { return prg_rom_; }
