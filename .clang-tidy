@@ -12,3 +12,5 @@ Checks: >
 WarningsAsErrors: ''
 HeaderFilterRegex: '/(src|tests)/'
 FormatStyle: file
+CheckOptions:
+  bugprone-easily-swappable-parameters.IgnoredParameterNames: 'x;y;address;value'
