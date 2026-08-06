@@ -12,8 +12,7 @@ namespace nes {
 
 class UnknownOpcode : public std::runtime_error {
 public:
-  explicit UnknownOpcode(const std::uint8_t opcode)
-      : std::runtime_error(std::format("Unknown opcode: 0x{:02X}", opcode)) {}
+  explicit UnknownOpcode(const uint8_t opcode) : std::runtime_error(std::format("Unknown opcode: 0x{:02X}", opcode)) {}
 };
 
 class Cpu {
@@ -24,37 +23,37 @@ public:
   [[nodiscard]] std::string StatusString() const;
   void Reset();
   [[nodiscard]] int Step();
-  [[nodiscard]] std::uint8_t FetchByte();
-  [[nodiscard]] std::uint8_t ReadByte(std::uint16_t address) const;
-  void WriteByte(std::uint16_t address, std::uint8_t value) const;
+  [[nodiscard]] uint8_t FetchByte();
+  [[nodiscard]] uint8_t ReadByte(uint16_t address) const;
+  void WriteByte(uint16_t address, uint8_t value) const;
 
-  [[nodiscard]] std::uint8_t GetAccumulator() const { return accumulator_; }
-  [[nodiscard]] std::uint8_t GetXRegister() const { return x_register_; };
-  [[nodiscard]] std::uint8_t GetYRegister() const { return y_register_; }
-  [[nodiscard]] std::uint8_t GetStatusRegister() const { return status_register_; }
-  [[nodiscard]] std::uint8_t GetStackPointer() const { return stack_pointer_; }
-  [[nodiscard]] std::uint16_t GetProgramCounter() const { return program_counter_; }
+  [[nodiscard]] uint8_t GetAccumulator() const { return accumulator_; }
+  [[nodiscard]] uint8_t GetXRegister() const { return x_register_; };
+  [[nodiscard]] uint8_t GetYRegister() const { return y_register_; }
+  [[nodiscard]] uint8_t GetStatusRegister() const { return status_register_; }
+  [[nodiscard]] uint8_t GetStackPointer() const { return stack_pointer_; }
+  [[nodiscard]] uint16_t GetProgramCounter() const { return program_counter_; }
 
   // Test helpers for driving register state directly
-  void SetXRegister(const std::uint8_t value) { x_register_ = value; }
-  void SetYRegister(const std::uint8_t value) { y_register_ = value; }
-  void SetProgramCounter(const std::uint16_t value) { program_counter_ = value; }
+  void SetXRegister(const uint8_t value) { x_register_ = value; }
+  void SetYRegister(const uint8_t value) { y_register_ = value; }
+  void SetProgramCounter(const uint16_t value) { program_counter_ = value; }
 
   /// Addressing Modes
   // Zero Page is an 8-bit address in the first 256 bytes of memory
-  std::uint16_t AddressZeroPage();
-  std::uint16_t AddressZeroPageX();
-  std::uint16_t AddressZeroPageY();
-  std::uint16_t AddressAbsolute();
-  std::uint16_t AddressAbsoluteX();
-  std::uint16_t AddressAbsoluteY();
-  std::uint16_t AddressRelative();
+  uint16_t AddressZeroPage();
+  uint16_t AddressZeroPageX();
+  uint16_t AddressZeroPageY();
+  uint16_t AddressAbsolute();
+  uint16_t AddressAbsoluteX();
+  uint16_t AddressAbsoluteY();
+  uint16_t AddressRelative();
   // Indirect addressing is used for JMP (Jump) instructions.
   // It reads a 16-bit address from the instruction, this address is the final
   // destination of the jump.
-  std::uint16_t AddressIndirect();
-  std::uint16_t AddressIndirectX();
-  std::uint16_t AddressIndirectY();
+  uint16_t AddressIndirect();
+  uint16_t AddressIndirectX();
+  uint16_t AddressIndirectY();
 
   /// STA (STore Accumulator)
   /// Affects flags: none
@@ -68,7 +67,7 @@ public:
 
   /// LDA (LoaD Accumulator)
   /// Affects flags: N Z
-  void Lda(std::uint8_t value);
+  void Lda(uint8_t value);
   void LdaImmediate();
   void LdaZeroPage();
   void LdaZeroPageX();
@@ -79,7 +78,7 @@ public:
   void LdaIndirectY();
 
   /// LDX (LoaD X register)
-  void Ldx(std::uint8_t value);
+  void Ldx(uint8_t value);
   void LdxImmediate();
   void LdxZeroPage();
   void LdxZeroPageY();
@@ -87,7 +86,7 @@ public:
   void LdxAbsoluteY();
 
   /// LDY (LoaD Y register)
-  void Ldy(std::uint8_t value);
+  void Ldy(uint8_t value);
   void LdyImmediate();
   void LdyZeroPage();
   void LdyZeroPageX();
@@ -114,7 +113,7 @@ public:
   // Flags are bits in the Status register.
   // The flags need to flip on or off.
   // Flags are used as a mask to cover up bits we don't want.
-  enum class StatusFlag : std::uint8_t {
+  enum class StatusFlag : uint8_t {
     C = 0x01, // Carry
     Z = 0x02, // Zero
     I = 0x04, // Interrupt Disable
@@ -127,9 +126,9 @@ public:
 
   /// Flag Methods
   void SetFlag(StatusFlag flag, bool is_on);
-  [[nodiscard]] bool IsFlagSet(std::uint8_t mask) const;
-  void SetZFlag(std::uint8_t register_value); // Zero Flag
-  void SetNFlag(std::uint8_t register_value); // Negative Flag
+  [[nodiscard]] bool IsFlagSet(uint8_t mask) const;
+  void SetZFlag(uint8_t register_value); // Zero Flag
+  void SetNFlag(uint8_t register_value); // Negative Flag
   void SetCFlag(bool is_on); // Carry Flag
   void SetVFlag(bool is_on); // Overflow Flag
 
@@ -173,10 +172,10 @@ public:
 
   /// Stack Methods
   // Lives at Page 1: $0100 - $01FF
-  void StackPushByte(std::uint8_t value);
-  std::uint8_t StackPullByte();
-  void StackPushWord(std::uint16_t value);
-  std::uint16_t StackPullWord();
+  void StackPushByte(uint8_t value);
+  uint8_t StackPullByte();
+  void StackPushWord(uint16_t value);
+  uint16_t StackPullWord();
 
   /**
    * Stack Instructions
@@ -192,7 +191,7 @@ public:
   void Plp();
 
   /// Comparison Instructions
-  void Compare(std::uint8_t register_value, std::uint8_t operand);
+  void Compare(uint8_t register_value, uint8_t operand);
 
   /// CMP (CoMPare accumulator)
   /// Affects Flags: N Z C
@@ -219,7 +218,7 @@ public:
   /// Shift Instructions
   /// ASL (Arithmetic Shift Left)
   /// Affects Flags: N Z C
-  std::uint8_t Asl(std::uint8_t value);
+  uint8_t Asl(uint8_t value);
   void AslAccumulator();
   void AslZeroPage();
   void AslZeroPageX();
@@ -228,7 +227,7 @@ public:
 
   /// LSR (Logical Shift Right)
   /// Affects Flags: N Z C
-  std::uint8_t Lsr(std::uint8_t value);
+  uint8_t Lsr(uint8_t value);
   void LsrAccumulator();
   void LsrZeroPage();
   void LsrZeroPageX();
@@ -237,7 +236,7 @@ public:
 
   /// ROL (ROtate Left)
   /// Affects Flags: N Z C
-  std::uint8_t Rol(std::uint8_t value);
+  uint8_t Rol(uint8_t value);
   void RolAccumulator();
   void RolZeroPage();
   void RolZeroPageX();
@@ -246,7 +245,7 @@ public:
 
   /// ROR (ROtate Right)
   /// Affects Flags: N Z C
-  std::uint8_t Ror(std::uint8_t value);
+  uint8_t Ror(uint8_t value);
   void RorAccumulator();
   void RorZeroPage();
   void RorZeroPageX();
@@ -255,7 +254,7 @@ public:
 
   /// ADC (Add with Carry)
   /// Affects flags: N V Z C
-  void Adc(std::uint8_t value);
+  void Adc(uint8_t value);
   void AdcImmediate();
   void AdcZeroPage();
   void AdcZeroPageX();
@@ -267,7 +266,7 @@ public:
 
   /// SBC (Subtract with Carry)
   /// Affects Flags: N V Z C
-  void Sbc(std::uint8_t value);
+  void Sbc(uint8_t value);
   void SbcImmediate();
   void SbcZeroPage();
   void SbcZeroPageX();
@@ -354,26 +353,26 @@ public:
 private:
   Bus& bus_;
 
-  std::uint8_t STATUS_INIT_ = static_cast<uint8_t>(StatusFlag::U) | static_cast<uint8_t>(StatusFlag::I);
+  uint8_t STATUS_INIT_ = static_cast<uint8_t>(StatusFlag::U) | static_cast<uint8_t>(StatusFlag::I);
 
   /// Stack
-  std::uint16_t STACK_BASE_ = 0x0100;
-  std::uint8_t STACK_INIT_ = 0xFD;
+  uint16_t STACK_BASE_ = 0x0100;
+  uint8_t STACK_INIT_ = 0xFD;
 
   /// CPU Registers
-  std::uint8_t accumulator_ = 0; // Accumulator
-  std::uint8_t x_register_ = 0; // X Register
-  std::uint8_t y_register_ = 0; // Y Register
-  std::uint8_t stack_pointer_ = STACK_INIT_; // Stack Pointer
-  std::uint8_t status_register_ = STATUS_INIT_; // Status Register (flags)
-  std::uint16_t program_counter_ = 0; // Program Counter
+  uint8_t accumulator_ = 0; // Accumulator
+  uint8_t x_register_ = 0; // X Register
+  uint8_t y_register_ = 0; // Y Register
+  uint8_t stack_pointer_ = STACK_INIT_; // Stack Pointer
+  uint8_t status_register_ = STATUS_INIT_; // Status Register (flags)
+  uint16_t program_counter_ = 0; // Program Counter
 
-  std::uint8_t MAX_8_BIT_UINT_ = 0xFF; // Maximum number that fits in a byte (8 bits): 255
+  uint8_t MAX_8_BIT_UINT_ = 0xFF; // Maximum number that fits in a byte (8 bits): 255
 
   /// Interrupt Vectors
-  std::uint16_t NMI_VECTOR_ = 0xFFFA; // The PPU finished drawing a frame (Non-Maskable Interrupt)
-  std::uint16_t RESET_VECTOR_ = 0xFFFC;
-  std::uint16_t IRQ_VECTOR_ = 0xFFFE; // Hardware interrupt
+  uint16_t NMI_VECTOR_ = 0xFFFA; // The PPU finished drawing a frame (Non-Maskable Interrupt)
+  uint16_t RESET_VECTOR_ = 0xFFFC;
+  uint16_t IRQ_VECTOR_ = 0xFFFE; // Hardware interrupt
 };
 
 } // namespace nes

@@ -63,15 +63,15 @@ TEST_CASE("IsFlagSet reports whether a given status bit is set") {
 
   ResetStatusRegister(cpu);
 
-  CHECK_FALSE(cpu.IsFlagSet(static_cast<std::uint8_t>(nes::Cpu::StatusFlag::C)));
-  CHECK_FALSE(cpu.IsFlagSet(static_cast<std::uint8_t>(nes::Cpu::StatusFlag::V)));
+  CHECK_FALSE(cpu.IsFlagSet(static_cast<uint8_t>(nes::Cpu::StatusFlag::C)));
+  CHECK_FALSE(cpu.IsFlagSet(static_cast<uint8_t>(nes::Cpu::StatusFlag::V)));
 
   cpu.SetFlag(nes::Cpu::StatusFlag::C, true);
-  CHECK(cpu.IsFlagSet(static_cast<std::uint8_t>(nes::Cpu::StatusFlag::C)));
-  CHECK_FALSE(cpu.IsFlagSet(static_cast<std::uint8_t>(nes::Cpu::StatusFlag::V)));
+  CHECK(cpu.IsFlagSet(static_cast<uint8_t>(nes::Cpu::StatusFlag::C)));
+  CHECK_FALSE(cpu.IsFlagSet(static_cast<uint8_t>(nes::Cpu::StatusFlag::V)));
 
   cpu.SetFlag(nes::Cpu::StatusFlag::V, true);
-  CHECK(cpu.IsFlagSet(static_cast<std::uint8_t>(nes::Cpu::StatusFlag::V)));
+  CHECK(cpu.IsFlagSet(static_cast<uint8_t>(nes::Cpu::StatusFlag::V)));
 }
 
 TEST_CASE("SetCFlag updates only the Carry flag") {
@@ -191,18 +191,18 @@ TEST_CASE("Nmi pushes the Program Counter and a masked status register onto "
   cpu.Nmi();
 
   // LIFO: the byte pushed last (status) comes off first, then the word (PC).
-  const std::uint8_t pushed_status = cpu.StackPullByte();
+  const uint8_t pushed_status = cpu.StackPullByte();
   CHECK(cpu.StackPullWord() == 0xABCD);
 
   // The pushed copy always has U set and B cleared, regardless of the live
   // register...
-  CHECK((pushed_status & static_cast<std::uint8_t>(nes::Cpu::StatusFlag::U)) != 0);
-  CHECK((pushed_status & static_cast<std::uint8_t>(nes::Cpu::StatusFlag::B)) == 0);
-  CHECK((pushed_status & static_cast<std::uint8_t>(nes::Cpu::StatusFlag::C)) != 0); // other flags preserved
+  CHECK((pushed_status & static_cast<uint8_t>(nes::Cpu::StatusFlag::U)) != 0);
+  CHECK((pushed_status & static_cast<uint8_t>(nes::Cpu::StatusFlag::B)) == 0);
+  CHECK((pushed_status & static_cast<uint8_t>(nes::Cpu::StatusFlag::C)) != 0); // other flags preserved
 
   // ...but Nmi only pushes a masked copy - it doesn't clear B on the live
   // status register itself.
-  CHECK(cpu.IsFlagSet(static_cast<std::uint8_t>(nes::Cpu::StatusFlag::B)));
+  CHECK(cpu.IsFlagSet(static_cast<uint8_t>(nes::Cpu::StatusFlag::B)));
 }
 
 TEST_CASE("Nmi sets the Interrupt Disable flag") {
@@ -210,11 +210,11 @@ TEST_CASE("Nmi sets the Interrupt Disable flag") {
   nes::Cpu cpu(bus);
 
   cpu.SetFlag(nes::Cpu::StatusFlag::I, false);
-  CHECK_FALSE(cpu.IsFlagSet(static_cast<std::uint8_t>(nes::Cpu::StatusFlag::I)));
+  CHECK_FALSE(cpu.IsFlagSet(static_cast<uint8_t>(nes::Cpu::StatusFlag::I)));
 
   cpu.Nmi();
 
-  CHECK(cpu.IsFlagSet(static_cast<std::uint8_t>(nes::Cpu::StatusFlag::I)));
+  CHECK(cpu.IsFlagSet(static_cast<uint8_t>(nes::Cpu::StatusFlag::I)));
 }
 
 TEST_CASE("Nmi loads the Program Counter from the NMI vector") {

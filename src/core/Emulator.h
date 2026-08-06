@@ -20,10 +20,10 @@ public:
 
   static void Run();
   int Step();
-  const std::vector<std::uint8_t>& RunFrame();
+  const std::vector<uint8_t>& RunFrame();
 
   // For loading test programs
-  void LoadProgram(const std::vector<std::uint8_t>& program, std::uint16_t start_address = 0x0000);
+  void LoadProgram(const std::vector<uint8_t>& program, uint16_t start_address = 0x0000);
 
   // Test helpers for inspecting internal state directly
   [[nodiscard]] Bus& GetBus() { return bus_; }

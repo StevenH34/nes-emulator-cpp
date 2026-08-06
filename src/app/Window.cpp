@@ -7,7 +7,7 @@ namespace nes {
 Window::Window(const std::string& title, const int width, const int height) {
   // SDL_CreateWindow(title, width, height, SDL_WindowFlag)
   ptr_ = SDL_CreateWindow(title.c_str(), width, height, 0);
-  if (!ptr_) {
+  if (ptr_ == nullptr) {
     throw std::runtime_error("Window creation failed: " + std::string(SDL_GetError()));
   }
   // Need to center window
@@ -15,7 +15,7 @@ Window::Window(const std::string& title, const int width, const int height) {
 }
 
 Window::~Window() {
-  if (ptr_) {
+  if (ptr_ != nullptr) {
     SDL_DestroyWindow(ptr_);
   }
 }
@@ -24,7 +24,7 @@ Window::Window(Window&& other) noexcept : ptr_(other.ptr_) { other.ptr_ = nullpt
 
 Window& Window::operator=(Window&& other) noexcept {
   if (this != &other) {
-    if (ptr_) {
+    if (ptr_ != nullptr) {
       SDL_DestroyWindow(ptr_);
     }
     ptr_ = other.ptr_;

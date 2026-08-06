@@ -104,7 +104,7 @@ TEST_CASE("Tsx copies the stack pointer into the X register and updates the "
   // Drive the stack pointer down to 0x00 by pushing 0xFD bytes (starts at
   // 0xFD).
   for (int i = 0; i < 0xFD; ++i) {
-    cpu.StackPushByte(static_cast<std::uint8_t>(i));
+    cpu.StackPushByte(static_cast<uint8_t>(i));
   }
 
   cpu.Tsx();

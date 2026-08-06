@@ -14,7 +14,7 @@ namespace nes_test {
 // file-based constructor.
 class TempRomFile {
 public:
-  explicit TempRomFile(const std::vector<std::uint8_t>& data);
+  explicit TempRomFile(const std::vector<uint8_t>& data);
   ~TempRomFile();
 
   TempRomFile(const TempRomFile&) = delete;
@@ -29,7 +29,7 @@ private:
 // Builds a minimal mapper-0 (NROM) ROM: one 16 KB PRG bank, one 8 KB CHR bank,
 // no trainer, all zeroed except for the reset vector (mirrored at CPU
 // 0xFFFC/0xFFFD).
-std::vector<std::uint8_t> MakeMinimalRom(std::uint16_t reset_vector = 0x0000);
+std::vector<uint8_t> MakeMinimalRom(uint16_t reset_vector = 0x0000);
 
 // A process-wide Cartridge backed by a minimal ROM with reset vector 0x0000,
 // for tests that need a Bus/Cpu but don't care about cartridge contents.

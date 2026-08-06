@@ -7,8 +7,8 @@
 
 namespace {
 
-std::vector<std::uint8_t> MakeHeader(const std::uint8_t prg_blocks, const std::uint8_t chr_blocks,
-                                     const std::uint8_t flags_6, const std::uint8_t flags_7) {
+std::vector<uint8_t> MakeHeader(const uint8_t prg_blocks, const uint8_t chr_blocks, const uint8_t flags_6,
+                                const uint8_t flags_7) {
   return {0x4E, 0x45, 0x53, 0x1A, prg_blocks, chr_blocks, flags_6, flags_7, 0, 0, 0, 0, 0, 0, 0, 0};
 }
 
@@ -54,7 +54,7 @@ TEST_CASE("ParseMirroring returns FourScreen when the four-screen bit is set") {
 }
 
 TEST_CASE("ParseMirroring gives FourScreen priority over the mirror bit") {
-  const std::uint8_t flags_6 = nes::Cartridge::FOUR_SCREEN_MASK | nes::Cartridge::MIRROR_MASK;
+  const uint8_t flags_6 = nes::Cartridge::FOUR_SCREEN_MASK | nes::Cartridge::MIRROR_MASK;
   CHECK(nes::Cartridge::ParseMirroring(flags_6) == nes::Cartridge::Mirroring::FourScreen);
 }
 
@@ -66,7 +66,7 @@ TEST_CASE("ValidateHeader accepts a well-formed header") {
 }
 
 TEST_CASE("ValidateHeader throws when the data is smaller than the header") {
-  const std::vector<std::uint8_t> data(10, 0);
+  const std::vector<uint8_t> data(10, 0);
   CHECK_THROWS_AS(nes::Cartridge::ValidateHeader(data), std::runtime_error);
 }
 
@@ -79,7 +79,7 @@ TEST_CASE("ValidateHeader throws when the magic number is wrong") {
 // --- ReadFileBytes ---
 
 TEST_CASE("ReadFileBytes returns the exact bytes on disk") {
-  const std::vector<std::uint8_t> expected = {0x4E, 0x45, 0x53, 0x1A, 0xDE, 0xAD, 0xBE, 0xEF};
+  const std::vector<uint8_t> expected = {0x4E, 0x45, 0x53, 0x1A, 0xDE, 0xAD, 0xBE, 0xEF};
   const TempRomFile rom(expected);
 
   const auto actual = nes::Cartridge::ReadFileBytes(rom.path());
@@ -119,7 +119,7 @@ TEST_CASE("Cartridge synthesizes 8KB of zeroed CHR-RAM when CHR-ROM size is 0") 
   const nes::Cartridge cart(rom.path());
 
   CHECK(cart.GetChrRom().size() == nes::Cartridge::CHR_BLOCK_SIZE);
-  CHECK(cart.GetChrRom() == std::vector<std::uint8_t>(nes::Cartridge::CHR_BLOCK_SIZE, 0));
+  CHECK(cart.GetChrRom() == std::vector<uint8_t>(nes::Cartridge::CHR_BLOCK_SIZE, 0));
 }
 
 TEST_CASE("Cartridge skips the 512-byte trainer before reading PRG-ROM") {
@@ -127,7 +127,7 @@ TEST_CASE("Cartridge skips the 512-byte trainer before reading PRG-ROM") {
   data.resize(data.size() + nes::Cartridge::TRAINER_SIZE,
               0xFF); // trainer bytes
   data.resize(data.size() + nes::Cartridge::PRG_BLOCK_SIZE + nes::Cartridge::CHR_BLOCK_SIZE, 0);
-  const std::size_t prg_start = nes::Cartridge::HEADER_SIZE + nes::Cartridge::TRAINER_SIZE;
+  const size_t prg_start = nes::Cartridge::HEADER_SIZE + nes::Cartridge::TRAINER_SIZE;
   data[prg_start] = 0x77;
   const TempRomFile rom(data);
 
@@ -184,7 +184,7 @@ TEST_CASE("Cartridge parses vertical mirroring from flags_6") {
 
 TEST_CASE("Cartridge constructor throws when the file is too small to be an "
           "iNES file") {
-  const TempRomFile rom(std::vector<std::uint8_t>(10, 0));
+  const TempRomFile rom(std::vector<uint8_t>(10, 0));
   CHECK_THROWS_AS(nes::Cartridge(rom.path()), std::runtime_error);
 }
 

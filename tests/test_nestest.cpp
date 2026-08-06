@@ -8,7 +8,7 @@
 
 namespace {
 
-template <typename T> T parse_hex(const std::string& line, const std::size_t pos, const std::size_t len) {
+template <typename T> T parse_hex(const std::string& line, const size_t pos, const size_t len) {
   return static_cast<T>(std::stoul(line.substr(pos, len), nullptr, 16));
 }
 
@@ -34,12 +34,12 @@ TEST_CASE("nestest: CPU matches log for all official opcodes") {
   for (const auto& line : log_lines) {
     INFO("Line: " << line);
     auto cpu = emulator.GetCpu();
-    REQUIRE(cpu.GetProgramCounter() == parse_hex<std::uint16_t>(line, 0, 4));
-    REQUIRE(cpu.GetAccumulator() == parse_hex<std::uint8_t>(line, 50, 2));
-    REQUIRE(cpu.GetXRegister() == parse_hex<std::uint8_t>(line, 55, 2));
-    REQUIRE(cpu.GetYRegister() == parse_hex<std::uint8_t>(line, 60, 2));
-    REQUIRE(cpu.GetStatusRegister() == parse_hex<std::uint8_t>(line, 65, 2));
-    REQUIRE(cpu.GetStackPointer() == parse_hex<std::uint8_t>(line, 71, 2));
+    REQUIRE(cpu.GetProgramCounter() == parse_hex<uint16_t>(line, 0, 4));
+    REQUIRE(cpu.GetAccumulator() == parse_hex<uint8_t>(line, 50, 2));
+    REQUIRE(cpu.GetXRegister() == parse_hex<uint8_t>(line, 55, 2));
+    REQUIRE(cpu.GetYRegister() == parse_hex<uint8_t>(line, 60, 2));
+    REQUIRE(cpu.GetStatusRegister() == parse_hex<uint8_t>(line, 65, 2));
+    REQUIRE(cpu.GetStackPointer() == parse_hex<uint8_t>(line, 71, 2));
 
     try {
       emulator.Step();
