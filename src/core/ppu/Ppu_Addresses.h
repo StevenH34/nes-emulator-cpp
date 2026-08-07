@@ -1,5 +1,4 @@
-#ifndef NES_EMULATOR_CPP_PPU_ADDRESSES_H
-#define NES_EMULATOR_CPP_PPU_ADDRESSES_H
+#pragma once
 
 #include <cstddef>
 #include <cstdint>
@@ -37,5 +36,3 @@ struct PpuAddresses {
 };
 
 } // namespace nes
-
-#endif // NES_EMULATOR_CPP_PPU_ADDRESSES_H

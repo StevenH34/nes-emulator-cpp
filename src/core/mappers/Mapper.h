@@ -1,5 +1,4 @@
-#ifndef NES_EMULATOR_CPP_MAPPER_H
-#define NES_EMULATOR_CPP_MAPPER_H
+#pragma once
 
 #include <cstdint>
 #include <memory>
@@ -62,5 +61,3 @@ public:
 };
 
 } // namespace nes
-
-#endif // NES_EMULATOR_CPP_MAPPER_H

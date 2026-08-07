@@ -5,6 +5,7 @@
 #include "../../src/core/ppu/Ppu_Addresses.h"
 #include "TestRom.h"
 
+#include <stdexcept>
 #include <vector>
 
 namespace {

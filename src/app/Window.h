@@ -1,5 +1,4 @@
-#ifndef NES_EMULATOR_CPP_WINDOW_H
-#define NES_EMULATOR_CPP_WINDOW_H
+#pragma once
 
 #include <SDL3/SDL.h>
 #include <stdexcept>
@@ -27,4 +26,3 @@ private:
 };
 
 } // namespace nes
-#endif // NES_EMULATOR_CPP_WINDOW_H

@@ -1,5 +1,4 @@
-#ifndef NES_EMULATOR_CPP_CONTROLLER_H
-#define NES_EMULATOR_CPP_CONTROLLER_H
+#pragma once
 
 #include <cstdint>
 
@@ -37,5 +36,3 @@ private:
 };
 
 } // namespace nes
-
-#endif // NES_EMULATOR_CPP_CONTROLLER_H

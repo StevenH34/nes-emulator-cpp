@@ -2,6 +2,8 @@
 #include "Cartridge.h"
 #include "Ppu_Addresses.h"
 
+#include <stdexcept>
+
 namespace nes {
 
 Ppu::Ppu(Cartridge& cartridge) : cartridge_(cartridge) {}

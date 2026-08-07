@@ -1,5 +1,4 @@
-#ifndef NES_EMULATOR_CPP_NES_APP_H
-#define NES_EMULATOR_CPP_NES_APP_H
+#pragma once
 
 #include <string>
 
@@ -45,4 +44,3 @@ private:
 };
 
 } // namespace nes_app
-#endif // NES_EMULATOR_CPP_NES_APP_H
