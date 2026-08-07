@@ -3,6 +3,7 @@
 #include "../src/core/Cartridge.h"
 #include "TestRom.h"
 
+#include <stdexcept>
 #include <vector>
 
 namespace {
