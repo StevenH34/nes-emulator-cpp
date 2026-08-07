@@ -7,9 +7,7 @@ on:
 
 env:
   VCPKG_ROOT: ${{ github.workspace }}/vcpkg
-  # Tells vcpkg to use the GitHub Actions cache as its binary cache, so already-built packages
-  # (SDL3 and its from-source dependencies) are restored instead of rebuilt on every run.
-  VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
+  VCPKG_BINARY_SOURCES: "clear;nuget,GitHub,readwrite"
 
 jobs:
   format:
@@ -33,26 +31,23 @@ jobs:
   sanitizers:
     name: ASan/UBSan tests
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # Needed to push/pull vcpkg binary packages to/from this repo's GitHub Packages NuGet feed.
+      packages: write
     steps:
       - uses: actions/checkout@v4
 
-      # Required by vcpkg's x-gha binary cache provider to authenticate against the GitHub
-      # Actions cache service. See https://learn.microsoft.com/vcpkg/consume/binary-caching-github-actions
-      - name: Export GitHub Actions cache variables
-        uses: actions/github-script@v7
-        with:
-          script: |
-            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
-            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
-
       # Package list below is SDL's own documented Linux build-dependency list (https://wiki.libsdl.org/SDL3/README-linux),
-      # plus autotools for the vcpkg-built pieces.
+      # plus autotools for the vcpkg-built pieces, plus mono-runtime to run nuget.exe for the
+      # vcpkg binary cache.
       - name: Install native build dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y \
             build-essential git make pkg-config ninja-build \
             gcc-14 g++-14 \
+            mono-runtime \
             autoconf autoconf-archive automake libtool libltdl-dev \
             gnome-desktop-testing libasound2-dev libpulse-dev libaudio-dev libfribidi-dev \
             libjack-dev libsndio-dev \
@@ -63,7 +58,7 @@ jobs:
             libpipewire-0.3-dev libwayland-dev wayland-protocols libdecor-0-dev liburing-dev
 
       # Caches the vcpkg tool itself (its git clone + bootstrapped binary), separate from the
-      # x-gha binary cache above which handles the packages vcpkg builds.
+      # nuget binary cache above which handles the packages vcpkg builds.
       - name: Cache vcpkg tool
         uses: actions/cache@v4
         with:
@@ -82,6 +77,20 @@ jobs:
             git clone https://github.com/microsoft/vcpkg "${{ env.VCPKG_ROOT }}"
           fi
           "${{ env.VCPKG_ROOT }}/bootstrap-vcpkg.sh"
+
+      # Points vcpkg's nuget-based binary cache (VCPKG_BINARY_SOURCES above) at this repo's
+      # GitHub Packages feed, authenticated with the workflow's own GITHUB_TOKEN.
+      - name: Setup NuGet credentials for vcpkg binary cache
+        run: |
+          NUGET_EXE=$("${{ env.VCPKG_ROOT }}/vcpkg" fetch nuget | tail -n 1)
+          mono "$NUGET_EXE" sources add \
+            -source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" \
+            -storepasswordincleartext \
+            -name "GitHub" \
+            -username "${{ github.repository_owner }}" \
+            -password "${{ secrets.GITHUB_TOKEN }}"
+          mono "$NUGET_EXE" setapikey "${{ secrets.GITHUB_TOKEN }}" \
+            -source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
 
       - name: Configure (asan preset)
         run: cmake --preset asan -DCMAKE_C_COMPILER=gcc-14 -DCMAKE_CXX_COMPILER=g++-14
