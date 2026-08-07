@@ -1,5 +1,4 @@
-#ifndef NES_EMULATOR_CPP_CARTRIDGE_H
-#define NES_EMULATOR_CPP_CARTRIDGE_H
+#pragma once
 
 #include <array>
 #include <cstddef>
@@ -77,5 +76,3 @@ private:
 };
 
 } // namespace nes
-
-#endif // NES_EMULATOR_CPP_CARTRIDGE_H

@@ -1,5 +1,4 @@
-#ifndef NES_EMULATOR_CPP_BUS_H
-#define NES_EMULATOR_CPP_BUS_H
+#pragma once
 
 #include <array>
 #include <cstdint>
@@ -57,5 +56,3 @@ private:
 };
 
 } // namespace nes
-
-#endif // NES_EMULATOR_CPP_BUS_H

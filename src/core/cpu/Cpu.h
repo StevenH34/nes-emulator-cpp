@@ -1,5 +1,4 @@
-#ifndef NES_EMULATOR_CPP_CPU_H
-#define NES_EMULATOR_CPP_CPU_H
+#pragma once
 
 #include <cstdint>
 #include <format>
@@ -376,5 +375,3 @@ private:
 };
 
 } // namespace nes
-
-#endif // NES_EMULATOR_CPP_CPU_H

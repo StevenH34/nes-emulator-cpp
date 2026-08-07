@@ -1,5 +1,4 @@
-#ifndef NES_EMULATOR_CPP_PPU_H
-#define NES_EMULATOR_CPP_PPU_H
+#pragma once
 
 #include <cstdint>
 #include <functional>
@@ -333,5 +332,3 @@ private:
 };
 
 } // namespace nes
-
-#endif // NES_EMULATOR_CPP_PPU_H

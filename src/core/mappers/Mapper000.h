@@ -1,5 +1,4 @@
-#ifndef NES_EMULATOR_CPP_MAPPER000_H
-#define NES_EMULATOR_CPP_MAPPER000_H
+#pragma once
 
 #include "Mapper.h"
 
@@ -27,5 +26,3 @@ private:
 };
 
 } // namespace nes
-
-#endif // NES_EMULATOR_CPP_MAPPER000_H

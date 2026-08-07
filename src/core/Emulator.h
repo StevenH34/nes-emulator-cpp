@@ -1,5 +1,4 @@
-#ifndef NES_EMULATOR_CPP_EMULATOR_H
-#define NES_EMULATOR_CPP_EMULATOR_H
+#pragma once
 
 #include "Bus.h"
 #include "cpu/Cpu.h"
@@ -37,5 +36,3 @@ private:
 };
 
 } // namespace nes
-
-#endif // NES_EMULATOR_CPP_EMULATOR_H

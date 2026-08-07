@@ -1,5 +1,4 @@
-#ifndef NES_EMULATOR_CPP_OPCODES_H
-#define NES_EMULATOR_CPP_OPCODES_H
+#pragma once
 
 #include <array>
 #include <cstdint>
@@ -387,5 +386,3 @@ struct Opcodes {
 };
 
 } // namespace nes
-
-#endif // NES_EMULATOR_CPP_OPCODES_H
