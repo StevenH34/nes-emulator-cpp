@@ -1,7 +1,10 @@
-#ifndef NES_EMULATOR_CPP_APU_H
-#define NES_EMULATOR_CPP_APU_H
+#pragma once
+
 #include <cstdint>
 
+#include "ApuConstants.h"
+
+namespace nes {
 
 class Apu {
 public:
@@ -55,12 +58,6 @@ private:
     static constexpr float PULSE_MIXER_COEFFICIENT = 0.00752f;
     static constexpr float TND_T_MIXER_COEFFICIENT = 0.00851f;
     static constexpr float TND_N_MIXER_COEFFICIENT = 0.00494f;
-    // Length counter look-up table
-    static constexpr std::uint8_t LENGTH_COUNTER_TABLE[32] = {
-        10, 254,  20,   2,  40,   4,  80,   6,  160,   8,  60,  10,  14,  12,  26,  14,
-        12,  16,  24,  18,  48,  20,  96,  22,  192,  24,  72,  26,  16,  28,  32,  30
-    };
 };
 
-
-#endif //NES_EMULATOR_CPP_APU_H
+} // namespace nes

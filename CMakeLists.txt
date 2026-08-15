@@ -29,8 +29,11 @@ add_library(nes_core STATIC
         src/app/NesApp.h
         src/core/Controller.cpp
         src/core/Controller.h
-        src/core/Apu.cpp
-        src/core/Apu.h)
+        src/core/apu/Apu.cpp
+        src/core/apu/Apu.h
+        src/core/apu/ApuConstants.h
+        src/core/apu/Pulse.cpp
+        src/core/apu/Pulse.h)
 
 target_include_directories(nes_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/core)
 
