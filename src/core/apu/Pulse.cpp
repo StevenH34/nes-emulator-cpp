@@ -89,9 +89,7 @@ uint8_t Pulse::Output() const {
 }
 
 void Pulse::ClockSweep() {
-  auto target = SweepTargetPeriod();
-
-  if (sweep_divider_ == 0 && sweep_enabled_ && sweep_shift_ > 0 && timer_period_ >= 8 && target <= 0x7FF) {
+  if (const auto target = SweepTargetPeriod(); sweep_divider_ == 0 && sweep_enabled_ && sweep_shift_ > 0 && timer_period_ >= 8 && target <= 0x7FF) {
     timer_period_ = target;
   }
 
@@ -110,12 +108,10 @@ uint16_t Pulse::SweepTargetPeriod() const {
     if (channel_ == 0) {
       // Pulse 1: one's complement
       return static_cast<uint16_t>(timer_period_ - change - 1);
-    } else {
-      // Pulse 2: two's complement
+    }       // Pulse 2: two's complement
       return static_cast<uint16_t>(timer_period_ - change);
-    }
-  } else {
-    return static_cast<uint16_t>(timer_period_ + change);
   }
+  return static_cast<uint16_t>(timer_period_ + change);
 }
+
 } // namespace nes
