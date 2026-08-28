@@ -39,15 +39,15 @@ jobs:
       - uses: actions/checkout@v4
 
       # Package list below is SDL's own documented Linux build-dependency list (https://wiki.libsdl.org/SDL3/README-linux),
-      # plus autotools for the vcpkg-built pieces, plus mono-runtime to run nuget.exe for the
-      # vcpkg binary cache.
+      # plus autotools for the vcpkg-built pieces, plus mono-complete to run nuget.exe for the
+      # vcpkg binary cache (mono-runtime alone is missing assemblies nuget.exe needs).
       - name: Install native build dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y \
             build-essential git make pkg-config ninja-build \
             gcc-14 g++-14 \
-            mono-runtime \
+            mono-complete \
             autoconf autoconf-archive automake libtool libltdl-dev \
             gnome-desktop-testing libasound2-dev libpulse-dev libaudio-dev libfribidi-dev \
             libjack-dev libsndio-dev \
