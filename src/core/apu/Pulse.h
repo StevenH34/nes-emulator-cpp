@@ -26,7 +26,6 @@ public:
   void ClockSweep();
   [[nodiscard]] uint8_t Output() const;
 
-
 private:
   uint8_t channel_;
   uint8_t volume_{0};
@@ -49,10 +48,10 @@ private:
   bool sweep_reload_{false};
 
   static constexpr uint8_t DUTY_TABLE_[4][8] = {
-    {0, 1, 0, 0, 0, 0, 0, 0}, // 12.5%
-    {0, 1, 1, 0, 0, 0, 0, 0}, // 25%
-    {0, 1, 1, 1, 1, 0, 0, 0}, // 50%
-    {1, 0, 0, 1, 1, 1, 1, 1}, // 75%
+      {0, 1, 0, 0, 0, 0, 0, 0}, // 12.5%
+      {0, 1, 1, 0, 0, 0, 0, 0}, // 25%
+      {0, 1, 1, 1, 1, 0, 0, 0}, // 50%
+      {1, 0, 0, 1, 1, 1, 1, 1}, // 75%
   };
 
   [[nodiscard]] uint16_t SweepTargetPeriod() const;

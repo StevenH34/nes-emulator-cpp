@@ -7,7 +7,8 @@ Pulse::Pulse(const uint8_t channel) : channel_{channel} {}
 
 void Pulse::SetEnabled(const bool enabled) {
   enabled_ = enabled;
-  if (!enabled_) length_counter_ = 0;
+  if (!enabled_)
+    length_counter_ = 0;
 }
 
 // $4000/$4004: DDLC VVVV
@@ -21,7 +22,8 @@ void Pulse::WriteControl(const uint8_t value) {
 // $4003/$4007: LLLL LTTT (length load + timer high)
 void Pulse::WriteTimerHigh(const uint8_t value) {
   timer_period_ = (timer_period_ & 0x00FF) | (static_cast<uint16_t>(value & 0x07) << 8);
-  if (enabled_) length_counter_ = ApuConstants::LENGTH_COUNTER_TABLE[(value >> 3) & 0x1F];
+  if (enabled_)
+    length_counter_ = ApuConstants::LENGTH_COUNTER_TABLE[(value >> 3) & 0x1F];
   duty_step_ = 0;
   envelope_start_ = true;
 }
@@ -58,8 +60,10 @@ void Pulse::ClockEnvelope() {
   } else {
     if (envelope_divider_ == 0) {
       envelope_divider_ = volume_;
-      if (envelope_decay_ > 0) --envelope_decay_;
-      else if (length_halt_) envelope_decay_ = 15;
+      if (envelope_decay_ > 0)
+        --envelope_decay_;
+      else if (length_halt_)
+        envelope_decay_ = 15;
     } else {
       --envelope_divider_;
     }
@@ -74,9 +78,12 @@ void Pulse::ClockLengthCounter() {
 
 // The output volume. 0 is silence.
 uint8_t Pulse::Output() const {
-  if (!enabled_ || length_counter_ == 0) return 0;
-  if (DUTY_TABLE_[duty_cycle_][duty_step_] == 0) return 0;
-  if (timer_period_ < 8 || SweepTargetPeriod() > 0x7FF) return 0;
+  if (!enabled_ || length_counter_ == 0)
+    return 0;
+  if (DUTY_TABLE_[duty_cycle_][duty_step_] == 0)
+    return 0;
+  if (timer_period_ < 8 || SweepTargetPeriod() > 0x7FF)
+    return 0;
 
   return constant_value_ ? volume_ : envelope_decay_;
 }
