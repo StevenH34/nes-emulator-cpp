@@ -1,0 +1,106 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+env:
+  VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+  VCPKG_BINARY_SOURCES: "clear;nuget,GitHub,readwrite"
+
+jobs:
+  format:
+    name: clang-format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Pull from the official LLVM apt repo instead of the distro's.
+      - name: Install clang-format
+        run: |
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh 19
+          sudo apt-get install -y clang-format-19
+
+      - name: Check formatting
+        run: |
+          find src tests -name '*.cpp' -o -name '*.h' -o -name '*.hpp' \
+            | xargs clang-format-19 --dry-run --Werror
+
+  sanitizers:
+    name: ASan/UBSan tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # Needed to push/pull vcpkg binary packages to/from this repo's GitHub Packages NuGet feed.
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      # Package list below is SDL's own documented Linux build-dependency list (https://wiki.libsdl.org/SDL3/README-linux),
+      # plus autotools for the vcpkg-built pieces, plus mono-runtime to run nuget.exe for the
+      # vcpkg binary cache.
+      - name: Install native build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential git make pkg-config ninja-build \
+            gcc-14 g++-14 \
+            mono-runtime \
+            autoconf autoconf-archive automake libtool libltdl-dev \
+            gnome-desktop-testing libasound2-dev libpulse-dev libaudio-dev libfribidi-dev \
+            libjack-dev libsndio-dev \
+            libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev \
+            libxss-dev libxtst-dev \
+            libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev libegl1-mesa-dev \
+            libdbus-1-dev libibus-1.0-dev libudev-dev libthai-dev libusb-1.0-0-dev \
+            libpipewire-0.3-dev libwayland-dev wayland-protocols libdecor-0-dev liburing-dev
+
+      # Caches the vcpkg tool itself (its git clone + bootstrapped binary), separate from the
+      # nuget binary cache above which handles the packages vcpkg builds.
+      - name: Cache vcpkg tool
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ env.VCPKG_ROOT }}
+            !${{ env.VCPKG_ROOT }}/buildtrees
+            !${{ env.VCPKG_ROOT }}/downloads
+            !${{ env.VCPKG_ROOT }}/packages
+          key: vcpkg-${{ runner.os }}-${{ hashFiles('vcpkg.json') }}
+          restore-keys: |
+            vcpkg-${{ runner.os }}-
+
+      - name: Bootstrap vcpkg
+        run: |
+          if [ ! -f "${{ env.VCPKG_ROOT }}/vcpkg" ]; then
+            git clone https://github.com/microsoft/vcpkg "${{ env.VCPKG_ROOT }}"
+          fi
+          "${{ env.VCPKG_ROOT }}/bootstrap-vcpkg.sh"
+
+      # Points vcpkg's nuget-based binary cache (VCPKG_BINARY_SOURCES above) at this repo's
+      # GitHub Packages feed, authenticated with the workflow's own GITHUB_TOKEN.
+      - name: Setup NuGet credentials for vcpkg binary cache
+        run: |
+          NUGET_EXE=$("${{ env.VCPKG_ROOT }}/vcpkg" fetch nuget | tail -n 1)
+          mono "$NUGET_EXE" sources add \
+            -source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" \
+            -storepasswordincleartext \
+            -name "GitHub" \
+            -username "${{ github.repository_owner }}" \
+            -password "${{ secrets.GITHUB_TOKEN }}"
+          mono "$NUGET_EXE" setapikey "${{ secrets.GITHUB_TOKEN }}" \
+            -source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
+
+      - name: Configure (asan preset)
+        run: cmake --preset asan -DCMAKE_C_COMPILER=gcc-14 -DCMAKE_CXX_COMPILER=g++-14
+
+      - name: Build tests
+        run: cmake --build cmake-build-asan --target nes_emulator_tests
+
+      - name: Run tests under ASan/UBSan
+        working-directory: cmake-build-asan
+        env:
+          ASAN_OPTIONS: detect_leaks=1
+          UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
+        run: ./nes_emulator_tests

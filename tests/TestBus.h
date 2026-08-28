@@ -11,19 +11,19 @@ namespace detail {
 // declaration order), so TestBus can hand Bus a Ppu& that is private to this
 // TestBus instance instead of a process-wide singleton shared by every test.
 struct PpuHolder {
-    nes::Ppu ppu;
-    explicit PpuHolder(nes::Cartridge& cartridge) : ppu(cartridge) {}
+  nes::Ppu ppu;
+  explicit PpuHolder(nes::Cartridge& cartridge) : ppu(cartridge) {}
 };
 } // namespace detail
 
-// A Bus wired to a shared, process-wide dummy Cartridge and a fresh, private Ppu,
-// for CPU/opcode tests that only exercise the RAM range and don't care about
-// cartridge or PPU state.
+// A Bus wired to a shared, process-wide dummy Cartridge and a fresh, private
+// Ppu, for CPU/opcode tests that only exercise the RAM range and don't care
+// about cartridge or PPU state.
 class TestBus : private detail::PpuHolder, public nes::Bus {
 public:
-    TestBus();
+  TestBus();
 };
 
-} // nes_test
+} // namespace nes_test
 
-#endif //NES_EMULATOR_CPP_TEST_BUS_H
+#endif // NES_EMULATOR_CPP_TEST_BUS_H
