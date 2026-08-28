@@ -3,13 +3,19 @@
 #include <cstdint>
 
 #include "ApuConstants.h"
+#include "Pulse.h"
 
 namespace nes {
 
 class Apu {
 public:
+    Apu();
 
 private:
+    // Channels
+    Pulse pulse1_;
+    Pulse pulse2_;
+
     static constexpr std::uint32_t SAMPLE_RATE = 44100;
     static constexpr std::uint32_t CPU_CLOCK = 1789773;
     // Used for downsampling
