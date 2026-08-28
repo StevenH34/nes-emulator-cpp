@@ -18,6 +18,7 @@ public:
 
   [[nodiscard]] uint8_t GetLengthCounter() const { return length_counter_; }
   [[nodiscard]] bool GetEnabled() const { return enabled_; }
+  [[nodiscard]] uint16_t GetTimerPeriod() const { return timer_period_; }
 
   void ClockTimer();
   void ClockEnvelope();
