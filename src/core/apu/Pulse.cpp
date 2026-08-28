@@ -109,13 +109,13 @@ uint16_t Pulse::SweepTargetPeriod() const {
   if (sweep_negate_) {
     if (channel_ == 0) {
       // Pulse 1: one's complement
-      return timer_period_ - change - 1;
+      return static_cast<uint16_t>(timer_period_ - change - 1);
     } else {
       // Pulse 2: two's complement
-      return timer_period_ - change;
+      return static_cast<uint16_t>(timer_period_ - change);
     }
   } else {
-    return timer_period_ + change;
+    return static_cast<uint16_t>(timer_period_ + change);
   }
 }
 } // namespace nes
