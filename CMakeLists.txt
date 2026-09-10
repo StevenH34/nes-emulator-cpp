@@ -67,7 +67,9 @@ set(NES_CORE_SOURCES
         src/core/apu/Apu.h
         src/core/apu/ApuConstants.h
         src/core/apu/Pulse.cpp
-        src/core/apu/Pulse.h)
+        src/core/apu/Pulse.h
+        src/core/apu/Triangle.cpp
+        src/core/apu/Triangle.h)
 
 add_library(nes_core STATIC ${NES_CORE_SOURCES})
 
@@ -101,6 +103,7 @@ add_executable(nes_emulator_tests
         tests/Bus_tests.cpp
         tests/Controller_tests.cpp
         tests/Pulse_tests.cpp
+        tests/Triangle_tests.cpp
         tests/Emulator_tests.cpp
         tests/Cartridge_tests.cpp
         tests/test_nestest.cpp
