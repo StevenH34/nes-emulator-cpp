@@ -69,7 +69,9 @@ set(NES_CORE_SOURCES
         src/core/apu/Pulse.cpp
         src/core/apu/Pulse.h
         src/core/apu/Triangle.cpp
-        src/core/apu/Triangle.h)
+        src/core/apu/Triangle.h
+        src/core/apu/Noise.cpp
+        src/core/apu/Noise.h)
 
 add_library(nes_core STATIC ${NES_CORE_SOURCES})
 
