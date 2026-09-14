@@ -1,6 +1,5 @@
 #pragma once
 
-#include "ApuConstants.h"
 #include "Noise.h"
 #include "Pulse.h"
 #include "Triangle.h"
@@ -26,7 +25,16 @@ public:
   [[nodiscard]] std::vector<float>& GetSampleBuffer() { return sample_buffer_; }
   [[nodiscard]] uint32_t GetCycle() const { return cycle_; }
 
-  void Step();
+  void ClockFrameCounter();
+  void ClockQuarterFrame();
+  void ClockHalfFrame();
+  void TakeSample();
+  void Step(int32_t cpu_cycles);
+  std::vector<float> DrainSamples();
+  void WriteStatus(uint8_t value);
+  void WriteFrameCounter(uint8_t value);
+  void WriteRegisters(uint16_t address, uint8_t value);
+  [[nodiscard]] uint8_t ReadStatus() const;
 
 private:
   // Channels
@@ -72,14 +80,14 @@ private:
   struct FrameCounterNtsc {
     // Mode 0: 4-Step Sequence
     static constexpr uint32_t MODE0_STEP1 = 7457; // 3728.5 * 2
-    static constexpr uint32_t MODE0_STEP2 = 14914; // 7456.5 * 2 (Rounded)
+    static constexpr uint32_t MODE0_STEP2 = 14913; // 7456.5 * 2 (Rounded)
     static constexpr uint32_t MODE0_STEP3 = 22371; // 11185.5 * 2
     static constexpr uint32_t MODE0_STEP4 = 29829; // 14914.5 * 2
     static constexpr uint32_t MODE0_MAX = 29830; // Total sequence length
 
     // Mode 1: 5-Step Sequence
     static constexpr uint32_t MODE1_STEP1 = 7457; // 3728.5 * 2
-    static constexpr uint32_t MODE1_STEP2 = 14914; // 7456.5 * 2
+    static constexpr uint32_t MODE1_STEP2 = 14913; // 7456.5 * 2
     static constexpr uint32_t MODE1_STEP3 = 22371; // 11185.5 * 2
     static constexpr uint32_t MODE1_STEP4 = 29829; // 14914.5 * 2
     static constexpr uint32_t MODE1_STEP5 = 37281; // 18640.5 * 2
