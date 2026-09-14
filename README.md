@@ -10,10 +10,9 @@
 - ✅ Added PPU sprite rendering.
 - 🚀 First playable build!
   - Compatible with most [Mapper000](https://nesdir.github.io/mapper0.html) ROMs (including Super Mario Bros.).
-- TODO: Add APU.
+- ✅ Add APU.
 - TODO: Add Mapper001 support.
-- TODO: Update README build instructions.
-- TODO: Improve performance.
+- TODO: Add save states.
 
 <p style="text-align: center;">
   <img src="./images/img.png" alt="emulator picture" width="300" />
