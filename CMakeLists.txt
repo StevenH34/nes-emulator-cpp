@@ -161,14 +161,14 @@ endif()
 
 add_test(NAME nes_emulator_tests COMMAND nes_emulator_tests)
 
-# Build and run the tests in one step: cmake --build cmake-build-debug --target run_tests
+# Build and run the tests in one step: cmake --build build-debug --target run_tests
 add_custom_target(run_tests
         COMMAND nes_emulator_tests
         DEPENDS nes_emulator_tests
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         COMMENT "Running nes_emulator_tests")
 
-# Static analysis via .clang-tidy: cmake --build cmake-build-debug --target clang-tidy
+# Static analysis via .clang-tidy: cmake --build build-debug --target clang-tidy
 find_program(CLANG_TIDY_EXE
         NAMES clang-tidy
         HINTS /opt/homebrew/opt/llvm/bin /usr/local/opt/llvm/bin)

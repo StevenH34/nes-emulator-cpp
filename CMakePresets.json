@@ -6,7 +6,7 @@
       "name": "default",
       "displayName": "vcpkg (Ninja)",
       "generator": "Ninja",
-      "binaryDir": "${sourceDir}/cmake-build-debug",
+      "binaryDir": "${sourceDir}/build-debug",
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
         "CMAKE_BUILD_TYPE": "Debug"
@@ -16,10 +16,59 @@
       "name": "asan",
       "displayName": "vcpkg (Ninja) + ASan/UBSan",
       "inherits": "default",
-      "binaryDir": "${sourceDir}/cmake-build-asan",
+      "binaryDir": "${sourceDir}/build-asan",
       "cacheVariables": {
         "NES_ENABLE_SANITIZERS": "ON"
       }
+    },
+    {
+      "name": "release",
+      "displayName": "vcpkg (Ninja) Release",
+      "inherits": "default",
+      "binaryDir": "${sourceDir}/build-release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "default",
+      "configurePreset": "default",
+      "targets": "nes_emulator"
+    },
+    {
+      "name": "asan",
+      "configurePreset": "asan",
+      "targets": "nes_emulator"
+    },
+    {
+      "name": "release",
+      "configurePreset": "release",
+      "targets": "nes_emulator"
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "default",
+      "steps": [
+        { "type": "configure", "name": "default" },
+        { "type": "build", "name": "default" }
+      ]
+    },
+    {
+      "name": "asan",
+      "steps": [
+        { "type": "configure", "name": "asan" },
+        { "type": "build", "name": "asan" }
+      ]
+    },
+    {
+      "name": "release",
+      "steps": [
+        { "type": "configure", "name": "release" },
+        { "type": "build", "name": "release" }
+      ]
     }
   ]
 }
