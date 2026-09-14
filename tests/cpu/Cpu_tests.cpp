@@ -161,7 +161,8 @@ TEST_CASE("Reset loads the Program Counter from the reset vector") {
   const nes_test::TempRomFile rom_file(rom);
   nes::Cartridge cartridge(rom_file.path());
   nes::Ppu ppu(cartridge);
-  nes::Bus bus(cartridge, ppu);
+  nes::Apu apu;
+  nes::Bus bus(cartridge, ppu, apu);
   nes::Cpu cpu(bus);
 
   cpu.SetProgramCounter(0x0000);
@@ -229,7 +230,8 @@ TEST_CASE("Nmi loads the Program Counter from the NMI vector") {
   const nes_test::TempRomFile rom_file(rom);
   nes::Cartridge cartridge(rom_file.path());
   nes::Ppu ppu(cartridge);
-  nes::Bus bus(cartridge, ppu);
+  nes::Apu apu;
+  nes::Bus bus(cartridge, ppu, apu);
   nes::Cpu cpu(bus);
 
   cpu.Nmi();

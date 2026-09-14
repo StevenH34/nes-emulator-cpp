@@ -107,6 +107,7 @@ add_executable(nes_emulator_tests
         tests/Pulse_tests.cpp
         tests/Triangle_tests.cpp
         tests/Noise_tests.cpp
+        tests/Apu_tests.cpp
         tests/Emulator_tests.cpp
         tests/Cartridge_tests.cpp
         tests/test_nestest.cpp
