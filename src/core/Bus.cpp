@@ -5,7 +5,7 @@
 
 namespace nes {
 
-Bus::Bus(Cartridge& cartridge, Ppu& ppu) : cartridge_(cartridge), ppu_(ppu) {};
+Bus::Bus(Cartridge& cartridge, Ppu& ppu, Apu& apu) : cartridge_(cartridge), ppu_(ppu), apu_(apu) {};
 
 uint8_t Bus::ReadCpu(const uint16_t address) const {
   if (address >= RAM_START && address <= RAM_MIRROR_END) {
@@ -17,14 +17,14 @@ uint8_t Bus::ReadCpu(const uint16_t address) const {
   if (address >= PRG_ROM_START && address <= PRG_ROM_END) {
     return cartridge_.GetMapper().ReadPrg(address);
   }
+  if (address == APU_STATUS) {
+    return apu_.ReadStatus();
+  }
   if (address == CONTROLLER_1) {
     return controller_1_.Read();
   }
   if (address == CONTROLLER_2) {
     return controller_2_.Read();
-  }
-  if (address >= PRG_ROM_START && address <= PRG_ROM_END) {
-    return cartridge_.GetMapper().ReadPrg(address);
   }
 
   return 0;
@@ -44,6 +44,15 @@ void Bus::WriteCpu(const uint16_t address, const uint8_t value) {
     // When the game writes to $4016, the strobe goes to both controllers.
     controller_1_.Write(value);
     controller_2_.Write(value);
+  }
+  if (address >= APU_START && address <= APU_END) {
+    apu_.WriteRegisters(address, value);
+  }
+  if (address == APU_STATUS) {
+    apu_.WriteStatus(value);
+  }
+  if (address == APU_FRAME_COUNTER) {
+    apu_.WriteFrameCounter(value);
   }
 }
 

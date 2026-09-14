@@ -79,7 +79,8 @@ TEST_CASE("Bus reads PRG-ROM through the cartridge mapper at 0x8000-0xFFFF") {
   const nes_test::TempRomFile rom(data);
   nes::Cartridge cartridge(rom.path());
   nes::Ppu ppu(cartridge);
-  const nes::Bus bus(cartridge, ppu);
+  nes::Apu apu;
+  const nes::Bus bus(cartridge, ppu, apu);
 
   CHECK(bus.ReadCpu(0x8000) == 0x42);
   CHECK(bus.ReadCpu(0xC000) == 0x42);

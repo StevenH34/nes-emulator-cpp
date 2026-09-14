@@ -5,7 +5,7 @@
 namespace nes {
 
 Emulator::Emulator(std::string path)
-    : cartridge_(std::move(path)), ppu_(cartridge_), bus_(cartridge_, ppu_), cpu_(bus_) {
+    : cartridge_(std::move(path)), ppu_(cartridge_), bus_(cartridge_, ppu_, apu_), cpu_(bus_) {
   ppu_.SetNmiCallback([this] { cpu_.Nmi(); });
   cpu_.Reset();
 }
@@ -16,6 +16,7 @@ int Emulator::Step() {
   for (size_t i = 0; i < static_cast<size_t>(cycles) * 3; ++i) {
     ppu_.Step();
   }
+  apu_.Step(cycles);
   return cycles;
 }
 

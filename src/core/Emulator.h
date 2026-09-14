@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Bus.h"
+#include "apu/Apu.h"
 #include "cpu/Cpu.h"
 
 #include <vector>
@@ -27,10 +28,12 @@ public:
   // Test helpers for inspecting internal state directly
   [[nodiscard]] Bus& GetBus() { return bus_; }
   [[nodiscard]] Cpu& GetCpu() { return cpu_; }
+  [[nodiscard]] Apu& GetApu() { return apu_; }
 
 private:
   Cartridge cartridge_;
   Ppu ppu_;
+  Apu apu_;
   Bus bus_;
   Cpu cpu_;
 };
