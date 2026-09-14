@@ -41,6 +41,7 @@ private:
   nes::Window window_;
   SDL_Renderer *renderer_{nullptr};
   SDL_Texture *texture_{nullptr};
+  SDL_AudioStream *audio_stream_{nullptr};
 };
 
 } // namespace nes_app

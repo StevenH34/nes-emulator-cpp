@@ -7,10 +7,21 @@ namespace nes_app {
 namespace {
 // NTSC NES PPU runs at ~60.0988 Hz.
 constexpr double kFrameTimeMs = 1000.0 / 60.0988;
+
+// Audio buffer pacing: keep roughly 2 frames of audio queued in the SDL
+// audio stream, nudging playback speed up/down to correct drift instead of
+// letting the queue grow (added latency) or drain (crackling/underrun).
+constexpr int kBytesPerSample = sizeof(float);
+constexpr int kSamplesPerFrameEstimate = 735; // ~44100 / 60
+constexpr int kTargetQueuedBytes = 2 * kSamplesPerFrameEstimate * kBytesPerSample;
+constexpr int kQueuedMarginBytes = kSamplesPerFrameEstimate * kBytesPerSample;
+constexpr float kFastPlaybackRatio = 1.005f;
+constexpr float kSlowPlaybackRatio = 0.995f;
+constexpr float kNormalPlaybackRatio = 1.0f;
 } // namespace
 
 NesApp::SdlLifetime::SdlLifetime() {
-  if (!SDL_Init(SDL_INIT_VIDEO)) {
+  if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
     throw std::runtime_error("SDL_Init failed: " + std::string(SDL_GetError()));
   }
 }
@@ -31,7 +42,12 @@ NesApp::NesApp(const std::string& rom_path)
       throw std::runtime_error("SDL_CreateTexture failed: " + std::string(SDL_GetError()));
     }
 
-    // TODO: Add audio
+    const SDL_AudioSpec audio_spec{SDL_AUDIO_F32, 1, 44100}; // mono float32 @ 44.1kHz, matching Apu's SAMPLE_RATE
+    audio_stream_ = SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &audio_spec, nullptr, nullptr);
+    if (audio_stream_ == nullptr) {
+      throw std::runtime_error("SDL_OpenAudioDeviceStream failed: " + std::string(SDL_GetError()));
+    }
+    SDL_ResumeAudioStreamDevice(audio_stream_);
   } catch (...) {
     Cleanup();
     throw;
@@ -41,7 +57,10 @@ NesApp::NesApp(const std::string& rom_path)
 NesApp::~NesApp() { Cleanup(); }
 
 void NesApp::Cleanup() {
-  // TODO: Destroy audio
+  if (audio_stream_ != nullptr) {
+    SDL_DestroyAudioStream(audio_stream_); // also closes the device it's bound to
+    audio_stream_ = nullptr;
+  }
   if (texture_ != nullptr) {
     SDL_DestroyTexture(texture_);
     texture_ = nullptr;
@@ -60,7 +79,17 @@ void NesApp::Run() {
 
     const auto& frame_buffer = emulator_.RunFrame();
 
-    // TODO: Add audio
+    const auto samples = emulator_.GetApu().DrainSamples();
+    SDL_PutAudioStreamData(audio_stream_, samples.data(), static_cast<int>(samples.size() * sizeof(float)));
+
+    const int queued = SDL_GetAudioStreamQueued(audio_stream_);
+    if (queued > kTargetQueuedBytes + kQueuedMarginBytes) {
+      SDL_SetAudioStreamFrequencyRatio(audio_stream_, kFastPlaybackRatio);
+    } else if (queued < kTargetQueuedBytes - kQueuedMarginBytes) {
+      SDL_SetAudioStreamFrequencyRatio(audio_stream_, kSlowPlaybackRatio);
+    } else {
+      SDL_SetAudioStreamFrequencyRatio(audio_stream_, kNormalPlaybackRatio);
+    }
 
     SDL_UpdateTexture(texture_, nullptr, frame_buffer.data(), nes::Ppu::WIDTH * 4);
     SDL_RenderClear(renderer_);
