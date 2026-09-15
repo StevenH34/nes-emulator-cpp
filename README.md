@@ -1,7 +1,9 @@
 ### NES Emulator (in C++)
 
 - ✅ Added All 151 official opcodes with instructions.
+  - TODO: add unofficial opcodes.
 - ✅ Added Cartridge and Mapper000 support.
+  - TODO: Add Mapper001 support.
 - ✅ Added nestest to verify all 151 opcodes are working correctly.
 - ✅ Added PPU registers.
 - ✅ Added an SDL3 window and app loop.
@@ -10,8 +12,8 @@
 - ✅ Added PPU sprite rendering.
 - 🚀 First playable build!
   - Compatible with most [Mapper000](https://nesdir.github.io/mapper0.html) ROMs (including Super Mario Bros.).
-- ✅ Add APU.
-- TODO: Add Mapper001 support.
+- ✅ Add APU (Pulse, Triangle, and Noise channels).
+  - TODO: Add DMC channel.
 - TODO: Add save states.
 
 <p style="text-align: center;">
@@ -53,16 +55,20 @@ Rendering uses SDL3, installed via [vcpkg](https://github.com/microsoft/vcpkg).
 
 SDL3 itself does **not** need to be installed manually — it's declared in `vcpkg.json` and vcpkg installs it automatically on first configure.
 
-Configure Build dir: `cmake --preset default` \
-Build app target: `cmake --build cmake-build-debug --target nes_emulator` \
-Run Emulator: `./cmake-build-debug/nes_emulator <rom_path>`
+Configure and build in one step: `cmake --workflow --preset default` \
+Run Emulator: `./build-debug/nes_emulator <rom_path>`
+
+For an optimized Release build, use the `release` preset instead:
+
+Configure and build in one step: `cmake --workflow --preset release` \
+Run Emulator: `./build-release/nes_emulator <rom_path>`
 
 ### Testing
 
 Using `doctest.h`.
 
-Build tests only: `cmake --build cmake-build-debug --target nes_emulator_tests` \
-Build and run tests: `cmake --build cmake-build-debug --target run_tests`
+Build tests only: `cmake --build build-debug --target nes_emulator_tests` \
+Build and run tests: `cmake --build build-debug --target run_tests`
 
 ### Resources
 
