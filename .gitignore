@@ -35,6 +35,10 @@
 *.out
 *.app
 
+# Debug symbols (MSVC/clang-cl)
+*.pdb
+*.ilk
+
 .idea
 
 # CMake
