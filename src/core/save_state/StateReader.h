@@ -40,7 +40,9 @@ public:
   // `memcpy` into caller's span, no alloc
   void ReadBytes(std::span<uint8_t> out) {
     RequireBytes(out.size());
-    std::memcpy(out.data(), data_.data() + cursor_, out.size());
+    if (!out.empty()) {
+      std::memcpy(out.data(), data_.data() + cursor_, out.size());
+    }
     cursor_ += out.size();
   }
   [[nodiscard]] size_t BytesRemaining() const { return data_.size() - cursor_; }
