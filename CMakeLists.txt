@@ -141,6 +141,7 @@ add_executable(nes_emulator_tests
         tests/cpu/opcodes/nop_tests.cpp
         tests/ppu/Ppu_tests.cpp
         tests/mappers/Mapper000_tests.cpp
+        tests/SaveState_tests.cpp
 )
 
 target_link_libraries(nes_emulator_tests PRIVATE nes_core nes_warnings)
