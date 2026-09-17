@@ -35,9 +35,7 @@ public:
     std::memcpy(&int_value, &value, sizeof(float));
     WriteU32(int_value);
   }
-  void WriteBytes(std::span<const uint8_t> bytes) {
-    buffer_.insert(buffer_.end(), bytes.begin(), bytes.end());
-  }
+  void WriteBytes(std::span<const uint8_t> bytes) { buffer_.insert(buffer_.end(), bytes.begin(), bytes.end()); }
 
 private:
   std::vector<uint8_t>& buffer_;
