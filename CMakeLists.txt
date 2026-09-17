@@ -71,8 +71,9 @@ set(NES_CORE_SOURCES
         src/core/apu/Triangle.cpp
         src/core/apu/Triangle.h
         src/core/apu/Noise.cpp
-        src/core/apu/Noise.h)
+        src/core/apu/Noise.h
         src/core/save_state/StateWriter.h
+        src/core/save_state/StateReader.h)
 
 add_library(nes_core STATIC ${NES_CORE_SOURCES})
 
