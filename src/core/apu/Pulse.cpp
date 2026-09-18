@@ -21,7 +21,7 @@ void Pulse::WriteControl(const uint8_t value) {
 
 // $4003/$4007: LLLL LTTT (length load + timer high)
 void Pulse::WriteTimerHigh(const uint8_t value) {
-  timer_period_ = (timer_period_ & 0x00FF) | (static_cast<uint16_t>(value & 0x07) << 8);
+  timer_period_ = static_cast<uint16_t>((timer_period_ & 0x00FF) | (static_cast<uint16_t>(value & 0x07) << 8));
   if (enabled_)
     length_counter_ = ApuConstants::LENGTH_COUNTER_TABLE[(value >> 3) & 0x1F];
   duty_step_ = 0;

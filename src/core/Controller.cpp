@@ -27,4 +27,17 @@ void Controller::Write(const uint8_t value) {
   }
 }
 
+// Save and load state
+void Controller::Serialize(StateWriter& writer) const {
+  writer.WriteU8(buttons_);
+  writer.WriteU8(shift_register_);
+  writer.WriteBool(strobe_);
+}
+
+void Controller::Deserialize(StateReader& reader) {
+  buttons_ = reader.ReadU8();
+  shift_register_ = reader.ReadU8();
+  strobe_ = reader.ReadBool();
+}
+
 } // namespace nes
