@@ -1,6 +1,8 @@
 #include "Noise.h"
 
 #include "ApuConstants.h"
+#include "./save_state/StateReader.h"
+#include "./save_state/StateWriter.h"
 
 namespace nes {
 
@@ -76,6 +78,36 @@ void Noise::shift() {
   const uint16_t feedback = (shift_register_ & 1) ^ ((shift_register_ >> bit) & 1);
   shift_register_ >>= 1;
   shift_register_ |= (feedback << 14);
+}
+
+void Noise::Serialize(StateWriter& writer) const {
+  writer.WriteBool(enabled_);
+  writer.WriteBool(mode_);
+  writer.WriteBool(length_halt_);
+  writer.WriteBool(envelope_start_);
+  writer.WriteBool(constant_volume_);
+  writer.WriteU8(volume_);
+  writer.WriteU8(length_counter_);
+  writer.WriteU8(envelope_divider_);
+  writer.WriteU8(envelope_decay_);
+  writer.WriteU16(shift_register_);
+  writer.WriteU16(timer_);
+  writer.WriteU16(timer_period_);
+}
+
+void Noise::Deserialize(StateReader& reader) {
+  enabled_ = reader.ReadBool();
+  mode_ = reader.ReadBool();
+  length_halt_ = reader.ReadBool();
+  envelope_start_ = reader.ReadBool();
+  constant_volume_ = reader.ReadBool();
+  volume_ = reader.ReadU8();
+  length_counter_ = reader.ReadU8();
+  envelope_divider_ = reader.ReadU8();
+  envelope_decay_ = reader.ReadU8();
+  shift_register_ = reader.ReadU16();
+  timer_ = reader.ReadU16();
+  timer_period_ = reader.ReadU16();
 }
 
 } // namespace nes

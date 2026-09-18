@@ -4,6 +4,9 @@
 
 namespace nes {
 
+class StateReader;
+class StateWriter;
+
 class Noise {
 public:
   Noise() = default;
@@ -23,6 +26,10 @@ public:
   void ClockLengthCounter();
 
   [[nodiscard]] uint8_t Output() const;
+
+  // Save and load state
+  void Serialize(StateWriter& writer) const;
+  void Deserialize(StateReader& reader);
 
 private:
   bool enabled_{false};
