@@ -1,5 +1,7 @@
 #include "Triangle.h"
 
+#include "./save_state/StateReader.h"
+#include "./save_state/StateWriter.h"
 #include "ApuConstants.h"
 
 namespace nes {
@@ -73,6 +75,30 @@ uint8_t Triangle::Output() const {
     return 0; // Silence ultrasonic frequencies
 
   return SEQUENCE_TABLE[sequence_position_];
+}
+
+// Save and load state
+void Triangle::Serialize(StateWriter& writer) const {
+  writer.WriteU8(linear_reload_);
+  writer.WriteU8(linear_counter_);
+  writer.WriteU8(length_counter_);
+  writer.WriteU8(sequence_position_);
+  writer.WriteU16(timer_);
+  writer.WriteU16(timer_period_);
+  writer.WriteBool(linear_reload_flag_);
+  writer.WriteBool(enabled_);
+  writer.WriteBool(control_flag_);
+}
+void Triangle::Deserialize(StateReader& reader) {
+  linear_reload_ = reader.ReadU8();
+  linear_counter_ = reader.ReadU8();
+  length_counter_ = reader.ReadU8();
+  sequence_position_ = reader.ReadU8();
+  timer_ = reader.ReadU16();
+  timer_period_ = reader.ReadU16();
+  linear_reload_flag_ = reader.ReadBool();
+  enabled_ = reader.ReadBool();
+  control_flag_ = reader.ReadBool();
 }
 
 } // namespace nes

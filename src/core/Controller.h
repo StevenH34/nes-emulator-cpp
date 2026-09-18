@@ -1,18 +1,18 @@
 #pragma once
 
-#include "./save_state/StateReader.h"
-#include "./save_state/StateWriter.h"
-
 #include <cstdint>
 
 namespace nes {
+
+class StateReader;
+class StateWriter;
 
 class Controller {
 public:
   explicit Controller() = default;
   ~Controller() = default;
 
-  /// Button masks
+  // Button masks
   // Each button is 1 bit in a byte.
   static constexpr uint8_t BUTTON_A = 0x01;
   static constexpr uint8_t BUTTON_B = 0x02;
@@ -30,8 +30,8 @@ public:
   void Write(uint8_t value);
 
   // Save and load state
-  void Serialize(StateWriter&) const;
-  void Deserialize(StateReader&);
+  void Serialize(StateWriter& writer) const;
+  void Deserialize(StateReader& reader);
 
 private:
   // Current button state

@@ -1,4 +1,6 @@
 #include "Pulse.h"
+#include "./save_state/StateReader.h"
+#include "./save_state/StateWriter.h"
 #include "ApuConstants.h"
 
 namespace nes {
@@ -113,6 +115,50 @@ uint16_t Pulse::SweepTargetPeriod() const {
     return static_cast<uint16_t>(timer_period_ - change);
   }
   return static_cast<uint16_t>(timer_period_ + change);
+}
+
+void Pulse::Serialize(StateWriter& writer) const {
+  writer.WriteU8(channel_);
+  writer.WriteU8(volume_);
+  writer.WriteU8(length_counter_);
+  writer.WriteU8(duty_cycle_);
+  writer.WriteU8(duty_step_);
+  writer.WriteU8(envelope_decay_);
+  writer.WriteU8(envelope_divider_);
+  writer.WriteU8(sweep_divider_);
+  writer.WriteU8(sweep_period_);
+  writer.WriteU8(sweep_shift_);
+  writer.WriteU16(timer_period_);
+  writer.WriteU16(timer_);
+  writer.WriteBool(enabled_);
+  writer.WriteBool(length_halt_);
+  writer.WriteBool(constant_value_);
+  writer.WriteBool(envelope_start_);
+  writer.WriteBool(sweep_enabled_);
+  writer.WriteBool(sweep_negate_);
+  writer.WriteBool(sweep_reload_);
+}
+
+void Pulse::Deserialize(StateReader& reader) {
+  channel_ = reader.ReadU8();
+  volume_ = reader.ReadU8();
+  length_counter_ = reader.ReadU8();
+  duty_cycle_ = reader.ReadU8();
+  duty_step_ = reader.ReadU8();
+  envelope_decay_ = reader.ReadU8();
+  envelope_divider_ = reader.ReadU8();
+  sweep_divider_ = reader.ReadU8();
+  sweep_period_ = reader.ReadU8();
+  sweep_shift_ = reader.ReadU8();
+  timer_period_ = reader.ReadU16();
+  timer_ = reader.ReadU16();
+  enabled_ = reader.ReadBool();
+  length_halt_ = reader.ReadBool();
+  constant_value_ = reader.ReadBool();
+  envelope_start_ = reader.ReadBool();
+  sweep_enabled_ = reader.ReadBool();
+  sweep_negate_ = reader.ReadBool();
+  sweep_reload_ = reader.ReadBool();
 }
 
 } // namespace nes

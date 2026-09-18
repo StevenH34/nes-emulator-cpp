@@ -1,6 +1,11 @@
 #include "doctest.h"
 
 #include "../src/core/apu/Apu.h"
+#include "../src/core/save_state/StateReader.h"
+#include "../src/core/save_state/StateWriter.h"
+
+#include <cstdint>
+#include <vector>
 
 TEST_CASE("Step advances the cycle counter by exactly the number of CPU cycles passed in") {
   nes::Apu apu;
@@ -178,5 +183,128 @@ TEST_CASE("DrainSamples returns accumulated samples and leaves the buffer empty"
   const auto drained = apu.DrainSamples();
 
   CHECK(drained.size() == sample_count_before);
+  CHECK(apu.GetSampleBuffer().empty());
+}
+
+TEST_CASE("Serialize followed by Deserialize round-trips the cycle counter and a channel's output") {
+  nes::Apu apu;
+  apu.GetPulse1().SetEnabled(true);
+  apu.GetPulse1().WriteControl(0xD5); // duty 75%, constant volume 5
+  apu.GetPulse1().WriteTimerLow(0x08);
+  apu.GetPulse1().WriteTimerHigh(0x00);
+  apu.Step(1000);
+  REQUIRE(apu.GetCycle() == 1000);
+  REQUIRE(apu.GetPulse1().Output() == 5);
+
+  std::vector<uint8_t> buffer;
+  nes::StateWriter writer(buffer);
+  apu.Serialize(writer);
+
+  nes::Apu restored;
+  nes::StateReader reader(buffer);
+  restored.Deserialize(reader);
+
+  CHECK(restored.GetCycle() == 1000);
+  CHECK(restored.GetPulse1().Output() == 5);
+  CHECK(reader.BytesRemaining() == 0);
+}
+
+TEST_CASE("Serialize/Deserialize round-trips the frame counter's mode and in-progress position") {
+  nes::Apu apu;
+  apu.WriteFrameCounter(0x80); // mode 1
+  apu.Step(10000); // advance partway through the 5-step sequence
+  REQUIRE(apu.GetFrameMode() == 1);
+  const auto frame_cycle_before = apu.GetFrameCycle();
+  REQUIRE(frame_cycle_before > 0);
+
+  std::vector<uint8_t> buffer;
+  nes::StateWriter writer(buffer);
+  apu.Serialize(writer);
+
+  nes::Apu restored;
+  nes::StateReader reader(buffer);
+  restored.Deserialize(reader);
+
+  CHECK(restored.GetFrameMode() == 1);
+  CHECK(restored.GetFrameCycle() == frame_cycle_before);
+}
+
+TEST_CASE("Serialize/Deserialize round-trips the sample-rate downsampling accumulator") {
+  nes::Apu apu;
+  apu.Step(35); // advance close to, but not past, the ~40.58-cycle sample boundary
+  REQUIRE(apu.GetSampleBuffer().empty());
+
+  std::vector<uint8_t> buffer;
+  nes::StateWriter writer(buffer);
+  apu.Serialize(writer);
+
+  nes::Apu restored;
+  nes::StateReader reader(buffer);
+  restored.Deserialize(reader);
+
+  apu.Step(6); // crosses the sample boundary
+  restored.Step(6);
+
+  // Only matches if sample_clock_ itself round-tripped, rather than resetting to 0.
+  CHECK(restored.GetSampleBuffer().size() == apu.GetSampleBuffer().size());
+}
+
+TEST_CASE("Serialize/Deserialize round-trips every channel's state") {
+  nes::Apu apu;
+  apu.GetPulse1().SetEnabled(true);
+  apu.GetPulse1().WriteControl(0xD5); // duty 75%, constant volume 5
+  apu.GetPulse1().WriteTimerLow(0x08);
+  apu.GetPulse1().WriteTimerHigh(0x00);
+
+  apu.GetPulse2().SetEnabled(true);
+  apu.GetPulse2().WriteControl(0xD3); // duty 75%, constant volume 3
+  apu.GetPulse2().WriteTimerLow(0x08);
+  apu.GetPulse2().WriteTimerHigh(0x00);
+
+  apu.GetTriangle().SetEnabled(true);
+  apu.GetTriangle().WriteLinearCounter(0x7F);
+  apu.GetTriangle().WriteTimerLow(0x02);
+  apu.GetTriangle().WriteTimerHigh(0x00);
+  apu.GetTriangle().ClockLinearCounter();
+
+  apu.GetNoise().SetEnabled(true);
+  apu.GetNoise().WriteControlRegister(0x15); // constant volume 5
+  apu.GetNoise().WriteLengthCounterRegister(0x00);
+  apu.GetNoise().ClockTimer(); // clears the power-up LFSR mute
+
+  REQUIRE(apu.GetPulse1().Output() == 5);
+  REQUIRE(apu.GetPulse2().Output() == 3);
+  REQUIRE(apu.GetTriangle().Output() == 15);
+  REQUIRE(apu.GetNoise().Output() == 5);
+
+  std::vector<uint8_t> buffer;
+  nes::StateWriter writer(buffer);
+  apu.Serialize(writer);
+
+  nes::Apu restored;
+  nes::StateReader reader(buffer);
+  restored.Deserialize(reader);
+
+  CHECK(restored.GetPulse1().Output() == 5);
+  CHECK(restored.GetPulse2().Output() == 3);
+  CHECK(restored.GetTriangle().Output() == 15);
+  CHECK(restored.GetNoise().Output() == 5);
+}
+
+TEST_CASE("Deserialize discards any undrained samples left over from before the load") {
+  nes::Apu apu;
+  apu.Step(1000); // accumulates pending samples in the buffer
+  REQUIRE_FALSE(apu.GetSampleBuffer().empty());
+
+  std::vector<uint8_t> buffer;
+  nes::StateWriter writer(buffer);
+  apu.Serialize(writer);
+
+  // Deserializing into the same live instance is the real load-state scenario --
+  // the pre-load samples must not survive into the restored buffer, since they
+  // were mixed from state that no longer exists.
+  nes::StateReader reader(buffer);
+  apu.Deserialize(reader);
+
   CHECK(apu.GetSampleBuffer().empty());
 }

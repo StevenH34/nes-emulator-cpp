@@ -1,6 +1,11 @@
 #include "doctest.h"
 
 #include "../src/core/apu/Triangle.h"
+#include "../src/core/save_state/StateReader.h"
+#include "../src/core/save_state/StateWriter.h"
+
+#include <cstdint>
+#include <vector>
 
 TEST_CASE("Triangle starts disabled with a zero length counter and silent output") {
   nes::Triangle triangle;
@@ -240,4 +245,80 @@ TEST_CASE("WriteTimerHigh retriggers the linear counter reload even without rewr
 
   triangle.ClockLinearCounter(); // 1 -> 0
   CHECK(triangle.Output() == 0); // took exactly 5 decrements after the retrigger, confirming the reload
+}
+
+TEST_CASE("Serialize followed by Deserialize round-trips enabled, length counter, "
+          "and audible output") {
+  nes::Triangle triangle;
+  triangle.SetEnabled(true);
+  triangle.WriteLinearCounter(0x7F); // control off, reload 127
+  triangle.WriteTimerLow(0x02);
+  triangle.WriteTimerHigh(0x18); // period 2, length index 3 -> 2
+  triangle.ClockLinearCounter(); // loads the linear counter to 127
+  REQUIRE(triangle.Output() == 15);
+  REQUIRE(triangle.GetLengthCounter() == 2);
+
+  std::vector<uint8_t> buffer;
+  nes::StateWriter writer(buffer);
+  triangle.Serialize(writer);
+
+  nes::Triangle restored;
+  nes::StateReader reader(buffer);
+  restored.Deserialize(reader);
+
+  CHECK(restored.GetEnabled() == true);
+  CHECK(restored.GetLengthCounter() == 2);
+  CHECK(restored.Output() == 15);
+  CHECK(reader.BytesRemaining() == 0);
+}
+
+TEST_CASE("Serialize/Deserialize round-trips the in-progress sequence position") {
+  nes::Triangle triangle;
+  triangle.SetEnabled(true);
+  triangle.WriteLinearCounter(0x7F);
+  triangle.WriteTimerLow(0x01);
+  triangle.WriteTimerHigh(0x18); // period 1, length counter 2
+  triangle.ClockLinearCounter(); // loads the linear counter
+
+  for (int i = 0; i < 6; ++i)
+    triangle.ClockTimer(); // advance partway through the 32-step sequence
+  const uint8_t output_before = triangle.Output();
+
+  std::vector<uint8_t> buffer;
+  nes::StateWriter writer(buffer);
+  triangle.Serialize(writer);
+
+  nes::Triangle restored;
+  nes::StateReader reader(buffer);
+  restored.Deserialize(reader);
+
+  CHECK(restored.Output() == output_before);
+  // Confirms the timer and sequence position stay in lockstep afterward.
+  for (int i = 0; i < 10; ++i) {
+    triangle.ClockTimer();
+    restored.ClockTimer();
+    CHECK(restored.Output() == triangle.Output());
+  }
+}
+
+TEST_CASE("Serialize/Deserialize round-trips a pending linear counter reload") {
+  nes::Triangle triangle;
+  triangle.SetEnabled(true);
+  triangle.WriteLinearCounter(0x50); // control off, reload value 0x50
+  triangle.WriteTimerLow(0x02);
+  triangle.WriteTimerHigh(0x18); // sets the reload flag, length counter 2
+  // Deliberately skip ClockLinearCounter() -- the pending reload flag itself
+  // must survive the round trip, not just its eventual effect.
+  REQUIRE(triangle.Output() == 0); // linear counter hasn't been loaded yet
+
+  std::vector<uint8_t> buffer;
+  nes::StateWriter writer(buffer);
+  triangle.Serialize(writer);
+
+  nes::Triangle restored;
+  nes::StateReader reader(buffer);
+  restored.Deserialize(reader);
+
+  restored.ClockLinearCounter(); // loads linear_counter_ from the reload value
+  CHECK(restored.Output() == 15); // sequence position 0
 }

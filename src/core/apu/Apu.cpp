@@ -1,10 +1,13 @@
 #include "Apu.h"
+#include "./save_state/StateReader.h"
+#include "./save_state/StateWriter.h"
 
 #include <cstdint>
+#include <vector>
 
 namespace nes {
 
-Apu::Apu() : pulse1_{0}, pulse2_{1}, triangle_{}, noise_{} { sample_buffer_.reserve(800); }
+Apu::Apu() : pulse1_{0}, pulse2_{1} { sample_buffer_.reserve(800); }
 
 void Apu::ClockFrameCounter() {
   ++frame_cycle_;
@@ -198,6 +201,32 @@ void Apu::WriteRegisters(const uint16_t address, const uint8_t value) {
   default:
     break;
   }
+}
+
+void Apu::Serialize(StateWriter& writer) const {
+  writer.WriteU8(frame_mode_);
+  writer.WriteU32(frame_cycle_);
+  writer.WriteU32(cycle_);
+  writer.WriteFloat(sample_clock_);
+  pulse1_.Serialize(writer);
+  pulse2_.Serialize(writer);
+  triangle_.Serialize(writer);
+  noise_.Serialize(writer);
+}
+
+void Apu::Deserialize(StateReader& reader) {
+  frame_mode_ = reader.ReadU8();
+  frame_cycle_ = reader.ReadU32();
+  cycle_ = reader.ReadU32();
+  sample_clock_ = reader.ReadFloat();
+  pulse1_.Deserialize(reader);
+  pulse2_.Deserialize(reader);
+  triangle_.Deserialize(reader);
+  noise_.Deserialize(reader);
+
+  // Any undrained samples were mixed from pre-load channel state; keeping them
+  // would play stale audio right after the load.
+  sample_buffer_.clear();
 }
 
 } // namespace nes

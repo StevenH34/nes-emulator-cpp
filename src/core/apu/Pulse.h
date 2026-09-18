@@ -3,6 +3,8 @@
 #include <cstdint>
 
 namespace nes {
+class StateReader;
+class StateWriter;
 
 class Pulse {
 public:
@@ -25,6 +27,10 @@ public:
   void ClockLengthCounter();
   void ClockSweep();
   [[nodiscard]] uint8_t Output() const;
+
+  // Save and load state
+  void Serialize(StateWriter& writer) const;
+  void Deserialize(StateReader& reader);
 
 private:
   uint8_t channel_;

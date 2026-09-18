@@ -3,6 +3,9 @@
 
 namespace nes {
 
+class StateWriter;
+class StateReader;
+
 class Triangle {
 public:
   Triangle() = default;
@@ -21,6 +24,10 @@ public:
   void ClockLinearCounter();
   void ClockLengthCounter();
   [[nodiscard]] uint8_t Output() const;
+
+  // Save and load state
+  void Serialize(StateWriter& writer) const;
+  void Deserialize(StateReader& reader);
 
 private:
   uint8_t linear_reload_{0};

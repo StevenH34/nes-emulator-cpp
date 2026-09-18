@@ -1,6 +1,11 @@
 #include "doctest.h"
 
 #include "../src/core/apu/Noise.h"
+#include "../src/core/save_state/StateReader.h"
+#include "../src/core/save_state/StateWriter.h"
+
+#include <cstdint>
+#include <vector>
 
 TEST_CASE("Noise starts disabled with a zero length counter and silent output") {
   nes::Noise noise;
@@ -222,4 +227,98 @@ TEST_CASE("WriteModePeriod's short mode (M=1) still produces an audible first sh
 
   noise.ClockTimer();
   CHECK(noise.Output() == 5);
+}
+
+TEST_CASE("Serialize followed by Deserialize round-trips enabled, length counter, "
+          "and audible output") {
+  nes::Noise noise;
+  noise.SetEnabled(true);
+  noise.WriteControlRegister(0x15); // constant volume, volume 5
+  noise.WriteLengthCounterRegister(0x18); // length index 3 -> 2
+  noise.ClockTimer(); // clears the power-up LFSR mute
+  REQUIRE(noise.Output() == 5);
+  REQUIRE(noise.GetLengthCounter() == 2);
+
+  std::vector<uint8_t> buffer;
+  nes::StateWriter writer(buffer);
+  noise.Serialize(writer);
+
+  nes::Noise restored;
+  nes::StateReader reader(buffer);
+  restored.Deserialize(reader);
+
+  CHECK(restored.GetEnabled() == true);
+  CHECK(restored.GetLengthCounter() == 2);
+  CHECK(restored.Output() == 5);
+  CHECK(reader.BytesRemaining() == 0);
+}
+
+TEST_CASE("Serialize/Deserialize round-trips the LFSR's in-progress shift state") {
+  nes::Noise noise;
+  noise.SetEnabled(true);
+  noise.WriteControlRegister(0x15);
+  noise.WriteLengthCounterRegister(0x00);
+  for (int i = 0; i < 5; ++i)
+    noise.ClockTimer(); // shift several times away from the power-up seed
+
+  std::vector<uint8_t> buffer;
+  nes::StateWriter writer(buffer);
+  noise.Serialize(writer);
+
+  nes::Noise restored;
+  nes::StateReader reader(buffer);
+  restored.Deserialize(reader);
+
+  // If only Output() round-tripped (and not the LFSR bits themselves), the two
+  // would eventually diverge as they keep shifting; they must not.
+  for (int i = 0; i < 20; ++i) {
+    noise.ClockTimer();
+    restored.ClockTimer();
+    CHECK(restored.Output() == noise.Output());
+  }
+}
+
+TEST_CASE("Serialize/Deserialize round-trips the short/long mode flag") {
+  nes::Noise noise;
+  noise.SetEnabled(true);
+  noise.WriteControlRegister(0x15);
+  noise.WriteLengthCounterRegister(0x00);
+  noise.WriteModePeriod(0x80); // short mode: feedback tap at bit 6
+
+  std::vector<uint8_t> buffer;
+  nes::StateWriter writer(buffer);
+  noise.Serialize(writer);
+
+  nes::Noise restored;
+  nes::StateReader reader(buffer);
+  restored.Deserialize(reader);
+
+  for (int i = 0; i < 20; ++i) {
+    noise.ClockTimer();
+    restored.ClockTimer();
+    CHECK(restored.Output() == noise.Output());
+  }
+}
+
+TEST_CASE("Serialize/Deserialize round-trips in-progress envelope decay") {
+  nes::Noise noise;
+  noise.SetEnabled(true);
+  noise.WriteControlRegister(0x00); // constant volume off, envelope period 0
+  noise.WriteLengthCounterRegister(0x00);
+  noise.ClockTimer();
+  noise.ClockEnvelope(); // reload clock -> decay 15
+  noise.ClockEnvelope(); // decays to 14
+  REQUIRE(noise.Output() == 14);
+
+  std::vector<uint8_t> buffer;
+  nes::StateWriter writer(buffer);
+  noise.Serialize(writer);
+
+  nes::Noise restored;
+  nes::StateReader reader(buffer);
+  restored.Deserialize(reader);
+
+  REQUIRE(restored.Output() == 14);
+  restored.ClockEnvelope(); // continues decaying from 14, does not restart at 15
+  CHECK(restored.Output() == 13);
 }
