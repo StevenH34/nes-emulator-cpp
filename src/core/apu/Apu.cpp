@@ -3,6 +3,7 @@
 #include "./save_state/StateWriter.h"
 
 #include <cstdint>
+#include <vector>
 
 namespace nes {
 
