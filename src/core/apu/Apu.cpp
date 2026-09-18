@@ -223,6 +223,10 @@ void Apu::Deserialize(StateReader& reader) {
   pulse2_.Deserialize(reader);
   triangle_.Deserialize(reader);
   noise_.Deserialize(reader);
+
+  // Any undrained samples were mixed from pre-load channel state; keeping them
+  // would play stale audio right after the load.
+  sample_buffer_.clear();
 }
 
 } // namespace nes
