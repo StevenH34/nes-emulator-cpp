@@ -1,8 +1,8 @@
 #include "Triangle.h"
 
-#include "ApuConstants.h"
 #include "./save_state/StateReader.h"
 #include "./save_state/StateWriter.h"
+#include "ApuConstants.h"
 
 namespace nes {
 
