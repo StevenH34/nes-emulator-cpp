@@ -1,7 +1,11 @@
 #include "doctest.h"
 
 #include "../src/core/Controller.h"
+#include "../src/core/save_state/StateReader.h"
+#include "../src/core/save_state/StateWriter.h"
 #include "TestBus.h"
+
+#include <vector>
 
 TEST_CASE("Controller reads all zero bits when no buttons are pressed") {
   nes::Controller controller;
@@ -139,6 +143,106 @@ TEST_CASE("Controller Write with the strobe bit already low leaves the shift "
   controller.Write(0); // strobe never went high, so nothing was latched
 
   CHECK(controller.Read() == 0);
+}
+
+TEST_CASE("Controller Serialize writes buttons, shift register, and strobe in order") {
+  nes::Controller controller;
+  controller.Press(nes::Controller::BUTTON_A);
+  controller.Press(nes::Controller::BUTTON_START);
+  controller.Write(1); // strobe held high, latches buttons_ into shift_register_
+
+  std::vector<uint8_t> buffer;
+  nes::StateWriter writer(buffer);
+  controller.Serialize(writer);
+
+  const uint8_t pressed = nes::Controller::BUTTON_A | nes::Controller::BUTTON_START;
+  REQUIRE(buffer.size() == 3);
+  CHECK(buffer[0] == pressed); // buttons_
+  CHECK(buffer[1] == pressed); // shift_register_
+  CHECK(buffer[2] == 1); // strobe_
+}
+
+TEST_CASE("Controller Deserialize restores buttons, shift register, and strobe") {
+  nes::Controller controller;
+  controller.Press(nes::Controller::BUTTON_B);
+  controller.Write(1);
+  controller.Write(0); // latch, then freeze the shift register
+
+  std::vector<uint8_t> buffer;
+  nes::StateWriter writer(buffer);
+  controller.Serialize(writer);
+
+  nes::Controller restored;
+  nes::StateReader reader(buffer);
+  restored.Deserialize(reader);
+
+  const uint8_t expected[8] = {0, 1, 0, 0, 0, 0, 0, 0};
+  for (const uint8_t bit : expected) {
+    CHECK(restored.Read() == bit);
+  }
+}
+
+TEST_CASE("Controller save/load round-trip resumes a partially read-out shift register") {
+  nes::Controller controller;
+  controller.Press(nes::Controller::BUTTON_A);
+  controller.Press(nes::Controller::BUTTON_RIGHT);
+  controller.Write(1);
+  controller.Write(0);
+
+  // Read the first three bits (A, B, Select) before saving.
+  CHECK(controller.Read() == 1);
+  CHECK(controller.Read() == 0);
+  CHECK(controller.Read() == 0);
+
+  std::vector<uint8_t> buffer;
+  nes::StateWriter writer(buffer);
+  controller.Serialize(writer);
+
+  nes::Controller restored;
+  nes::StateReader reader(buffer);
+  restored.Deserialize(reader);
+
+  // The remaining bits (Start, Up, Down, Left, Right) must continue exactly
+  // where the original left off, not restart from the top.
+  const uint8_t expected[5] = {0, 0, 0, 0, 1};
+  for (const uint8_t bit : expected) {
+    CHECK(restored.Read() == bit);
+  }
+}
+
+TEST_CASE("Controller save/load round-trip preserves an active strobe") {
+  nes::Controller controller;
+  controller.Write(1); // strobe held high, never latched to low
+
+  std::vector<uint8_t> buffer;
+  nes::StateWriter writer(buffer);
+  controller.Serialize(writer);
+
+  nes::Controller restored;
+  nes::StateReader reader(buffer);
+  restored.Deserialize(reader);
+
+  CHECK(restored.Read() == 0);
+  restored.Press(nes::Controller::BUTTON_A);
+  CHECK(restored.Read() == 1); // still a live read, since strobe survived the round-trip
+}
+
+TEST_CASE("Controller save/load round-trip preserves the untouched default state") {
+  nes::Controller controller;
+
+  std::vector<uint8_t> buffer;
+  nes::StateWriter writer(buffer);
+  controller.Serialize(writer);
+
+  nes::Controller restored;
+  nes::StateReader reader(buffer);
+  restored.Deserialize(reader);
+
+  restored.Write(1);
+  restored.Write(0);
+  for (int i = 0; i < 8; ++i) {
+    CHECK(restored.Read() == 0);
+  }
 }
 
 TEST_CASE("Bus strobes and reads controller 1 through $4016") {
