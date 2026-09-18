@@ -3,6 +3,9 @@
 #include <format>
 #include <print>
 
+#include "save_state/StateReader.h"
+#include "save_state/StateWriter.h"
+
 namespace nes {
 
 Cpu::Cpu(Bus& bus) : bus_(bus) {}
@@ -737,18 +740,18 @@ void Cpu::Adc(const uint8_t value) {
   // Check for unsigned overflow
   SetCFlag(sum > MAX_8_BIT_UINT_);
   /**
-  * Check for signed overflow
-  * XOR both operands. If bit 7 is 0, both operands have the same sign.
-  * Else both operands have different signs
-  * ~(@a ^ value): If bit 7 is 0, inverse this to 1 for true
-  * (@a ^ result): True if both signs are different
-  * AND both to combine results
-  * & 0x80: Check only the signed bit (bit 7)
-  * If all 3 are true, inputs had the same sign, but result flipped the sign -
-  * this is overflow Two positives means it's a negative Two negatives means
-  * it's a positive If one is positive and one is negative overflow cannot
-  * happen
-  */
+   * Check for signed overflow
+   * XOR both operands. If bit 7 is 0, both operands have the same sign.
+   * Else both operands have different signs
+   * ~(@a ^ value): If bit 7 is 0, inverse this to 1 for true
+   * (@a ^ result): True if both signs are different
+   * AND both to combine results
+   * & 0x80: Check only the signed bit (bit 7)
+   * If all 3 are true, inputs had the same sign, but result flipped the sign -
+   * this is overflow Two positives means it's a negative Two negatives means
+   * it's a positive If one is positive and one is negative overflow cannot
+   * happen
+   */
   SetVFlag((~(accumulator_ ^ value) & (accumulator_ ^ result) & 0x80) != 0);
 
   accumulator_ = result;
@@ -1122,6 +1125,24 @@ void Cpu::Nmi() {
   const uint8_t low_byte = ReadByte(NMI_VECTOR_);
   const uint8_t high_byte = ReadByte(NMI_VECTOR_ + 1);
   program_counter_ = static_cast<uint16_t>(high_byte << 8) | static_cast<uint16_t>(low_byte);
+}
+
+void Cpu::Serialize(StateWriter& writer) const {
+  writer.WriteU8(accumulator_);
+  writer.WriteU8(x_register_);
+  writer.WriteU8(y_register_);
+  writer.WriteU8(stack_pointer_);
+  writer.WriteU16(program_counter_);
+  writer.WriteU8(status_register_);
+}
+
+void Cpu::Deserialize(StateReader& reader) {
+  accumulator_ = reader.ReadU8();
+  x_register_ = reader.ReadU8();
+  y_register_ = reader.ReadU8();
+  stack_pointer_ = reader.ReadU8();
+  program_counter_ = reader.ReadU16();
+  status_register_ = reader.ReadU8();
 }
 
 } // namespace nes
