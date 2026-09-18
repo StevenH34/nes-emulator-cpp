@@ -6,8 +6,12 @@
 #include "../../src/core/Cartridge.h"
 #include "../../src/core/cpu/Cpu.h"
 #include "../../src/core/ppu/Ppu.h"
+#include "../../src/core/save_state/StateReader.h"
+#include "../../src/core/save_state/StateWriter.h"
 #include "TestBus.h"
 #include "TestRom.h"
+
+#include <vector>
 
 namespace {
 
@@ -20,6 +24,27 @@ void ResetStatusRegister(nes::Cpu& cpu) {
   cpu.SetFlag(nes::Cpu::StatusFlag::U, true);
   cpu.SetFlag(nes::Cpu::StatusFlag::V, false);
   cpu.SetFlag(nes::Cpu::StatusFlag::N, false);
+}
+
+// Drives every serialized field (A, X, Y, SP, PC, status) to a distinct,
+// recognizable value via the public API, so a round trip can't accidentally
+// pass by leaving a field at its default.
+void SetDistinctRegisterState(nes::Cpu& cpu) {
+  cpu.Lda(0x11); // accumulator_ (also touches Z/N, overwritten below)
+  cpu.SetXRegister(0x44);
+  cpu.Txs(); // stack_pointer_ = 0x44
+  cpu.SetXRegister(0x22); // final x_register_ value
+  cpu.SetYRegister(0x33);
+  cpu.SetProgramCounter(0x1234);
+  cpu.SetFlag(nes::Cpu::StatusFlag::C, true);
+  cpu.SetFlag(nes::Cpu::StatusFlag::Z, false);
+  cpu.SetFlag(nes::Cpu::StatusFlag::I, true);
+  cpu.SetFlag(nes::Cpu::StatusFlag::D, false);
+  cpu.SetFlag(nes::Cpu::StatusFlag::B, true);
+  cpu.SetFlag(nes::Cpu::StatusFlag::U, true);
+  cpu.SetFlag(nes::Cpu::StatusFlag::V, false);
+  cpu.SetFlag(nes::Cpu::StatusFlag::N, true);
+  // status_register_ == 0xB5 (N|U|B|I|C)
 }
 
 } // namespace
@@ -237,4 +262,86 @@ TEST_CASE("Nmi loads the Program Counter from the NMI vector") {
   cpu.Nmi();
 
   CHECK(cpu.GetProgramCounter() == 0x9234);
+}
+
+TEST_CASE("Cpu Serialize writes A, X, Y, SP, PC, and status in order") {
+  nes_test::TestBus bus;
+  nes::Cpu cpu(bus);
+  SetDistinctRegisterState(cpu);
+
+  std::vector<uint8_t> buffer;
+  nes::StateWriter writer(buffer);
+  cpu.Serialize(writer);
+
+  REQUIRE(buffer.size() == 7);
+  CHECK(buffer[0] == 0x11); // accumulator_
+  CHECK(buffer[1] == 0x22); // x_register_
+  CHECK(buffer[2] == 0x33); // y_register_
+  CHECK(buffer[3] == 0x44); // stack_pointer_
+  CHECK(buffer[4] == 0x34); // program_counter_ low byte (little-endian)
+  CHECK(buffer[5] == 0x12); // program_counter_ high byte
+  CHECK(buffer[6] == 0xB5); // status_register_
+}
+
+TEST_CASE("Cpu Deserialize restores every register from a saved state") {
+  nes_test::TestBus bus;
+  nes::Cpu cpu(bus);
+  SetDistinctRegisterState(cpu);
+
+  std::vector<uint8_t> buffer;
+  nes::StateWriter writer(buffer);
+  cpu.Serialize(writer);
+
+  nes_test::TestBus restored_bus;
+  nes::Cpu restored(restored_bus);
+  // Give the restored Cpu different values first, so the checks below prove
+  // Deserialize overwrites them rather than happening to already match.
+  restored.Lda(0xFF);
+  restored.SetXRegister(0xAA);
+  restored.SetYRegister(0xBB);
+  restored.SetProgramCounter(0xBEEF);
+  restored.SetFlag(nes::Cpu::StatusFlag::N, false);
+
+  nes::StateReader reader(buffer);
+  restored.Deserialize(reader);
+
+  CHECK(restored.GetAccumulator() == 0x11);
+  CHECK(restored.GetXRegister() == 0x22);
+  CHECK(restored.GetYRegister() == 0x33);
+  CHECK(restored.GetStackPointer() == 0x44);
+  CHECK(restored.GetProgramCounter() == 0x1234);
+  CHECK(restored.GetStatusRegister() == 0xB5);
+}
+
+TEST_CASE("Cpu save/load round trip preserves the untouched power-up state") {
+  nes_test::TestBus bus;
+  nes::Cpu cpu(bus); // never touched: A=0, X=0, Y=0, SP=0xFD, PC=0, status=0x24
+
+  std::vector<uint8_t> buffer;
+  nes::StateWriter writer(buffer);
+  cpu.Serialize(writer);
+
+  nes_test::TestBus restored_bus;
+  nes::Cpu restored(restored_bus);
+  SetDistinctRegisterState(restored); // mutate first to prove Deserialize resets it
+
+  nes::StateReader reader(buffer);
+  restored.Deserialize(reader);
+
+  CHECK(restored.GetAccumulator() == 0x00);
+  CHECK(restored.GetXRegister() == 0x00);
+  CHECK(restored.GetYRegister() == 0x00);
+  CHECK(restored.GetStackPointer() == 0xFD);
+  CHECK(restored.GetProgramCounter() == 0x0000);
+  CHECK(restored.GetStatusRegister() == 0x24);
+}
+
+TEST_CASE("Cpu Deserialize throws when the saved buffer is truncated") {
+  nes_test::TestBus bus;
+  nes::Cpu cpu(bus);
+
+  std::vector<uint8_t> buffer = {0x11, 0x22, 0x33}; // fewer than the 7 bytes Serialize writes
+  nes::StateReader reader(buffer);
+
+  CHECK_THROWS_AS(cpu.Deserialize(reader), std::out_of_range);
 }
