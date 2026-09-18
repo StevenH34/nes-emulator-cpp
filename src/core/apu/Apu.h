@@ -9,6 +9,9 @@
 
 namespace nes {
 
+class StateReader;
+class StateWriter;
+
 class Apu {
 public:
   Apu();
@@ -20,7 +23,7 @@ public:
   [[nodiscard]] Noise& GetNoise() { return noise_; }
 
   [[nodiscard]] uint8_t GetFrameMode() const { return frame_mode_; }
-  [[nodiscard]] int32_t GetFrameCycle() const { return frame_cycle_; }
+  [[nodiscard]] uint32_t GetFrameCycle() const { return frame_cycle_; }
   [[nodiscard]] float GetSampleClock() const { return sample_clock_; }
   [[nodiscard]] std::vector<float>& GetSampleBuffer() { return sample_buffer_; }
   [[nodiscard]] uint32_t GetCycle() const { return cycle_; }
@@ -36,6 +39,10 @@ public:
   void WriteRegisters(uint16_t address, uint8_t value);
   [[nodiscard]] uint8_t ReadStatus() const;
 
+  // Save and load state
+  void Serialize(StateWriter& writer) const;
+  void Deserialize(StateReader& reader);
+
 private:
   // Channels
   Pulse pulse1_;
@@ -46,7 +53,7 @@ private:
   // 0 = 4-step sequence (~60Hz), 1 = 5-step sequence (~48Hz)
   uint8_t frame_mode_{0};
   // Current cycle within the frame counter sequence
-  int32_t frame_cycle_{0};
+  uint32_t frame_cycle_{0};
   // CPU cycle counter; even/odd determines APU timing
   uint32_t cycle_{0};
   // Accumulator for downsampling from ~1.79MHz to 44100Hz
