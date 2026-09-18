@@ -1,11 +1,11 @@
 #pragma once
 
-#include "./save_state/StateReader.h"
-#include "./save_state/StateWriter.h"
-
 #include <cstdint>
 
 namespace nes {
+
+class StateReader;
+class StateWriter;
 
 class Controller {
 public:
@@ -30,8 +30,8 @@ public:
   void Write(uint8_t value);
 
   // Save and load state
-  void Serialize(StateWriter&) const;
-  void Deserialize(StateReader&);
+  void Serialize(StateWriter& writer) const;
+  void Deserialize(StateReader& reader);
 
 private:
   // Current button state
