@@ -38,7 +38,7 @@ public:
   void SetYRegister(const uint8_t value) { y_register_ = value; }
   void SetProgramCounter(const uint16_t value) { program_counter_ = value; }
 
-  /// Addressing Modes
+  // Addressing Modes
   // Zero Page is an 8-bit address in the first 256 bytes of memory
   uint16_t AddressZeroPage();
   uint16_t AddressZeroPageX();
@@ -47,15 +47,17 @@ public:
   uint16_t AddressAbsoluteX();
   uint16_t AddressAbsoluteY();
   uint16_t AddressRelative();
-  // Indirect addressing is used for JMP (Jump) instructions.
-  // It reads a 16-bit address from the instruction, this address is the final
-  // destination of the jump.
+  /**
+  * Indirect addressing is used for JMP (Jump) instructions.
+  * It reads a 16-bit address from the instruction, this address is the final
+  * destination of the jump.
+  */
   uint16_t AddressIndirect();
   uint16_t AddressIndirectX();
   uint16_t AddressIndirectY();
 
-  /// STA (STore Accumulator)
-  /// Affects flags: none
+  // STA (STore Accumulator)
+  // Affects flags: none
   void StaZeroPage();
   void StaZeroPageX();
   void StaAbsolute();
@@ -64,8 +66,8 @@ public:
   void StaIndirectX();
   void StaIndirectY();
 
-  /// LDA (LoaD Accumulator)
-  /// Affects flags: N Z
+  // LDA (LoaD Accumulator)
+  // Affects flags: N Z
   void Lda(uint8_t value);
   void LdaImmediate();
   void LdaZeroPage();
@@ -76,7 +78,7 @@ public:
   void LdaIndirectX();
   void LdaIndirectY();
 
-  /// LDX (LoaD X register)
+  // LDX (LoaD X register)
   void Ldx(uint8_t value);
   void LdxImmediate();
   void LdxZeroPage();
@@ -84,7 +86,7 @@ public:
   void LdxAbsolute();
   void LdxAbsoluteY();
 
-  /// LDY (LoaD Y register)
+  // LDY (LoaD Y register)
   void Ldy(uint8_t value);
   void LdyImmediate();
   void LdyZeroPage();
@@ -92,26 +94,28 @@ public:
   void LdyAbsolute();
   void LdyAbsoluteX();
 
-  /// STX (STore X register)
+  // STX (STore X register)
   void StxZeroPage();
   void StxZeroPageY();
   void StxAbsolute();
 
-  /// STY (STore Y register)
+  // STY (STore Y register)
   void StyZeroPage();
   void StyZeroPageX();
   void StyAbsolute();
 
-  /// Register Increment Instruction
+  // Register Increment Instruction
   void Inx();
   void Iny();
   void Dex();
   void Dey();
 
-  /// Flag Masks (N V U B D I Z C)
-  // Flags are bits in the Status register.
-  // The flags need to flip on or off.
-  // Flags are used as a mask to cover up bits we don't want.
+  /**
+  * Flag Masks (N V U B D I Z C)
+  * Flags are bits in the Status register.
+  * The flags need to flip on or off.
+  * Flags are used as a mask to cover up bits we don't want.
+  */
   enum class StatusFlag : uint8_t {
     C = 0x01, // Carry
     Z = 0x02, // Zero
@@ -123,7 +127,7 @@ public:
     N = 0x80 // Negative
   };
 
-  /// Flag Methods
+  // Flag Methods
   void SetFlag(StatusFlag flag, bool is_on);
   [[nodiscard]] bool IsFlagSet(uint8_t mask) const;
   void SetZFlag(uint8_t register_value); // Zero Flag
@@ -150,7 +154,7 @@ public:
   void Sed();
   void Clv();
 
-  /// Branch Instructions
+  // Branch Instructions
   void BranchIf(bool condition);
   void Beq(); // Z == 1, branch if equal
   void Bne(); // Z == 0, branch if not equal
@@ -161,7 +165,7 @@ public:
   void Bvs(); // V == 1, branch if overflow set
   void Bvc(); // V == 0, branch if overflow clear
 
-  /// Jump Instructions
+  // Jump Instructions
   void JmpAbsolute();
   void JmpIndirect();
   void Jsr(); // Jump to subroutine
@@ -169,7 +173,7 @@ public:
   void Brk(); // Saves the full CPU state (Program Counter and flags)
   void Rti(); // Restores Program Counter and flags from the stack
 
-  /// Stack Methods
+  // Stack Methods
   // Lives at Page 1: $0100 - $01FF
   void StackPushByte(uint8_t value);
   uint8_t StackPullByte();
@@ -189,11 +193,11 @@ public:
   void Php();
   void Plp();
 
-  /// Comparison Instructions
+  // Comparison Instructions
   void Compare(uint8_t register_value, uint8_t operand);
 
-  /// CMP (CoMPare accumulator)
-  /// Affects Flags: N Z C
+  // CMP (CoMPare accumulator)
+  // Affects Flags: N Z C
   void CmpImmediate();
   void CmpZeroPage();
   void CmpZeroPageX();
@@ -203,20 +207,20 @@ public:
   void CmpIndirectX();
   void CmpIndirectY();
 
-  /// CPX (ComPare X register)
-  /// Affects Flags: N Z C
+  // CPX (ComPare X register)
+  // Affects Flags: N Z C
   void CpxImmediate();
   void CpxZeroPage();
   void CpxAbsolute();
 
-  /// CPY
+  // CPY
   void CpyImmediate();
   void CpyZeroPage();
   void CpyAbsolute();
 
-  /// Shift Instructions
-  /// ASL (Arithmetic Shift Left)
-  /// Affects Flags: N Z C
+  // Shift Instructions
+  // ASL (Arithmetic Shift Left)
+  // Affects Flags: N Z C
   uint8_t Asl(uint8_t value);
   void AslAccumulator();
   void AslZeroPage();
@@ -224,8 +228,8 @@ public:
   void AslAbsolute();
   void AslAbsoluteX();
 
-  /// LSR (Logical Shift Right)
-  /// Affects Flags: N Z C
+  // LSR (Logical Shift Right)
+  // Affects Flags: N Z C
   uint8_t Lsr(uint8_t value);
   void LsrAccumulator();
   void LsrZeroPage();
@@ -233,8 +237,8 @@ public:
   void LsrAbsolute();
   void LsrAbsoluteX();
 
-  /// ROL (ROtate Left)
-  /// Affects Flags: N Z C
+  // ROL (ROtate Left)
+  // Affects Flags: N Z C
   uint8_t Rol(uint8_t value);
   void RolAccumulator();
   void RolZeroPage();
@@ -242,8 +246,8 @@ public:
   void RolAbsolute();
   void RolAbsoluteX();
 
-  /// ROR (ROtate Right)
-  /// Affects Flags: N Z C
+  // ROR (ROtate Right)
+  // Affects Flags: N Z C
   uint8_t Ror(uint8_t value);
   void RorAccumulator();
   void RorZeroPage();
@@ -251,8 +255,8 @@ public:
   void RorAbsolute();
   void RorAbsoluteX();
 
-  /// ADC (Add with Carry)
-  /// Affects flags: N V Z C
+  // ADC (Add with Carry)
+  // Affects flags: N V Z C
   void Adc(uint8_t value);
   void AdcImmediate();
   void AdcZeroPage();
@@ -263,8 +267,8 @@ public:
   void AdcIndirectX();
   void AdcIndirectY();
 
-  /// SBC (Subtract with Carry)
-  /// Affects Flags: N V Z C
+  // SBC (Subtract with Carry)
+  // Affects Flags: N V Z C
   void Sbc(uint8_t value);
   void SbcImmediate();
   void SbcZeroPage();
@@ -275,10 +279,10 @@ public:
   void SbcIndirectX();
   void SbcIndirectY();
 
-  /// Register Instructions
-  /// Affect Flags: N Z
-  /// These instructions are implied mode, have a length of 1 byte, and require
-  /// 2 cycles
+  // Register Instructions
+  // Affect Flags: N Z
+  // These instructions are implied mode, have a length of 1 byte, and require
+  // 2 cycles
   void Tax(); // Transfer register A to X
   void Tay(); // Transfer register A to Y
   void Txa(); // Transfer register X to A
@@ -286,8 +290,8 @@ public:
   void Tsx(); // Transfer Stack Pointer to register X
   void Txs(); // Transfer X to Stack Pointer
 
-  /// AND (bitwise AND with Accumulator)
-  /// Affects flags: N Z
+  // AND (bitwise AND with Accumulator)
+  // Affects flags: N Z
   void AndImmediate();
   void AndZeroPage();
   void AndZeroPageX();
@@ -297,8 +301,8 @@ public:
   void AndIndirectX();
   void AndIndirectY();
 
-  /// ORA (bitwise OR with Accumulator)
-  /// Affects flags: N Z
+  // ORA (bitwise OR with Accumulator)
+  // Affects flags: N Z
   void OraImmediate();
   void OraZeroPage();
   void OraZeroPageX();
@@ -308,7 +312,7 @@ public:
   void OraIndirectX();
   void OraIndirectY();
 
-  /// EOR (bitwise Exclusive OR)
+  // EOR (bitwise Exclusive OR)
   void EorImmediate();
   void EorZeroPage();
   void EorZeroPageX();
@@ -318,16 +322,15 @@ public:
   void EorIndirectX();
   void EorIndirectY();
 
-  /// Misc Instructions
-  /// INC (INCrement memory)
-  /// Affects Flags: N Z
+  // INC (INCrement memory)
+  // Affects Flags: N Z
   void IncZeroPage();
   void IncZeroPageX();
   void IncAbsolute();
   void IncAbsoluteX();
 
-  /// DEC (DECrement memory)
-  /// Affects Flags: N Z
+  // DEC (DECrement memory)
+  // Affects Flags: N Z
   void DecZeroPage();
   void DecZeroPageX();
   void DecAbsolute();
@@ -344,7 +347,7 @@ public:
   void BitZeroPage();
   void BitAbsolute();
 
-  /// NOP (No OPeration)
+  // NOP (No OPeration)
   static void Nop();
 
   void Nmi(); // Non-Maskable Interrupt Request
@@ -354,11 +357,11 @@ private:
 
   uint8_t STATUS_INIT_ = static_cast<uint8_t>(StatusFlag::U) | static_cast<uint8_t>(StatusFlag::I);
 
-  /// Stack
+  // Stack
   uint16_t STACK_BASE_ = 0x0100;
   uint8_t STACK_INIT_ = 0xFD;
 
-  /// CPU Registers
+  // CPU Registers
   uint8_t accumulator_ = 0; // Accumulator
   uint8_t x_register_ = 0; // X Register
   uint8_t y_register_ = 0; // Y Register
@@ -368,7 +371,7 @@ private:
 
   uint8_t MAX_8_BIT_UINT_ = 0xFF; // Maximum number that fits in a byte (8 bits): 255
 
-  /// Interrupt Vectors
+  // Interrupt Vectors
   uint16_t NMI_VECTOR_ = 0xFFFA; // The PPU finished drawing a frame (Non-Maskable Interrupt)
   uint16_t RESET_VECTOR_ = 0xFFFC;
   uint16_t IRQ_VECTOR_ = 0xFFFE; // Hardware interrupt
