@@ -290,3 +290,21 @@ TEST_CASE("Serialize/Deserialize round-trips every channel's state") {
   CHECK(restored.GetTriangle().Output() == 15);
   CHECK(restored.GetNoise().Output() == 5);
 }
+
+TEST_CASE("Deserialize discards any undrained samples left over from before the load") {
+  nes::Apu apu;
+  apu.Step(1000); // accumulates pending samples in the buffer
+  REQUIRE_FALSE(apu.GetSampleBuffer().empty());
+
+  std::vector<uint8_t> buffer;
+  nes::StateWriter writer(buffer);
+  apu.Serialize(writer);
+
+  // Deserializing into the same live instance is the real load-state scenario --
+  // the pre-load samples must not survive into the restored buffer, since they
+  // were mixed from state that no longer exists.
+  nes::StateReader reader(buffer);
+  apu.Deserialize(reader);
+
+  CHECK(apu.GetSampleBuffer().empty());
+}
