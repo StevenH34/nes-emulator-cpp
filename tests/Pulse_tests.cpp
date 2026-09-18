@@ -1,6 +1,11 @@
 #include "doctest.h"
 
 #include "../src/core/apu/Pulse.h"
+#include "../src/core/save_state/StateReader.h"
+#include "../src/core/save_state/StateWriter.h"
+
+#include <cstdint>
+#include <vector>
 
 TEST_CASE("Pulse starts disabled with a zero length counter and silent output") {
   nes::Pulse pulse(0);
@@ -291,4 +296,126 @@ TEST_CASE("ClockSweep only applies the target once per full divider period") {
 
   pulse.ClockSweep(); // divider reaches 0: target = 12 + (12 >> 1) = 18
   CHECK(pulse.GetTimerPeriod() == 18);
+}
+
+TEST_CASE("Serialize followed by Deserialize round-trips enabled, length counter, "
+          "and audible output") {
+  nes::Pulse pulse(0);
+  pulse.SetEnabled(true);
+  pulse.WriteControl(0xD5); // duty 75%, constant volume 5
+  pulse.WriteTimerLow(0x08);
+  pulse.WriteTimerHigh(0x18); // period 8, length index 3 -> 2
+  REQUIRE(pulse.Output() == 5);
+  REQUIRE(pulse.GetLengthCounter() == 2);
+
+  std::vector<uint8_t> buffer;
+  nes::StateWriter writer(buffer);
+  pulse.Serialize(writer);
+
+  nes::Pulse restored(1); // deliberately mismatched channel argument
+  nes::StateReader reader(buffer);
+  restored.Deserialize(reader);
+
+  CHECK(restored.GetEnabled() == true);
+  CHECK(restored.GetLengthCounter() == 2);
+  CHECK(restored.GetTimerPeriod() == 8);
+  CHECK(restored.Output() == 5);
+  CHECK(reader.BytesRemaining() == 0);
+}
+
+TEST_CASE("Deserialize restores the serialized channel index, not the constructor argument") {
+  nes::Pulse pulse1(0); // Pulse 1: one's complement sweep negation
+  pulse1.SetEnabled(true);
+  pulse1.WriteControl(0xD5);
+  pulse1.WriteTimerLow(0x08);
+  pulse1.WriteTimerHigh(0x00); // timer period 8
+  pulse1.WriteSweep(0x08); // negate, shift 0 -> change equals the timer period itself
+  REQUIRE(pulse1.Output() == 0); // one's complement underflows -> muted
+
+  std::vector<uint8_t> buffer;
+  nes::StateWriter writer(buffer);
+  pulse1.Serialize(writer);
+
+  // Constructed with the Pulse 2 channel argument -- Deserialize must overwrite
+  // it with the serialized channel_ (0), or the sweep math below would disagree.
+  nes::Pulse restored(1);
+  nes::StateReader reader(buffer);
+  restored.Deserialize(reader);
+
+  CHECK(restored.Output() == 0); // still one's complement behavior after restore
+}
+
+TEST_CASE("Serialize/Deserialize round-trips in-progress envelope decay") {
+  nes::Pulse pulse(0);
+  pulse.SetEnabled(true);
+  pulse.WriteControl(0xC0); // duty 75%, constant volume off, envelope period 0
+  pulse.WriteTimerLow(0x08);
+  pulse.WriteTimerHigh(0x00);
+  pulse.ClockEnvelope(); // reload clock -> decay 15
+  pulse.ClockEnvelope(); // decays to 14
+  REQUIRE(pulse.Output() == 14);
+
+  std::vector<uint8_t> buffer;
+  nes::StateWriter writer(buffer);
+  pulse.Serialize(writer);
+
+  nes::Pulse restored(0);
+  nes::StateReader reader(buffer);
+  restored.Deserialize(reader);
+
+  REQUIRE(restored.Output() == 14);
+  restored.ClockEnvelope(); // continues decaying from 14, does not restart at 15
+  CHECK(restored.Output() == 13);
+}
+
+TEST_CASE("Serialize/Deserialize round-trips in-progress sweep divider timing") {
+  nes::Pulse pulse(0);
+  pulse.WriteTimerLow(0x08);
+  pulse.WriteTimerHigh(0x00); // timer period 8
+  pulse.WriteSweep(0xA1); // enabled, shift 1, period 2
+  pulse.ClockSweep(); // divider starts at 0 -> applies immediately: target = 12
+  REQUIRE(pulse.GetTimerPeriod() == 12);
+  pulse.ClockSweep(); // divider reloaded to 2, counting down: no update yet
+  REQUIRE(pulse.GetTimerPeriod() == 12);
+
+  std::vector<uint8_t> buffer;
+  nes::StateWriter writer(buffer);
+  pulse.Serialize(writer);
+
+  nes::Pulse restored(0);
+  nes::StateReader reader(buffer);
+  restored.Deserialize(reader);
+
+  restored.ClockSweep(); // divider at 1: still no update
+  CHECK(restored.GetTimerPeriod() == 12);
+  restored.ClockSweep(); // divider reaches 0: target = 12 + (12 >> 1) = 18
+  CHECK(restored.GetTimerPeriod() == 18);
+}
+
+TEST_CASE("Serialize/Deserialize round-trips the in-progress timer and duty step") {
+  nes::Pulse pulse(0);
+  pulse.SetEnabled(true);
+  pulse.WriteControl(0xD5); // duty 75%, constant volume 5
+  pulse.WriteTimerLow(0x02);
+  pulse.WriteTimerHigh(0x18); // period 2, length counter 2
+  pulse.ClockTimer(); // 2 -> 1
+  pulse.ClockTimer(); // 1 -> 0
+  pulse.ClockTimer(); // hits 0: reloads timer, advances duty_step_
+  const uint8_t output_before = pulse.Output();
+
+  std::vector<uint8_t> buffer;
+  nes::StateWriter writer(buffer);
+  pulse.Serialize(writer);
+
+  nes::Pulse restored(0);
+  nes::StateReader reader(buffer);
+  restored.Deserialize(reader);
+
+  CHECK(restored.Output() == output_before);
+  // Confirms both the timer count and duty step stay in lockstep afterward.
+  for (int i = 0; i < 8; ++i) {
+    pulse.ClockTimer();
+    restored.ClockTimer();
+    CHECK(restored.Output() == pulse.Output());
+  }
 }
