@@ -1,5 +1,8 @@
 #pragma once
 
+#include "./save_state/StateReader.h"
+#include "./save_state/StateWriter.h"
+
 #include <cstdint>
 
 namespace nes {
@@ -25,6 +28,10 @@ public:
   void Release(const uint8_t button) { buttons_ &= ~button; }
   uint8_t Read();
   void Write(uint8_t value);
+
+  // Save and load state
+  void Serialize(StateWriter&) const;
+  void Deserialize(StateReader&);
 
 private:
   // Current button state
