@@ -23,7 +23,7 @@ void Triangle::WriteTimerLow(const uint8_t value) {
 
 // $400B: LLLL LTTT
 void Triangle::WriteTimerHigh(const uint8_t value) {
-  timer_period_ = (timer_period_ & 0x00FF) | (static_cast<uint16_t>(value & 0x07) << 8);
+  timer_period_ = static_cast<uint16_t>((timer_period_ & 0x00FF) | (static_cast<uint16_t>(value & 0x07) << 8));
   if (enabled_)
     length_counter_ = ApuConstants::LENGTH_COUNTER_TABLE[(value >> 3) & 0x1F];
   linear_reload_flag_ = true;
