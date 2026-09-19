@@ -112,4 +112,12 @@ void Cartridge::Parse(std::span<const uint8_t> data) {
   mapper_ = Mapper::Create(mapper_id_, prg_rom_, chr_rom_);
 }
 
+void Cartridge::Serialize(StateWriter& writer) const {
+  mapper_->Serialize(writer);
+}
+
+void Cartridge::Deserialize(StateReader& reader) {
+  mapper_->Deserialize(reader);
+}
+
 } // namespace nes
