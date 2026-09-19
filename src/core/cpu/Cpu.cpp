@@ -3,6 +3,9 @@
 #include <format>
 #include <print>
 
+#include "save_state/StateReader.h"
+#include "save_state/StateWriter.h"
+
 namespace nes {
 
 Cpu::Cpu(Bus& bus) : bus_(bus) {}
@@ -46,7 +49,7 @@ uint8_t Cpu::ReadByte(const uint16_t address) const { return bus_.ReadCpu(addres
 
 void Cpu::WriteByte(const uint16_t address, const uint8_t value) const { bus_.WriteCpu(address, value); }
 
-/// Addressing Modes
+// Addressing Modes
 // Read a byte and convert it to a 16-bit address
 uint16_t Cpu::AddressZeroPage() { return FetchByte(); }
 
@@ -118,7 +121,7 @@ uint16_t Cpu::AddressIndirectY() {
   return static_cast<uint16_t>(address + y_register_);
 }
 
-/// STA Instructions
+// STA Instructions
 // STA does not affect any flags
 void Cpu::StaZeroPage() {
   const auto address = AddressZeroPage();
@@ -155,7 +158,7 @@ void Cpu::StaIndirectY() {
   WriteByte(address, accumulator_);
 }
 
-/// LDA Instructions
+// LDA Instructions
 void Cpu::Lda(const uint8_t value) {
   accumulator_ = value;
   SetZFlag(accumulator_);
@@ -209,7 +212,7 @@ void Cpu::LdaIndirectY() {
   Lda(value);
 }
 
-/// LDX Instructions
+// LDX Instructions
 void Cpu::Ldx(const uint8_t value) {
   x_register_ = value;
   SetZFlag(x_register_);
@@ -245,7 +248,7 @@ void Cpu::LdxAbsoluteY() {
   Ldx(value);
 }
 
-/// LDY Instructions
+// LDY Instructions
 void Cpu::Ldy(const uint8_t value) {
   y_register_ = value;
   SetZFlag(y_register_);
@@ -279,7 +282,7 @@ void Cpu::LdyAbsoluteX() {
   Ldy(value);
 }
 
-/// STX Instructions
+// STX Instructions
 void Cpu::StxZeroPage() {
   const auto address = AddressZeroPage();
   WriteByte(address, x_register_);
@@ -295,7 +298,7 @@ void Cpu::StxAbsolute() {
   WriteByte(address, x_register_);
 }
 
-/// STY Instructions
+// STY Instructions
 void Cpu::StyZeroPage() {
   const auto address = AddressZeroPage();
   WriteByte(address, y_register_);
@@ -311,7 +314,7 @@ void Cpu::StyAbsolute() {
   WriteByte(address, y_register_);
 }
 
-/// Register Increment Instructions
+// Register Increment Instructions
 void Cpu::Inx() {
   x_register_ = static_cast<uint8_t>(x_register_ + 1);
   SetZFlag(x_register_);
@@ -336,7 +339,7 @@ void Cpu::Dey() {
   SetNFlag(y_register_);
 }
 
-/// Flag Methods
+// Flag Methods
 void Cpu::SetFlag(const StatusFlag flag, const bool is_on) {
   const auto mask = static_cast<uint8_t>(flag);
   if (is_on) {
@@ -363,7 +366,7 @@ void Cpu::SetCFlag(const bool is_on) { SetFlag(StatusFlag::C, is_on); }
 
 void Cpu::SetVFlag(const bool is_on) { SetFlag(StatusFlag::V, is_on); }
 
-/// Flag Instructions
+// Flag Instructions
 void Cpu::Clc() { SetFlag(StatusFlag::C, false); }
 
 void Cpu::Sec() { SetFlag(StatusFlag::C, true); }
@@ -378,7 +381,7 @@ void Cpu::Sed() { SetFlag(StatusFlag::D, true); }
 
 void Cpu::Clv() { SetFlag(StatusFlag::V, false); }
 
-/// Branch Instructions
+// Branch Instructions
 void Cpu::BranchIf(const bool condition) {
   const auto target = AddressRelative();
   if (condition)
@@ -401,7 +404,7 @@ void Cpu::Bvs() { BranchIf(IsFlagSet(static_cast<uint8_t>(StatusFlag::V))); }
 
 void Cpu::Bvc() { BranchIf(!IsFlagSet(static_cast<uint8_t>(StatusFlag::V))); }
 
-/// Jump Instructions
+// Jump Instructions
 void Cpu::JmpAbsolute() {
   // Reads 16-bit address and sets PC to it
   program_counter_ = AddressAbsolute();
@@ -446,7 +449,7 @@ void Cpu::Rti() {
   program_counter_ = StackPullWord();
 }
 
-/// Stack Methods
+// Stack Methods
 void Cpu::StackPushByte(const uint8_t value) {
   // Write current value at stack address then decrement stack pointer
   WriteByte(STACK_BASE_ | static_cast<uint16_t>(stack_pointer_), value);
@@ -470,7 +473,7 @@ uint16_t Cpu::StackPullWord() {
   return static_cast<uint16_t>(high_byte << 8) | static_cast<uint16_t>(low_byte);
 }
 
-/// Stack Instructions
+// Stack Instructions
 void Cpu::Pha() { StackPushByte(accumulator_); }
 
 void Cpu::Pla() {
@@ -487,7 +490,7 @@ void Cpu::Plp() {
   status_register_ = (StackPullByte() & ~static_cast<uint8_t>(StatusFlag::B)) | static_cast<uint8_t>(StatusFlag::U);
 }
 
-/// Comparison Instructions
+// Comparison Instructions
 void Cpu::Compare(const uint8_t register_value, const uint8_t operand) {
   const uint8_t result = static_cast<uint8_t>(register_value - operand);
   // If register >= operand, not borrow, so C = 1, else C = 0
@@ -498,7 +501,7 @@ void Cpu::Compare(const uint8_t register_value, const uint8_t operand) {
   SetNFlag(result);
 }
 
-/// CMP
+// CMP
 void Cpu::CmpImmediate() {
   const auto value = FetchByte();
   Compare(accumulator_, value);
@@ -539,7 +542,7 @@ void Cpu::CmpIndirectY() {
   Compare(accumulator_, value);
 }
 
-/// CPX
+// CPX
 void Cpu::CpxImmediate() {
   const auto value = FetchByte();
   Compare(x_register_, value);
@@ -555,7 +558,7 @@ void Cpu::CpxAbsolute() {
   Compare(x_register_, value);
 }
 
-/// CPY
+// CPY
 void Cpu::CpyImmediate() {
   const auto value = FetchByte();
   Compare(y_register_, value);
@@ -571,7 +574,7 @@ void Cpu::CpyAbsolute() {
   Compare(y_register_, value);
 }
 
-/// Shift Instructions
+// Shift Instructions
 /**
  * ASL (Arithmetic Shift Left), moves all bits one position to the left.
  * Bit 7 goes to Carry flag
@@ -727,7 +730,7 @@ void Cpu::RorAbsoluteX() {
   WriteByte(address, Ror(value));
 }
 
-/// ADC (Add with Carry)
+// ADC (Add with Carry)
 void Cpu::Adc(const uint8_t value) {
   // Get current value of the carry flag
   const uint16_t carry_in = IsFlagSet(static_cast<uint8_t>(StatusFlag::C)) ? 1 : 0;
@@ -736,17 +739,19 @@ void Cpu::Adc(const uint8_t value) {
 
   // Check for unsigned overflow
   SetCFlag(sum > MAX_8_BIT_UINT_);
-  // Check for signed overflow
-  // XOR both operands. If bit 7 is 0, both operands have the same sign.
-  // Else both operands have different signs
-  // ~(@a ^ value): If bit 7 is 0, inverse this to 1 for true
-  // (@a ^ result): True if both signs are different
-  // AND both to combine results
-  // & 0x80: Check only the signed bit (bit 7)
-  // If all 3 are true, inputs had the same sign, but result flipped the sign -
-  // this is overflow Two positives means it's a negative Two negatives means
-  // it's a positive If one is positive and one is negative overflow cannot
-  // happen
+  /**
+   * Check for signed overflow
+   * XOR both operands. If bit 7 is 0, both operands have the same sign.
+   * Else both operands have different signs
+   * ~(@a ^ value): If bit 7 is 0, inverse this to 1 for true
+   * (@a ^ result): True if both signs are different
+   * AND both to combine results
+   * & 0x80: Check only the signed bit (bit 7)
+   * If all 3 are true, inputs had the same sign, but result flipped the sign -
+   * this is overflow Two positives means it's a negative Two negatives means
+   * it's a positive If one is positive and one is negative overflow cannot
+   * happen
+   */
   SetVFlag((~(accumulator_ ^ value) & (accumulator_ ^ result) & 0x80) != 0);
 
   accumulator_ = result;
@@ -795,7 +800,7 @@ void Cpu::AdcIndirectY() {
   Adc(value);
 }
 
-/// SBC (Subtract with Carry)
+// SBC (Subtract with Carry)
 void Cpu::Sbc(const uint8_t value) {
   Adc(static_cast<uint8_t>(~value)); // Subtracting is the same as adding the one's complement
 }
@@ -840,7 +845,7 @@ void Cpu::SbcIndirectY() {
   Sbc(value);
 }
 
-/// Register Instructions
+// Register Instructions
 void Cpu::Tax() {
   x_register_ = accumulator_;
   SetZFlag(x_register_);
@@ -872,7 +877,7 @@ void Cpu::Tsx() {
 
 void Cpu::Txs() { stack_pointer_ = x_register_; }
 
-/// AND
+// AND
 void Cpu::AndImmediate() {
   accumulator_ &= FetchByte();
   SetZFlag(accumulator_);
@@ -921,7 +926,7 @@ void Cpu::AndIndirectY() {
   SetNFlag(accumulator_);
 }
 
-/// ORA
+// ORA
 void Cpu::OraImmediate() {
   accumulator_ |= FetchByte();
   SetZFlag(accumulator_);
@@ -970,7 +975,7 @@ void Cpu::OraIndirectY() {
   SetNFlag(accumulator_);
 }
 
-/// EOR
+// EOR
 void Cpu::EorImmediate() {
   accumulator_ ^= FetchByte();
   SetZFlag(accumulator_);
@@ -1019,7 +1024,6 @@ void Cpu::EorIndirectY() {
   SetNFlag(accumulator_);
 }
 
-/// Misc Instructions
 /**
  * INC (INCrement memory)
  * Adds one to the value held at a specified memory location setting the zero
@@ -1094,7 +1098,7 @@ void Cpu::DecAbsoluteX() {
   SetNFlag(value);
 }
 
-/// BIT
+// BIT
 void Cpu::BitZeroPage() {
   const uint8_t value = ReadByte(AddressZeroPage());
   SetZFlag(accumulator_ & value);
@@ -1109,7 +1113,7 @@ void Cpu::BitAbsolute() {
   SetVFlag((value >> 6 & 1) == 1);
 }
 
-/// NOP
+// NOP
 void Cpu::Nop() {
   // Do nothing
 }
@@ -1121,6 +1125,24 @@ void Cpu::Nmi() {
   const uint8_t low_byte = ReadByte(NMI_VECTOR_);
   const uint8_t high_byte = ReadByte(NMI_VECTOR_ + 1);
   program_counter_ = static_cast<uint16_t>(high_byte << 8) | static_cast<uint16_t>(low_byte);
+}
+
+void Cpu::Serialize(StateWriter& writer) const {
+  writer.WriteU8(accumulator_);
+  writer.WriteU8(x_register_);
+  writer.WriteU8(y_register_);
+  writer.WriteU8(stack_pointer_);
+  writer.WriteU16(program_counter_);
+  writer.WriteU8(status_register_);
+}
+
+void Cpu::Deserialize(StateReader& reader) {
+  accumulator_ = reader.ReadU8();
+  x_register_ = reader.ReadU8();
+  y_register_ = reader.ReadU8();
+  stack_pointer_ = reader.ReadU8();
+  program_counter_ = reader.ReadU16();
+  status_register_ = reader.ReadU8();
 }
 
 } // namespace nes

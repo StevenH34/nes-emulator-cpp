@@ -5,9 +5,9 @@
 
 namespace nes {
 
-/// CPU OpCodes
+// CPU OpCodes
 struct Opcodes {
-  /// LDA Opcodes
+  // LDA Opcodes
   static constexpr uint8_t LDA_IMMEDIATE = 0xA9;
   static constexpr uint8_t LDA_ZERO_PAGE = 0xA5;
   static constexpr uint8_t LDA_ZERO_PAGE_X = 0xB5;
@@ -17,21 +17,21 @@ struct Opcodes {
   static constexpr uint8_t LDA_INDIRECT_X = 0xA1;
   static constexpr uint8_t LDA_INDIRECT_Y = 0xB1;
 
-  /// LDX Opcodes
+  // LDX Opcodes
   static constexpr uint8_t LDX_IMMEDIATE = 0xA2;
   static constexpr uint8_t LDX_ZERO_PAGE = 0xA6;
   static constexpr uint8_t LDX_ZERO_PAGE_Y = 0xB6;
   static constexpr uint8_t LDX_ABSOLUTE = 0xAE;
   static constexpr uint8_t LDX_ABSOLUTE_Y = 0xBE;
 
-  /// LDY Opcodes
+  // LDY Opcodes
   static constexpr uint8_t LDY_IMMEDIATE = 0xA0;
   static constexpr uint8_t LDY_ZERO_PAGE = 0xA4;
   static constexpr uint8_t LDY_ZERO_PAGE_X = 0xB4;
   static constexpr uint8_t LDY_ABSOLUTE = 0xAC;
   static constexpr uint8_t LDY_ABSOLUTE_X = 0xBC;
 
-  /// STA Opcodes
+  // STA Opcodes
   static constexpr uint8_t STA_ZERO_PAGE = 0x85;
   static constexpr uint8_t STA_ZERO_PAGE_X = 0x95;
   static constexpr uint8_t STA_ABSOLUTE = 0x8D;
@@ -40,23 +40,23 @@ struct Opcodes {
   static constexpr uint8_t STA_INDIRECT_X = 0x81;
   static constexpr uint8_t STA_INDIRECT_Y = 0x91;
 
-  /// STX Opcodes
+  // STX Opcodes
   static constexpr uint8_t STX_ZERO_PAGE = 0x86;
   static constexpr uint8_t STX_ZERO_PAGE_Y = 0x96;
   static constexpr uint8_t STX_ABSOLUTE = 0x8E;
 
-  /// STY Opcodes
+  // STY Opcodes
   static constexpr uint8_t STY_ZERO_PAGE = 0x84;
   static constexpr uint8_t STY_ZERO_PAGE_X = 0x94;
   static constexpr uint8_t STY_ABSOLUTE = 0x8C;
 
-  /// Register Increment Opcode
+  // Register Increment Opcode
   static constexpr uint8_t INX = 0xE8;
   static constexpr uint8_t INY = 0xC8;
   static constexpr uint8_t DEX = 0xCA;
   static constexpr uint8_t DEY = 0x88;
 
-  /// Jump Opcodes
+  // Jump Opcodes
   static constexpr uint8_t JMP_ABSOLUTE = 0x4C;
   static constexpr uint8_t JMP_INDIRECT = 0x6C;
   static constexpr uint8_t JMP_JSR = 0x20;
@@ -64,7 +64,7 @@ struct Opcodes {
   static constexpr uint8_t JMP_BRK = 0x00;
   static constexpr uint8_t JMP_RTI = 0x40;
 
-  /// AND (bitwise AND with Accumulator)
+  // AND (bitwise AND with Accumulator)
   static constexpr uint8_t AND_IMMEDIATE = 0x29;
   static constexpr uint8_t AND_ZERO_PAGE = 0x25;
   static constexpr uint8_t AND_ZERO_PAGE_X = 0x35;
@@ -74,7 +74,7 @@ struct Opcodes {
   static constexpr uint8_t AND_INDIRECT_X = 0x21;
   static constexpr uint8_t AND_INDIRECT_Y = 0x31;
 
-  /// ORA (bitwise OR with Accumulator)
+  // ORA (bitwise OR with Accumulator)
   static constexpr uint8_t ORA_IMMEDIATE = 0x09;
   static constexpr uint8_t ORA_ZERO_PAGE = 0x05;
   static constexpr uint8_t ORA_ZERO_PAGE_X = 0x15;
@@ -84,7 +84,7 @@ struct Opcodes {
   static constexpr uint8_t ORA_INDIRECT_X = 0x01;
   static constexpr uint8_t ORA_INDIRECT_Y = 0x11;
 
-  /// EOR
+  // EOR
   static constexpr uint8_t EOR_IMMEDIATE = 0x49;
   static constexpr uint8_t EOR_ZERO_PAGE = 0x45;
   static constexpr uint8_t EOR_ZERO_PAGE_X = 0x55;
@@ -94,13 +94,13 @@ struct Opcodes {
   static constexpr uint8_t EOR_INDIRECT_X = 0x41;
   static constexpr uint8_t EOR_INDIRECT_Y = 0x51;
 
-  /// Stack Opcodes
+  // Stack Opcodes
   static constexpr uint8_t PHA = 0x48;
   static constexpr uint8_t PHP = 0x08;
   static constexpr uint8_t PLA = 0x68;
   static constexpr uint8_t PLP = 0x28;
 
-  /// Flag Opcodes
+  // Flag Opcodes
   static constexpr uint8_t CLC = 0x18;
   static constexpr uint8_t SEC = 0x38;
   static constexpr uint8_t CLI = 0x58;
@@ -109,7 +109,7 @@ struct Opcodes {
   static constexpr uint8_t CLD = 0xD8;
   static constexpr uint8_t SED = 0xF8;
 
-  /// Register Transfer Opcodes
+  // Register Transfer Opcodes
   static constexpr uint8_t TAX = 0xAA;
   static constexpr uint8_t TAY = 0xA8;
   static constexpr uint8_t TXA = 0x8A;
@@ -117,7 +117,7 @@ struct Opcodes {
   static constexpr uint8_t TSX = 0xBA;
   static constexpr uint8_t TXS = 0x9A;
 
-  /// CMP Opcodes
+  // CMP Opcodes
   static constexpr uint8_t CMP_IMMEDIATE = 0xC9;
   static constexpr uint8_t CMP_ZERO_PAGE = 0xC5;
   static constexpr uint8_t CMP_ZERO_PAGE_X = 0xD5;
@@ -126,16 +126,16 @@ struct Opcodes {
   static constexpr uint8_t CMP_ABSOLUTE_Y = 0xD9;
   static constexpr uint8_t CMP_INDIRECT_X = 0xC1;
   static constexpr uint8_t CMP_INDIRECT_Y = 0xD1;
-  /// CPX Opcodes
+  // CPX Opcodes
   static constexpr uint8_t CPX_IMMEDIATE = 0xE0;
   static constexpr uint8_t CPX_ZERO_PAGE = 0xE4;
   static constexpr uint8_t CPX_ABSOLUTE = 0xEC;
-  /// CPY Opcodes
+  // CPY Opcodes
   static constexpr uint8_t CPY_IMMEDIATE = 0xC0;
   static constexpr uint8_t CPY_ZERO_PAGE = 0xC4;
   static constexpr uint8_t CPY_ABSOLUTE = 0xCC;
 
-  /// Branch Opcodes
+  // Branch Opcodes
   static constexpr uint8_t BEQ = 0xF0;
   static constexpr uint8_t BNE = 0xD0;
   static constexpr uint8_t BCS = 0xB0;
@@ -145,33 +145,33 @@ struct Opcodes {
   static constexpr uint8_t BVS = 0x70;
   static constexpr uint8_t BVC = 0x50;
 
-  /// Shift Opcodes
-  /// ASL
+  // Shift Opcodes
+  // ASL
   static constexpr uint8_t ASL_ACCUMULATOR = 0x0A;
   static constexpr uint8_t ASL_ZERO_PAGE = 0x06;
   static constexpr uint8_t ASL_ZERO_PAGE_X = 0x16;
   static constexpr uint8_t ASL_ABSOLUTE = 0x0E;
   static constexpr uint8_t ASL_ABSOLUTE_X = 0x1E;
-  /// LSR
+  // LSR
   static constexpr uint8_t LSR_ACCUMULATOR = 0x4A;
   static constexpr uint8_t LSR_ZERO_PAGE = 0x46;
   static constexpr uint8_t LSR_ZERO_PAGE_X = 0x56;
   static constexpr uint8_t LSR_ABSOLUTE = 0x4E;
   static constexpr uint8_t LSR_ABSOLUTE_X = 0x5E;
-  /// ROL
+  // ROL
   static constexpr uint8_t ROL_ACCUMULATOR = 0x2A;
   static constexpr uint8_t ROL_ZERO_PAGE = 0x26;
   static constexpr uint8_t ROL_ZERO_PAGE_X = 0x36;
   static constexpr uint8_t ROL_ABSOLUTE = 0x2E;
   static constexpr uint8_t ROL_ABSOLUTE_X = 0x3E;
-  /// ROR
+  // ROR
   static constexpr uint8_t ROR_ACCUMULATOR = 0x6A;
   static constexpr uint8_t ROR_ZERO_PAGE = 0x66;
   static constexpr uint8_t ROR_ZERO_PAGE_X = 0x76;
   static constexpr uint8_t ROR_ABSOLUTE = 0x6E;
   static constexpr uint8_t ROR_ABSOLUTE_X = 0x7E;
 
-  /// ADC
+  // ADC
   static constexpr uint8_t ADC_IMMEDIATE = 0x69;
   static constexpr uint8_t ADC_ZERO_PAGE = 0x65;
   static constexpr uint8_t ADC_ZERO_PAGE_X = 0x75;
@@ -181,7 +181,7 @@ struct Opcodes {
   static constexpr uint8_t ADC_INDIRECT_X = 0x61;
   static constexpr uint8_t ADC_INDIRECT_Y = 0x71;
 
-  /// SBC
+  // SBC
   static constexpr uint8_t SBC_IMMEDIATE = 0xE9;
   static constexpr uint8_t SBC_ZERO_PAGE = 0xE5;
   static constexpr uint8_t SBC_ZERO_PAGE_X = 0xF5;
@@ -191,21 +191,21 @@ struct Opcodes {
   static constexpr uint8_t SBC_INDIRECT_X = 0xE1;
   static constexpr uint8_t SBC_INDIRECT_Y = 0xF1;
 
-  /// Misc Opcodes
-  /// INC
+  // Misc Opcodes
+  // INC
   static constexpr uint8_t INC_ZERO_PAGE = 0xE6;
   static constexpr uint8_t INC_ZERO_PAGE_X = 0xF6;
   static constexpr uint8_t INC_ABSOLUTE = 0xEE;
   static constexpr uint8_t INC_ABSOLUTE_X = 0xFE;
-  /// DEC
+  // DEC
   static constexpr uint8_t DEC_ZERO_PAGE = 0xC6;
   static constexpr uint8_t DEC_ZERO_PAGE_X = 0xD6;
   static constexpr uint8_t DEC_ABSOLUTE = 0xCE;
   static constexpr uint8_t DEC_ABSOLUTE_X = 0xDE;
-  /// BIT
+  // BIT
   static constexpr uint8_t BIT_ZERO_PAGE = 0x24;
   static constexpr uint8_t BIT_ABSOLUTE = 0x2C;
-  /// NOP
+  // NOP
   static constexpr uint8_t NOP = 0xEA;
 
   static constexpr std::array<int, 256> CYCLES = [] {
