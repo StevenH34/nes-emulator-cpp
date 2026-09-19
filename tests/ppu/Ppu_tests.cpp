@@ -3,6 +3,8 @@
 #include "../../src/core/Cartridge.h"
 #include "../../src/core/ppu/Ppu.h"
 #include "../../src/core/ppu/Ppu_Addresses.h"
+#include "../../src/core/save_state/StateReader.h"
+#include "../../src/core/save_state/StateWriter.h"
 #include "TestRom.h"
 
 #include <stdexcept>
@@ -593,4 +595,109 @@ TEST_CASE("TriggerNmi throws when no NMI callback has been registered") {
   auto cart = MakeCartridge();
   nes::Ppu ppu(cart);
   CHECK_THROWS_AS(ppu.TriggerNmi(), std::runtime_error);
+}
+
+// --- Save state ---
+
+TEST_CASE("Ppu Serialize writes cycle, scanline, and frame_complete before the register/memory state") {
+  auto cart = MakeCartridge();
+  nes::Ppu ppu(cart);
+  // Advance to a mid-frame position past VBlank so cycle_, scanline_, and
+  // frame_complete_ are all distinct from their power-up defaults (0, 0, false).
+  StepN(ppu, nes::Ppu::CYCLES_PER_SCANLINE * 245 + 37);
+  REQUIRE(ppu.GetCycle() == 37);
+  REQUIRE(ppu.GetScanline() == 245);
+  REQUIRE(ppu.IsFrameComplete());
+
+  std::vector<uint8_t> buffer;
+  nes::StateWriter writer(buffer);
+  ppu.Serialize(writer);
+
+  REQUIRE(buffer.size() > 5);
+  CHECK(buffer[0] == 37); // cycle_ low byte
+  CHECK(buffer[1] == 0); // cycle_ high byte
+  CHECK(buffer[2] == 245); // scanline_ low byte
+  CHECK(buffer[3] == 0); // scanline_ high byte
+  CHECK(buffer[4] == 1); // frame_complete_
+}
+
+TEST_CASE("Ppu Deserialize restores mid-frame cycle, scanline, and frame_complete state") {
+  auto cart = MakeCartridge();
+  nes::Ppu ppu(cart);
+  StepN(ppu, nes::Ppu::CYCLES_PER_SCANLINE * 245 + 37);
+
+  std::vector<uint8_t> buffer;
+  nes::StateWriter writer(buffer);
+  ppu.Serialize(writer);
+
+  auto restored_cart = MakeCartridge();
+  nes::Ppu restored(restored_cart);
+  // Give the restored Ppu different values first, so the checks below prove
+  // Deserialize overwrites them rather than happening to already match.
+  StepN(restored, 10);
+  CHECK(restored.GetCycle() != 37);
+
+  nes::StateReader reader(buffer);
+  restored.Deserialize(reader);
+
+  CHECK(restored.GetCycle() == 37);
+  CHECK(restored.GetScanline() == 245);
+  CHECK(restored.IsFrameComplete());
+}
+
+TEST_CASE("Ppu save/load round trip preserves the full serialized byte stream") {
+  auto cart = MakeCartridge();
+  nes::Ppu ppu(cart);
+
+  // Registers: distinct, non-default values. Ctrl/mask avoid the NMI-enable
+  // and show-background/show-sprites bits so the StepN below doesn't exercise
+  // the full rendering pipeline -- that behavior is covered by other tests.
+  ppu.WriteCtrlRegister(0x01);
+  ppu.WriteMask(0x06);
+  ppu.SetSprite0Hit();
+  ppu.WriteOamAddr(0x10);
+  ppu.WriteOamData(0xAB);
+  ppu.WriteOamData(0xCD);
+
+  // Nametable and palette RAM, plus the PPUDATA read-buffer.
+  SetVAddress(ppu, 0x2005);
+  ppu.WriteData(0x11);
+  ppu.WriteData(0x22);
+  SetVAddress(ppu, 0x2005);
+  ppu.ReadDataRegister(); // buffers nametable_ram_[...] == 0x11 into vram_buffer_
+  SetVAddress(ppu, 0x3F00);
+  ppu.WriteData(0x05);
+
+  // Leave v/t/x/w mid-write.
+  SetVAddress(ppu, 0x2345);
+  ppu.WriteScrollX(0x0A);
+  ppu.WriteAddr(0x12);
+
+  // Mid-frame, past VBlank.
+  StepN(ppu, nes::Ppu::CYCLES_PER_SCANLINE * 245 + 37);
+
+  std::vector<uint8_t> buffer;
+  nes::StateWriter writer(buffer);
+  ppu.Serialize(writer);
+
+  auto restored_cart = MakeCartridge();
+  nes::Ppu restored(restored_cart);
+  nes::StateReader reader(buffer);
+  restored.Deserialize(reader);
+
+  std::vector<uint8_t> round_tripped;
+  nes::StateWriter round_trip_writer(round_tripped);
+  restored.Serialize(round_trip_writer);
+
+  CHECK(round_tripped == buffer);
+}
+
+TEST_CASE("Ppu Deserialize throws when the saved buffer is truncated") {
+  auto cart = MakeCartridge();
+  nes::Ppu ppu(cart);
+
+  const std::vector<uint8_t> buffer = {0x11, 0x22, 0x33}; // far fewer than a full Serialize writes
+  nes::StateReader reader(buffer);
+
+  CHECK_THROWS_AS(ppu.Deserialize(reader), std::out_of_range);
 }
