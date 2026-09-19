@@ -2,6 +2,7 @@
 #include "Cartridge.h"
 #include "Ppu_Addresses.h"
 
+#include <span>
 #include <stdexcept>
 
 #include "save_state/StateReader.h"
@@ -24,15 +25,9 @@ void Ppu::Serialize(StateWriter& writer) const {
   writer.WriteU8(status_register_);
   writer.WriteU8(oam_addr_register_);
   writer.WriteU8(vram_buffer_);
-  for (const auto& byte : oam_) {
-    writer.WriteU8(byte);
-  }
-  for (const auto& byte : nametable_ram_) {
-    writer.WriteU8(byte);
-  }
-  for (const auto& byte : palette_ram_) {
-    writer.WriteU8(byte);
-  }
+  writer.WriteBytes(std::span<const uint8_t>(oam_.data(), oam_.size()));
+  writer.WriteBytes(std::span<const uint8_t>(nametable_ram_.data(), nametable_ram_.size()));
+  writer.WriteBytes(std::span<const uint8_t>(palette_ram_.data(), palette_ram_.size()));
 }
 
 void Ppu::Deserialize(StateReader& reader) {
@@ -48,15 +43,9 @@ void Ppu::Deserialize(StateReader& reader) {
   status_register_ = reader.ReadU8();
   oam_addr_register_ = reader.ReadU8();
   vram_buffer_ = reader.ReadU8();
-  for (auto& byte : oam_) {
-    byte = reader.ReadU8();
-  }
-  for (auto& byte : nametable_ram_) {
-    byte = reader.ReadU8();
-  }
-  for (auto& byte : palette_ram_) {
-    byte = reader.ReadU8();
-  }
+  reader.ReadBytes(std::span<uint8_t>(oam_.data(), oam_.size()));
+  reader.ReadBytes(std::span<uint8_t>(nametable_ram_.data(), nametable_ram_.size()));
+  reader.ReadBytes(std::span<uint8_t>(palette_ram_.data(), palette_ram_.size()));
 }
 
 // Latch methods

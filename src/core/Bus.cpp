@@ -3,6 +3,9 @@
 #include <iostream>
 #include <ostream>
 
+#include "save_state/StateReader.h"
+#include "save_state/StateWriter.h"
+
 namespace nes {
 
 Bus::Bus(Cartridge& cartridge, Ppu& ppu, Apu& apu) : cartridge_(cartridge), ppu_(ppu), apu_(apu) {};
@@ -75,4 +78,17 @@ void Bus::OamDma(const uint8_t page) const {
   }
   ppu_.OamDma(data);
 }
+
+void Bus::Serialize(StateWriter& writer) const {
+  writer.WriteBytes(std::span<const uint8_t>(ram_.data(), ram_.size()));
+  controller_1_.Serialize(writer);
+  controller_2_.Serialize(writer);
+}
+
+void Bus::Deserialize(StateReader& reader) {
+  reader.ReadBytes(std::span<uint8_t>(ram_.data(), ram_.size()));
+  controller_1_.Deserialize(reader);
+  controller_2_.Deserialize(reader);
+}
+
 } // namespace nes

@@ -10,6 +10,9 @@
 
 namespace nes {
 
+class StateReader;
+class StateWriter;
+
 class Bus {
 public:
   explicit Bus(Cartridge& cartridge, Ppu& ppu, Apu& apu);
@@ -27,8 +30,11 @@ public:
 
   void OamDma(uint8_t page) const;
 
+  // Save and load state
+  void Serialize(StateWriter& writer) const;
+  void Deserialize(StateReader& reader);
+
 private:
-  // std::vector<uint8_t> ram_;
   std::array<uint8_t, 2048> ram_{};
   Cartridge& cartridge_;
   Ppu& ppu_;
