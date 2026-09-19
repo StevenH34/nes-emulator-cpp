@@ -54,11 +54,10 @@ public:
   uint16_t AddressAbsoluteX();
   uint16_t AddressAbsoluteY();
   uint16_t AddressRelative();
-  /**
-   * Indirect addressing is used for JMP (Jump) instructions.
-   * It reads a 16-bit address from the instruction, this address is the final
-   * destination of the jump.
-   */
+
+  // Indirect addressing is used for JMP (Jump) instructions.
+  // It reads a 16-bit address from the instruction, this address is the final
+  // destination of the jump.
   uint16_t AddressIndirect();
   uint16_t AddressIndirectX();
   uint16_t AddressIndirectY();

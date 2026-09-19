@@ -4,37 +4,90 @@
 
 #include <stdexcept>
 
+#include "save_state/StateReader.h"
+#include "save_state/StateWriter.h"
+
 namespace nes {
 
 Ppu::Ppu(Cartridge& cartridge) : cartridge_(cartridge) {}
 
-/// Latch methods
-/// Advances v by 1 or 32 (per VramIncrement, based on bit 2 of PPUCTRL).
-/// The & VRAM_MASK makes sure v doesn't exceed 14 bits.
+void Ppu::Serialize(StateWriter& writer) const {
+  writer.WriteU16(static_cast<uint16_t>(cycle_));
+  writer.WriteU16(static_cast<uint16_t>(scanline_));
+  writer.WriteU8(frame_complete_ ? 1 : 0);
+  writer.WriteU16(v_register_);
+  writer.WriteU16(t_register_);
+  writer.WriteU8(x_register_);
+  writer.WriteU8(w_register_ ? 1 : 0);
+  writer.WriteU8(ctrl_register_);
+  writer.WriteU8(mask_register_);
+  writer.WriteU8(status_register_);
+  writer.WriteU8(oam_addr_register_);
+  writer.WriteU8(vram_buffer_);
+  for (const auto& byte : oam_) {
+    writer.WriteU8(byte);
+  }
+  for (const auto& byte : nametable_ram_) {
+    writer.WriteU8(byte);
+  }
+  for (const auto& byte : palette_ram_) {
+    writer.WriteU8(byte);
+  }
+}
+
+void Ppu::Deserialize(StateReader& reader) {
+  cycle_ = reader.ReadU16();
+  scanline_ = reader.ReadU16();
+  frame_complete_ = reader.ReadU8() != 0;
+  v_register_ = reader.ReadU16();
+  t_register_ = reader.ReadU16();
+  x_register_ = reader.ReadU8();
+  w_register_ = reader.ReadU8() != 0;
+  ctrl_register_ = reader.ReadU8();
+  mask_register_ = reader.ReadU8();
+  status_register_ = reader.ReadU8();
+  oam_addr_register_ = reader.ReadU8();
+  vram_buffer_ = reader.ReadU8();
+  for (auto& byte : oam_) {
+    byte = reader.ReadU8();
+  }
+  for (auto& byte : nametable_ram_) {
+    byte = reader.ReadU8();
+  }
+  for (auto& byte : palette_ram_) {
+    byte = reader.ReadU8();
+  }
+}
+
+// Latch methods
+// Advances v by 1 or 32 (per VramIncrement, based on bit 2 of PPUCTRL).
+// The & VRAM_MASK makes sure v doesn't exceed 14 bits.
 void Ppu::IncrementVRegister() { v_register_ = v_register_ + VramIncrement() & PpuAddresses::VRAM_MASK; }
 
-/// Puts coarse X in bits 4-0
+// Puts coarse X in bits 4-0
 void Ppu::SetCoarseX(const uint16_t coarse_x) { t_register_ = (t_register_ & CLEAR_COARSE_X) | coarse_x; }
 
-/// Puts the nametable selection in bits 11-10
+// Puts the nametable selection in bits 11-10
 void Ppu::SetNametable(const uint16_t nametable) {
   t_register_ = static_cast<uint16_t>((t_register_ & CLEAR_NAMETABLE) | nametable << 10);
 }
 
-/// Puts fine Y in bits 14-12 and coarse Y in bits 9-5.
+// Puts fine Y in bits 14-12 and coarse Y in bits 9-5.
 void Ppu::SetScrollY(const uint16_t fine_y, const uint16_t coarse_y) {
   t_register_ = static_cast<uint16_t>((t_register_ & CLEAR_ALL_Y) | fine_y << 12 | coarse_y << 5);
 }
 
-/// Ctrl methods
-/// PPUCTRL configures the PPU
-/// bit 0-1: base nametable (0=$2000, 1=$2400, 2=$2800, 3=$2C00)
-/// bit 2: VRAM increment (0=+1 horizontal, 1=+32 vertical)
-/// bit 3: sprite pattern table (0=$0000, 1=$1000)
-/// bit 4: background pattern table (0=$0000, 1=$1000)
-/// bit 5: sprite size (0=8x8, 1=8x16)
-/// bit 6: master/slave (not used on NES)
-/// bit 7: generate NMI on VBlank
+/**
+ * Ctrl methods
+ * PPUCTRL configures the PPU
+ * bit 0-1: base nametable (0=$2000, 1=$2400, 2=$2800, 3=$2C00)
+ * bit 2: VRAM increment (0=+1 horizontal, 1=+32 vertical)
+ * bit 3: sprite pattern table (0=$0000, 1=$1000)
+ * bit 4: background pattern table (0=$0000, 1=$1000)
+ * bit 5: sprite size (0=8x8, 1=8x16)
+ * bit 6: master/slave (not used on NES)
+ * bit 7: generate NMI on VBlank
+ */
 void Ppu::WriteCtrlRegister(const uint8_t value) {
   ctrl_register_ = value;
   const auto nametable = static_cast<uint16_t>(value & 0x03);
@@ -57,7 +110,7 @@ uint16_t Ppu::SpritePatternTable() const {
   return (ctrl_register_ & FLAG_SPR_PATTERN_TABLE) != 0 ? PATTERN_TABLE_1 : PATTERN_TABLE_0;
 }
 
-/// Status register methods
+// Status register methods
 uint8_t Ppu::ReadStatusRegister() {
   const uint8_t status_snapshot = status_register_;
   // Clear the VBlank flag
@@ -71,7 +124,7 @@ void Ppu::SetVblank() { status_register_ |= FLAG_VBLANK; }
 
 void Ppu::ClearVblank() { status_register_ &= ~FLAG_VBLANK; }
 
-/// Scroll register methods - PPUSCROLL ($2005)
+// Scroll register methods - PPUSCROLL ($2005)
 void Ppu::WriteScroll(const uint8_t value) {
   IsLatchOn() ? WriteScrollY(value) : WriteScrollX(value);
   ToggleLatch();
@@ -89,7 +142,7 @@ void Ppu::WriteScrollY(const uint8_t value) {
   SetScrollY(fine_y, coarse_y);
 }
 
-/// PPUADDR ($2006): VRAM address
+// PPUADDR ($2006): VRAM address
 void Ppu::WriteAddr(const uint8_t value) {
   if (IsLatchOn()) {
     t_register_ = (t_register_ & 0xFF00) | static_cast<uint16_t>(value);
@@ -100,7 +153,7 @@ void Ppu::WriteAddr(const uint8_t value) {
   ToggleLatch();
 }
 
-/// PPUDATA ($2007): VRAM access
+// PPUDATA ($2007): VRAM access
 uint8_t Ppu::ReadDataRegister() {
   uint8_t result;
   if (v_register_ >= PpuAddresses::PALETTE_START) {
@@ -119,7 +172,7 @@ void Ppu::WriteData(const uint8_t value) {
   IncrementVRegister();
 }
 
-/// OAMDATA ($2004): Sprites
+// OAMDATA ($2004): Sprites
 void Ppu::WriteOamData(const uint8_t value) {
   oam_[oam_addr_register_] = value;
   oam_addr_register_ = static_cast<uint8_t>(oam_addr_register_ + 1);
@@ -127,7 +180,7 @@ void Ppu::WriteOamData(const uint8_t value) {
 
 void Ppu::OamDma(std::array<uint8_t, 256> data) { std::ranges::copy(data, oam_.begin()); }
 
-/// Register router
+// Register router
 uint8_t Ppu::ReadRegister(const uint16_t address) {
   switch (address & 0x07) {
   case 0x02:
@@ -170,7 +223,7 @@ void Ppu::WriteRegister(uint16_t address, uint8_t value) {
   }
 }
 
-/// VRAM: the memory router
+// VRAM: the memory router
 uint8_t Ppu::ReadVram(const uint16_t address) const {
   const uint16_t addr = address & PpuAddresses::VRAM_MASK;
   if (addr <= PpuAddresses::PATTERN_TABLE_END) {
@@ -195,7 +248,7 @@ void Ppu::WriteVram(const uint16_t address, const uint8_t value) {
   palette_ram_[PaletteIndex(addr)] = value & PpuAddresses::COLOR_MASK;
 }
 
-/// Nametable mirroring
+// Nametable mirroring
 uint16_t Ppu::MirrorNametableAddr(const uint16_t address) const {
   const uint16_t relative = address - PpuAddresses::NAMETABLE_START & PpuAddresses::NAMETABLE_AREA_MASK;
   const uint16_t nametable = relative / PpuAddresses::NAMETABLE_SIZE;
@@ -220,7 +273,7 @@ uint16_t Ppu::MirrorNametableAddr(const uint16_t address) const {
   return physical * PpuAddresses::NAMETABLE_SIZE + offset;
 }
 
-/// Palette mirroring
+// Palette mirroring
 uint16_t Ppu::PaletteIndex(const uint16_t address) {
   uint16_t index = address & PpuAddresses::PALETTE_MASK;
   if (index >= PpuAddresses::PALETTE_SPRITE_BASE && (index & PpuAddresses::PALETTE_COLOR_MASK) == 0) {
@@ -236,26 +289,27 @@ void Ppu::TriggerNmi() const {
   nmi_callback_();
 }
 
-/// Timing
-/// Advances one cycle. Every 341 cycles a scanline ends.
+// Timing
+// Advances one cycle. Every 341 cycles a scanline ends.
 void Ppu::Step() {
   RenderIfVisible();
   UpdateScrollRegisters();
   AdvanceCycle();
 }
-
-/// Checks if we're on a visible scanline (between 0 and 239) and if we're at
-/// the start of a new scanline (cycle 0). Actual NES hardware renders each
-/// pixel across the scanline, but for simplicity we render the entire scanline
-/// at once.
+/**
+ * Checks if we're on a visible scanline (between 0 and 239) and if we're at
+ * the start of a new scanline (cycle 0). Actual NES hardware renders each
+ * pixel across the scanline, but for simplicity we render the entire scanline
+ * at once.
+ */
 void Ppu::RenderIfVisible() {
   if (scanline_ < HEIGHT && cycle_ == 0) {
     RenderScanline(scanline_);
   }
 }
 
-/// If rendering is enabled, and we're on a visible scanline, update the scroll
-/// registers.
+// If rendering is enabled, and we're on a visible scanline, update the scroll
+// registers.
 void Ppu::UpdateScrollRegisters() {
   if (!IsRenderingEnabled())
     return;
@@ -315,12 +369,14 @@ void Ppu::AdvanceCycle() {
   }
 }
 
-/// The main rendering logic loop.
-/// Walks the scanline one tile at a time (not one pixel at a time): everything
-/// that's constant for the whole scanline (coarse Y, fine Y, base coarse
-/// X/nametable) is read once up front, and everything that's constant per-tile
-/// (bitplanes, palette) is fetched once per 8 pixels via FetchBackgroundTile
-/// rather than once per pixel.
+/**
+ * The main rendering logic loop.
+ * Walks the scanline one tile at a time (not one pixel at a time): everything
+ * that's constant for the whole scanline (coarse Y, fine Y, base coarse
+ * X/nametable) is read once up front, and everything that's constant per-tile
+ * (bitplanes, palette) is fetched once per 8 pixels via FetchBackgroundTile
+ * rather than once per pixel.
+ */
 void Ppu::RenderScanline(const int32_t y) {
   if (!IsShowBackground()) {
     const uint8_t backdrop_color = PaletteColor(0, 0);
@@ -385,9 +441,9 @@ void Ppu::RenderScanline(const int32_t y) {
   }
 }
 
-/// Fetches the tile index, both pattern-table bitplanes, and the resolved
-/// palette for one tile. This is the only place background rendering touches
-/// VRAM, and it happens once per tile rather than once per pixel.
+// Fetches the tile index, both pattern-table bitplanes, and the resolved
+// palette for one tile. This is the only place background rendering touches
+// VRAM, and it happens once per tile rather than once per pixel.
 Ppu::BackgroundTile Ppu::FetchBackgroundTile(const int tile_column, const int nametable, const int coarse_y,
                                              const int fine_y) const {
   // The nametable starts at $2000 + nametable * 1024 bytes
@@ -447,9 +503,9 @@ void Ppu::CheckSprite0Hit(int32_t y) {
   }
 }
 
-/// Resolves the background pixel under an arbitrary screen coordinate, fetching
-/// the tile via VRAM. Used by sprite-0-hit detection, which needs to sample
-/// outside the tile currently being drawn by RenderScanline.
+// Resolves the background pixel under an arbitrary screen coordinate, fetching
+// the tile via VRAM. Used by sprite-0-hit detection, which needs to sample
+// outside the tile currently being drawn by RenderScanline.
 Ppu::Pixel Ppu::BackgroundPixelAt(const int32_t x, const int32_t /*y*/) const {
   const int fine_y = GetFineY();
   const int coarse_y = GetCoarseY();
@@ -468,8 +524,8 @@ Ppu::Pixel Ppu::BackgroundPixelAt(const int32_t x, const int32_t /*y*/) const {
   return ExtractBackgroundPixel(tile, scroll_x % PIXELS_PER_TILE);
 }
 
-/// Combines the two bitplane bytes at a given pixel position into a 2-bit color
-/// index. Shared by background and sprite pixel fetching.
+// Combines the two bitplane bytes at a given pixel position into a 2-bit color
+// index. Shared by background and sprite pixel fetching.
 int Ppu::ColorFromBitplanes(const uint8_t low_bitplane, const uint8_t high_bitplane, const int pixel_in_tile) {
   const int bit = (PIXELS_PER_TILE - 1) - pixel_in_tile;
   const int low_bit = (low_bitplane >> bit) & 1;
@@ -477,8 +533,8 @@ int Ppu::ColorFromBitplanes(const uint8_t low_bitplane, const uint8_t high_bitpl
   return (high_bit << 1) | low_bit;
 }
 
-/// Reads one pixel out of an already-fetched tile's bitplanes. Pure bit math,
-/// no VRAM access.
+// Reads one pixel out of an already-fetched tile's bitplanes. Pure bit math,
+// no VRAM access.
 Ppu::Pixel Ppu::ExtractBackgroundPixel(const BackgroundTile& tile, const int pixel_in_tile) {
   // 0 means the pixel is transparent and the tile's palette doesn't matter.
   const int color = ColorFromBitplanes(tile.low_bitplane, tile.high_bitplane, pixel_in_tile);
@@ -495,7 +551,7 @@ int32_t Ppu::SpriteTilePixel(const uint8_t tile_index, const int32_t tile_row, c
   return ColorFromBitplanes(low_bitplane, high_bitplane, static_cast<int>(pixel_in_tile));
 }
 
-/// Find the first opaque sprite pixel on the scanline.
+// Find the first opaque sprite pixel on the scanline.
 std::tuple<int32_t, int32_t, bool> Ppu::SpritePixel(const int32_t x, const int32_t y) const {
   int count = 0;
 
@@ -537,7 +593,7 @@ std::tuple<int32_t, int32_t, bool> Ppu::SpritePixel(const int32_t x, const int32
   return {0, 0, false};
 }
 
-/// The attribute table
+// The attribute table
 int32_t Ppu::TilePalette(const int32_t nametable_address, const int32_t tile_column, const int32_t tile_row) const {
   // Each byte in the attribute table corresponds to a 4x4 block of tiles.
   // Subdivided into 2x2 blocks of tiles, each block uses 2 bits to select a
@@ -555,8 +611,8 @@ int32_t Ppu::TilePalette(const int32_t nametable_address, const int32_t tile_col
   return (attribute_byte >> shift) & (COLORS_PER_PALETTE - 1);
 }
 
-/// The final color
-/// Returns an index form 0-63 from the NES master palette.
+// The final color
+// Returns an index form 0-63 from the NES master palette.
 uint8_t Ppu::PaletteColor(const int32_t palette, const int32_t color) const {
   return ResolvePaletteColor(0, palette, color);
 }
@@ -574,7 +630,7 @@ uint8_t Ppu::ResolvePaletteColor(const int32_t palette_group_offset, const int32
                                         (palette_group_offset + palette) * COLORS_PER_PALETTE + color));
 }
 
-/// Set pixel to the frame buffer.
+// Set pixel to the frame buffer.
 void Ppu::SetPixel(const int32_t x, const int32_t y, const uint8_t palette_index) {
   // Look up the RGB color in the master palette.
   const auto [r, g, b] = GetColor(palette_index);

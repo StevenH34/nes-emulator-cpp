@@ -9,10 +9,18 @@
 
 namespace nes {
 
+class StateReader;
+class StateWriter;
+
 class Ppu {
 public:
   explicit Ppu(Cartridge& cartridge);
-  /// Display
+
+  // Save and load state
+  void Serialize(StateWriter& writer) const;
+  void Deserialize(StateReader& reader);
+
+  // Display
   static constexpr int WIDTH = 256;
   static constexpr int HEIGHT = 240;
   // 341 cycles per scanline
@@ -23,7 +31,7 @@ public:
   static constexpr int VBLANK_SCANLINE = 241;
   // Pre-render scanline is line 261, the last scanline of the frame
   static constexpr int PRE_RENDER_SCANLINE = 261;
-  /// Tile constants
+  // Tile constants
   // 32 tiles per row, 8 pixels per tile, 16 bytes per tile (2 bitplanes)
   static constexpr int TILES_PER_ROW = 32;
   static constexpr int PIXELS_PER_TILE = 8;
@@ -39,12 +47,14 @@ public:
     uint8_t r, g, b;
   };
 
-  /// NES PPU has 64 fixed colors
-  /// 4 rows of 16 colors:
-  ///   Row 0: Dark
-  ///   Row 1: Medium
-  ///   Row 2: Bright
-  ///   Row 3: Pastel
+  /**
+   * NES PPU has 64 fixed colors
+   * 4 rows of 16 colors:
+   * Row 0: Dark
+   * Row 1: Medium
+   * Row 2: Bright
+   * Row 3: Pastel
+   */
   static constexpr std::array<Color, 64> PALETTE = {{
       // $00-$0F: Dark
       {84, 84, 84},
@@ -118,7 +128,7 @@ public:
       {0, 0, 0},
       {0, 0, 0},
   }};
-  /// Extract bits
+  // Extract bits
   static constexpr uint16_t MASK_COARSE_X = 0x001F;
   static constexpr uint16_t MASK_COARSE_Y = 0x03E0;
   static constexpr uint16_t MASK_NAMETABLE = 0x0C00;
@@ -127,42 +137,42 @@ public:
   static constexpr uint16_t MASK_HORIZONTAL = 0x041F;
   // Vertical bits: coarse Y + find Y + vertical nametable bit
   static constexpr uint16_t MASK_VERTICAL = 0x07BE0;
-  /// Clears bits
+  // Clears bits
   static constexpr uint16_t CLEAR_NAMETABLE = 0xF3FF;
   static constexpr uint16_t CLEAR_COARSE_X = 0xFFE0;
-  /// Clears coarse Y + fine Y, but keeps the nametable and coarse X bits.
+  // Clears coarse Y + fine Y, but keeps the nametable and coarse X bits.
   static constexpr uint16_t CLEAR_ALL_Y = 0x0C1F;
-  /// Ctrl register constants
+  // Ctrl register constants
   static constexpr uint8_t FLAG_VRAM_INCREMENT = 0x04;
   static constexpr uint8_t FLAG_NMI_ENABLED = 0x80;
   static constexpr uint8_t FLAG_SPR_PATTERN_TABLE = 0x08;
   static constexpr uint8_t FLAG_BG_PATTERN_TABLE = 0x10;
-  /// Pattern tables
+  // Pattern tables
   static constexpr uint16_t PATTERN_TABLE_0 = 0x0000;
   static constexpr uint16_t PATTERN_TABLE_1 = 0x1000;
-  /// Status register constant
+  // Status register constant
   static constexpr uint8_t FLAG_VBLANK = 0x80;
   static constexpr uint8_t FLAG_SPRITE_0_HIT = 0x40;
-  /// Scroll register constant
+  // Scroll register constant
   static constexpr uint8_t FINE_BITS = 0x07;
-  /// PPUMASK
+  // PPUMASK
   static constexpr uint8_t FLAG_SHOW_BG = 0x08;
   static constexpr uint8_t FLAG_SHOW_SPRITES = 0x10;
-  /// Scanline points of modification
+  // Scanline points of modification
   static constexpr int32_t DOT_FINE_Y_INCREMENT = 256;
   static constexpr int32_t DOT_COPY_HORIZONTAL = 257;
   static constexpr int32_t DOT_COPY_VERTICAL_START = 280;
   static constexpr int32_t DOT_COPY_VERTICAL_END = 304;
-  /// Use to flip the nametable bit in v register via XOR
+  // Use to flip the nametable bit in v register via XOR
   static constexpr uint16_t FLIP_NAMETABLE_H = 0X0400;
   static constexpr uint16_t FLIP_NAMETABLE_V = 0X0800;
   // Add to v register, increments fine y by 1
   static constexpr uint16_t FINE_Y_UNIT = 0X1000;
-  /// Boundary values
+  // Boundary values
   static constexpr int32_t MAX_COARSE_X = 31;
   static constexpr int32_t MAX_COARSE_Y = 29;
   static constexpr int32_t MAX_FINE_Y = 7;
-  /// Sprite constants
+  // Sprite constants
   static constexpr int32_t SPRITE_Y_OFFSET = 1;
   static constexpr uint8_t SPRITE_PALETTE_MASK = 0x03;
   static constexpr uint8_t SPRITE_BEHIND_BACKGROUND = 0x20;
@@ -174,6 +184,8 @@ public:
   static constexpr int SPRITE_BYTES = 4;
 
   // Getters
+  [[nodiscard]] int GetCycle() const { return cycle_; }
+  [[nodiscard]] int GetScanline() const { return scanline_; }
   [[nodiscard]] uint16_t GetV() const { return v_register_; }
   [[nodiscard]] uint16_t GetT() const { return t_register_; }
   [[nodiscard]] uint8_t GetX() const { return x_register_; }
@@ -183,7 +195,7 @@ public:
   void SetSprite0Hit() { status_register_ |= FLAG_SPRITE_0_HIT; }
   void ClearSprite0Hit() { status_register_ &= ~FLAG_SPRITE_0_HIT; }
 
-  /// Latch methods
+  // Latch methods
   [[nodiscard]] bool IsLatchOn() const { return w_register_; }
   void ResetLatch() { w_register_ = false; }
   void ToggleLatch() { w_register_ = !w_register_; } // Alternates between first and second write
@@ -192,59 +204,59 @@ public:
   void SetNametable(uint16_t nametable);
   void SetScrollY(uint16_t fine_y, uint16_t coarse_y);
 
-  /// Ctrl methods
+  // Ctrl methods
   void WriteCtrlRegister(uint8_t value);
   [[nodiscard]] uint16_t VramIncrement() const;
   [[nodiscard]] bool isNmiEnabled() const;
   [[nodiscard]] uint16_t BackgroundPatternTable() const;
   [[nodiscard]] uint16_t SpritePatternTable() const;
 
-  /// PPUMASK controls what the PPU draws
+  // PPUMASK controls what the PPU draws
   void WriteMask(const uint8_t value) { mask_register_ = value; }
-  /// If bit 3 of PPUMASK is off, background is not drawn
+  // If bit 3 of PPUMASK is off, background is not drawn
   [[nodiscard]] bool IsShowBackground() const { return (mask_register_ & FLAG_SHOW_BG) != 0; }
   [[nodiscard]] bool IsShowSprites() const { return (mask_register_ & FLAG_SHOW_SPRITES) != 0; }
-  /// If either is on, the PPU is rendering
+  // If either is on, the PPU is rendering
   [[nodiscard]] bool IsRenderingEnabled() const { return IsShowBackground() || IsShowSprites(); }
 
-  /// Status register methods
+  // Status register methods
   uint8_t ReadStatusRegister();
   void SetVblank();
   void ClearVblank();
 
-  /// Scroll register methods - PPUSCROLL ($2005)
+  // Scroll register methods - PPUSCROLL ($2005)
   void WriteScroll(uint8_t value);
   void WriteScrollX(uint8_t value);
   void WriteScrollY(uint8_t value);
 
-  /// PPUADDR ($2006): VRAM address
+  // PPUADDR ($2006): VRAM address
   void WriteAddr(uint8_t value);
 
-  /// PPUDATA ($2007): VRAM access
+  // PPUDATA ($2007): VRAM access
   uint8_t ReadDataRegister();
   void WriteData(uint8_t value);
 
-  /// OAMADDR ($2003): OAM address
+  // OAMADDR ($2003): OAM address
   void WriteOamAddr(const uint8_t value) { oam_addr_register_ = value; }
 
-  /// OAMDATA ($2004): Sprites
+  // OAMDATA ($2004): Sprites
   [[nodiscard]] uint8_t ReadOamData() const { return oam_[oam_addr_register_]; }
   void WriteOamData(uint8_t value);
   void OamDma(std::array<uint8_t, 256> data);
 
-  /// Register router
+  // Register router
   uint8_t ReadRegister(uint16_t address);
   void WriteRegister(uint16_t address, uint8_t value);
 
-  /// VRAM: the memory router
+  // VRAM: the memory router
   [[nodiscard]] uint8_t ReadVram(uint16_t address) const;
   void WriteVram(uint16_t address, uint8_t value);
-  /// Nametable mirroring
+  // Nametable mirroring
   [[nodiscard]] uint16_t MirrorNametableAddr(uint16_t address) const;
-  /// Palette mirroring
+  // Palette mirroring
   static uint16_t PaletteIndex(uint16_t address);
 
-  /// Timing
+  // Timing
   void Step();
   void RenderIfVisible();
   void UpdateScrollRegisters();
@@ -254,22 +266,24 @@ public:
   void AdvanceCycle();
   void SetNmiCallback(std::function<void()> callback) { nmi_callback_ = std::move(callback); }
 
-  /// V register methods
-  /// Each getter ANDs with the corresponding mask and shifts down to 0 if
-  /// necessary
+  // V register methods
+  // Each getter ANDs with the corresponding mask and shifts down to 0 if
+  // necessary
   [[nodiscard]] int GetCoarseX() const { return v_register_ & MASK_COARSE_X; }
   [[nodiscard]] int GetCoarseY() const { return (v_register_ & MASK_COARSE_Y) >> 5; }
   [[nodiscard]] int GetFineY() const { return (v_register_ & MASK_FINE_Y) >> 12; }
   [[nodiscard]] int GetNametable() const { return (v_register_ & MASK_NAMETABLE) >> 10; }
 
-  /// Rendering logic
+  // Rendering logic
   struct Pixel {
     int color;
     int palette;
   };
-  /// The two bitplane rows and resolved palette for one tile, shared by all 8
-  /// pixels in that tile so VRAM only needs to be read once per tile instead of
-  /// once per pixel.
+  /**
+   * The two bitplane rows and resolved palette for one tile, shared by all 8
+   * pixels in that tile so VRAM only needs to be read once per tile instead of
+   * once per pixel.
+   */
   struct BackgroundTile {
     uint8_t low_bitplane;
     uint8_t high_bitplane;
@@ -296,13 +310,13 @@ public:
   void CheckSprite0Hit(int32_t y);
 
 private:
-  /// Will read CHR ROM from Cartridge
+  // Will read CHR ROM from Cartridge
   Cartridge& cartridge_;
   std::function<void()> nmi_callback_{nullptr};
   int cycle_{0};
   int scanline_{0};
   bool frame_complete_{false};
-  /// @frame_buffer_ 256 x 240 pixels, 4 bytes per pixel (RGBA)
+  // @frame_buffer_ 256 x 240 pixels, 4 bytes per pixel (RGBA)
   std::vector<uint8_t> frame_buffer_ = std::vector<uint8_t>(static_cast<std::size_t>(WIDTH) * HEIGHT * 4, 0);
   uint8_t vram_buffer_{0};
   std::vector<uint8_t> nametable_ram_ = std::vector<uint8_t>(PpuAddresses::NAMETABLE_RAM_SIZE, 0);
@@ -313,18 +327,20 @@ private:
   uint8_t status_register_{0};
   uint8_t oam_addr_register_{0};
 
-  /// Internal PPU Registers
-  /// V (15 bits): Scroll position during rendering. Holds VRAM address during
-  /// VBlank. T (15 bits): Specifies the starting coarse-x scroll for the next
-  /// scanline and the starting y scroll for the screen.
-  ///     Holds the scroll or VRAM address before transferring it to v during
-  ///     VBlank.
-  /// X (3 bits): the pixel offset within a tile.
-  ///     The fine-x position of the current scroll, used during rendering
-  ///     alongside v.
-  /// W (1 bit): Toggles on each write to either PPUSCROLL or PPUADDR,
-  /// indicating first or second write.
-  ///     Clears on reads of PPUSTATUS.
+  /**
+   * Internal PPU Registers
+   * V (15 bits): Scroll position during rendering. Holds VRAM address during
+   * VBlank. T (15 bits): Specifies the starting coarse-x scroll for the next
+   * scanline and the starting y scroll for the screen.
+   *     Holds the scroll or VRAM address before transferring it to v during
+   *     VBlank.
+   * X (3 bits): the pixel offset within a tile.
+   *     The fine-x position of the current scroll, used during rendering
+   *     alongside v.
+   * W (1 bit): Toggles on each write to either PPUSCROLL or PPUADDR,
+   * indicating first or second write.
+   *     Clears on reads of PPUSTATUS.
+   */
   uint16_t v_register_{0};
   uint16_t t_register_{0};
   uint8_t x_register_{0};
