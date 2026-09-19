@@ -12,6 +12,9 @@
 
 namespace nes {
 
+class StateReader;
+class StateWriter;
+
 /**
  * Header structure of an iNES file:
  * Byte 0-3: "NES" + 0x1A (magic number)
@@ -64,6 +67,10 @@ public:
   static uint8_t ParseMapperId(uint8_t flags_6, uint8_t flags_7);
   static Mirroring ParseMirroring(uint8_t flags_6);
   void Parse(std::span<const uint8_t> data);
+
+  // Save and load state
+  void Serialize(StateWriter& writer) const;
+  void Deserialize(StateReader& reader);
 
 private:
   std::string path_;

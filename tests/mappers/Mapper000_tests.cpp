@@ -2,6 +2,8 @@
 
 #include "../../src/core/Cartridge.h"
 #include "../../src/core/mappers/Mapper000.h"
+#include "../../src/core/save_state/StateReader.h"
+#include "../../src/core/save_state/StateWriter.h"
 
 #include <vector>
 
@@ -62,4 +64,29 @@ TEST_CASE("Mapper000 reads the first and last bytes of an 8KB CHR-ROM") {
 
   CHECK(mapper.ReadChr(0x0000) == 0x33);
   CHECK(mapper.ReadChr(0x1FFF) == 0x44);
+}
+
+// --- Save state ---
+// Mapper000 has no bank-select registers or other mutable state, so it does
+// not override Serialize/Deserialize and inherits Mapper's no-op defaults.
+
+TEST_CASE("Mapper000 Serialize writes no bytes, since NROM has no bank registers to save") {
+  const std::vector<uint8_t> prg(nes::Cartridge::PRG_BLOCK_SIZE, 0);
+  const nes::Mapper000 mapper(prg, {});
+
+  std::vector<uint8_t> buffer;
+  nes::StateWriter writer(buffer);
+  mapper.Serialize(writer);
+
+  CHECK(buffer.empty());
+}
+
+TEST_CASE("Mapper000 Deserialize does not throw or consume bytes from an unrelated buffer") {
+  const std::vector<uint8_t> prg(nes::Cartridge::PRG_BLOCK_SIZE, 0);
+  nes::Mapper000 mapper(prg, {});
+  const std::vector<uint8_t> buffer = {0x11, 0x22, 0x33};
+  nes::StateReader reader(buffer);
+
+  CHECK_NOTHROW(mapper.Deserialize(reader));
+  CHECK(reader.BytesRemaining() == buffer.size()); // nothing consumed
 }

@@ -1,6 +1,8 @@
 #include "doctest.h"
 
 #include "../src/core/Cartridge.h"
+#include "../src/core/save_state/StateReader.h"
+#include "../src/core/save_state/StateWriter.h"
 #include "TestRom.h"
 
 #include <stdexcept>
@@ -11,6 +13,13 @@ namespace {
 std::vector<uint8_t> MakeHeader(const uint8_t prg_blocks, const uint8_t chr_blocks, const uint8_t flags_6,
                                 const uint8_t flags_7) {
   return {0x4E, 0x45, 0x53, 0x1A, prg_blocks, chr_blocks, flags_6, flags_7, 0, 0, 0, 0, 0, 0, 0, 0};
+}
+
+// A minimal, single-bank mapper 0 (NROM) ROM, valid enough to construct a Cartridge.
+std::vector<uint8_t> MakeMinimalRomData() {
+  auto data = MakeHeader(1, 1, 0, 0);
+  data.resize(data.size() + nes::Cartridge::PRG_BLOCK_SIZE + nes::Cartridge::CHR_BLOCK_SIZE, 0);
+  return data;
 }
 
 } // namespace
@@ -208,4 +217,62 @@ TEST_CASE("Cartridge constructor throws when the file is truncated before the "
 
 TEST_CASE("Cartridge constructor throws when the file does not exist") {
   CHECK_THROWS_AS(nes::Cartridge("/no/such/file/definitely_missing.nes"), std::runtime_error);
+}
+
+// --- Save state ---
+// Cartridge itself has no mutable state to save (the ROM data is re-read from
+// disk on load); Serialize/Deserialize just delegate to the mapper's own
+// save/load, since only the mapper carries runtime state (bank registers, etc).
+
+TEST_CASE("Cartridge Serialize delegates to the mapper, producing the same bytes as "
+          "calling Serialize on the mapper directly") {
+  const TempRomFile rom(MakeMinimalRomData());
+  const nes::Cartridge cart(rom.path());
+
+  std::vector<uint8_t> via_cartridge;
+  nes::StateWriter cartridge_writer(via_cartridge);
+  cart.Serialize(cartridge_writer);
+
+  std::vector<uint8_t> via_mapper;
+  nes::StateWriter mapper_writer(via_mapper);
+  cart.GetMapper().Serialize(mapper_writer);
+
+  CHECK(via_cartridge == via_mapper);
+}
+
+TEST_CASE("Cartridge Serialize writes no bytes, since Mapper000 has no serializable state") {
+  const TempRomFile rom(MakeMinimalRomData());
+  const nes::Cartridge cart(rom.path());
+
+  std::vector<uint8_t> buffer;
+  nes::StateWriter writer(buffer);
+  cart.Serialize(writer);
+
+  CHECK(buffer.empty());
+}
+
+TEST_CASE("Cartridge Deserialize does not throw when given an empty saved buffer") {
+  const TempRomFile rom(MakeMinimalRomData());
+  nes::Cartridge cart(rom.path());
+  const std::vector<uint8_t> buffer;
+  nes::StateReader reader(buffer);
+
+  CHECK_NOTHROW(cart.Deserialize(reader));
+}
+
+TEST_CASE("Cartridge save/load round-trip leaves the mapper readable and functional") {
+  const auto data = MakeMinimalRomData();
+  const TempRomFile rom(data);
+  const nes::Cartridge cart(rom.path());
+
+  std::vector<uint8_t> buffer;
+  nes::StateWriter writer(buffer);
+  cart.Serialize(writer);
+
+  nes::Cartridge restored(rom.path());
+  nes::StateReader reader(buffer);
+  restored.Deserialize(reader);
+
+  CHECK(restored.GetMapper().ReadPrg(0x8000) == cart.GetMapper().ReadPrg(0x8000));
+  CHECK(restored.GetMapper().ReadChr(0x0000) == cart.GetMapper().ReadChr(0x0000));
 }
