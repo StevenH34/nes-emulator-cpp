@@ -9,17 +9,20 @@ namespace nes {
 class StateReader {
 public:
   explicit StateReader(std::span<const uint8_t> data) : data_(data) {}
+
   uint8_t ReadU8() {
     if (cursor_ >= data_.size())
       throw std::out_of_range("StateReader: ReadU8 out of range");
     return data_[cursor_++];
   }
+
   uint16_t ReadU16() {
     RequireBytes(2);
     const uint16_t value = static_cast<uint16_t>(data_[cursor_] | (data_[cursor_ + 1] << 8));
     cursor_ += 2;
     return value;
   }
+
   uint32_t ReadU32() {
     RequireBytes(4);
     const uint32_t value = static_cast<uint32_t>(data_[cursor_] | (data_[cursor_ + 1] << 8) |
@@ -27,7 +30,9 @@ public:
     cursor_ += 4;
     return value;
   }
+
   bool ReadBool() { return ReadU8() != 0; }
+
   float ReadFloat() {
     const uint32_t int_value = ReadU32();
     float value;
@@ -37,6 +42,7 @@ public:
     std::memcpy(&value, &int_value, sizeof(float));
     return value;
   }
+
   // `memcpy` into caller's span, no alloc
   void ReadBytes(std::span<uint8_t> out) {
     RequireBytes(out.size());
@@ -45,6 +51,7 @@ public:
     }
     cursor_ += out.size();
   }
+
   [[nodiscard]] size_t BytesRemaining() const { return data_.size() - cursor_; }
 
 private:
