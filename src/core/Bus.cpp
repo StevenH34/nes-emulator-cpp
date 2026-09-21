@@ -1,10 +1,9 @@
 #include "Bus.h"
+#include "save_state/StateReader.h"
+#include "save_state/StateWriter.h"
 
 #include <iostream>
 #include <ostream>
-
-#include "save_state/StateReader.h"
-#include "save_state/StateWriter.h"
 
 namespace nes {
 

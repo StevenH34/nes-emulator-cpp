@@ -39,9 +39,9 @@ private:
   bool running_{true};
   SdlLifetime sdl_;
   nes::Window window_;
-  SDL_Renderer *renderer_{nullptr};
-  SDL_Texture *texture_{nullptr};
-  SDL_AudioStream *audio_stream_{nullptr};
+  SDL_Renderer* renderer_{nullptr};
+  SDL_Texture* texture_{nullptr};
+  SDL_AudioStream* audio_stream_{nullptr};
 };
 
 } // namespace nes_app

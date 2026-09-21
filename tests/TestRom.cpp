@@ -10,7 +10,7 @@ TempRomFile::TempRomFile(const std::vector<uint8_t>& data) {
   static std::atomic<int> counter{0};
   path_ = (std::filesystem::temp_directory_path() / ("nes_test_rom_" + std::to_string(counter++) + ".nes")).string();
   std::ofstream file(path_, std::ios::binary);
-  file.write(reinterpret_cast<const char *>(data.data()), static_cast<std::streamsize>(data.size()));
+  file.write(reinterpret_cast<const char*>(data.data()), static_cast<std::streamsize>(data.size()));
 }
 
 TempRomFile::~TempRomFile() {

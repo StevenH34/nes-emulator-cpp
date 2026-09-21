@@ -30,7 +30,7 @@ NesApp::SdlLifetime::~SdlLifetime() { SDL_Quit(); }
 NesApp::NesApp(const std::string& rom_path)
     : emulator_(rom_path), window_("NES Emulator", WINDOW_WIDTH, WINDOW_HEIGHT) {
   try {
-    renderer_ = SDL_CreateRenderer(static_cast<SDL_Window *>(window_), nullptr);
+    renderer_ = SDL_CreateRenderer(static_cast<SDL_Window*>(window_), nullptr);
     if (renderer_ == nullptr) {
       throw std::runtime_error("SDL_CreateRenderer failed: " + std::string(SDL_GetError()));
     }

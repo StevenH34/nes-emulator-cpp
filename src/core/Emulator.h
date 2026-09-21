@@ -8,6 +8,9 @@
 
 namespace nes {
 
+class StateReader;
+class StateWriter;
+
 class Emulator {
 public:
   explicit Emulator(std::string path);
@@ -29,6 +32,14 @@ public:
   [[nodiscard]] Bus& GetBus() { return bus_; }
   [[nodiscard]] Cpu& GetCpu() { return cpu_; }
   [[nodiscard]] Apu& GetApu() { return apu_; }
+  [[nodiscard]] Ppu& GetPpu() { return ppu_; }
+  [[nodiscard]] Cartridge& GetCartridge() { return cartridge_; }
+
+  // Save and load state
+  void Serialize(StateWriter& writer) const;
+  void Deserialize(StateReader& reader);
+  void SaveStateToFile(const std::string& path) const;
+  void LoadStateFromFile(const std::string& path);
 
 private:
   Cartridge cartridge_;

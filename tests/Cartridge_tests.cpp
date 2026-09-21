@@ -276,3 +276,70 @@ TEST_CASE("Cartridge save/load round-trip leaves the mapper readable and functio
   CHECK(restored.GetMapper().ReadPrg(0x8000) == cart.GetMapper().ReadPrg(0x8000));
   CHECK(restored.GetMapper().ReadChr(0x0000) == cart.GetMapper().ReadChr(0x0000));
 }
+
+// --- ComputeRomChecksum / GetRomChecksum ---
+// FNV-1a 32-bit over PRG-ROM bytes followed by CHR-ROM bytes; expected values
+// below were computed independently against the same algorithm.
+
+TEST_CASE("ComputeRomChecksum returns the FNV-1a offset basis when both spans are empty") {
+  CHECK(nes::Cartridge::ComputeRomChecksum({}, {}) == 0x811C9DC5u);
+}
+
+TEST_CASE("ComputeRomChecksum folds a single PRG-ROM byte into the offset basis") {
+  const std::vector<uint8_t> prg{0x11};
+  CHECK(nes::Cartridge::ComputeRomChecksum(prg, {}) == 0x140C74BCu);
+}
+
+TEST_CASE("ComputeRomChecksum folds a single CHR-ROM byte into the offset basis") {
+  const std::vector<uint8_t> chr{0x22};
+  CHECK(nes::Cartridge::ComputeRomChecksum({}, chr) == 0x270C92A5u);
+}
+
+TEST_CASE("ComputeRomChecksum folds PRG-ROM bytes before CHR-ROM bytes") {
+  const std::vector<uint8_t> prg{0x11, 0x22, 0x33};
+  const std::vector<uint8_t> chr{0x44, 0x55};
+  CHECK(nes::Cartridge::ComputeRomChecksum(prg, chr) == 0x0A2F16B8u);
+}
+
+TEST_CASE("ComputeRomChecksum is sensitive to byte order, not just byte content") {
+  const std::vector<uint8_t> a{0x01, 0x02};
+  const std::vector<uint8_t> b{0x02, 0x01};
+  CHECK(nes::Cartridge::ComputeRomChecksum(a, {}) != nes::Cartridge::ComputeRomChecksum(b, {}));
+}
+
+TEST_CASE("Cartridge stores GetRomChecksum computed from its own parsed PRG-ROM and CHR-ROM") {
+  auto data = MakeHeader(1, 1, 0, 0);
+  data.resize(data.size() + nes::Cartridge::PRG_BLOCK_SIZE + nes::Cartridge::CHR_BLOCK_SIZE, 0);
+  data[16] = 0x11; // first PRG-ROM byte
+  data[16 + nes::Cartridge::PRG_BLOCK_SIZE] = 0x22; // first CHR-ROM byte
+  const TempRomFile rom(data);
+
+  const nes::Cartridge cart(rom.path());
+
+  CHECK(cart.GetRomChecksum() == nes::Cartridge::ComputeRomChecksum(cart.GetPrgRom(), cart.GetChrRom()));
+}
+
+TEST_CASE("Cartridge GetRomChecksum matches for two Cartridges parsed from byte-identical ROM files") {
+  const auto data = MakeMinimalRomData();
+  const TempRomFile rom_a(data);
+  const TempRomFile rom_b(data);
+
+  const nes::Cartridge cart_a(rom_a.path());
+  const nes::Cartridge cart_b(rom_b.path());
+
+  CHECK(cart_a.GetRomChecksum() == cart_b.GetRomChecksum());
+}
+
+TEST_CASE("Cartridge GetRomChecksum differs when PRG-ROM content differs") {
+  auto data_a = MakeHeader(1, 1, 0, 0);
+  data_a.resize(data_a.size() + nes::Cartridge::PRG_BLOCK_SIZE + nes::Cartridge::CHR_BLOCK_SIZE, 0);
+  auto data_b = data_a;
+  data_b[16] = 0xFF; // change the first PRG-ROM byte only
+
+  const TempRomFile rom_a(data_a);
+  const TempRomFile rom_b(data_b);
+  const nes::Cartridge cart_a(rom_a.path());
+  const nes::Cartridge cart_b(rom_b.path());
+
+  CHECK(cart_a.GetRomChecksum() != cart_b.GetRomChecksum());
+}
