@@ -9,8 +9,8 @@
 #include <stdexcept>
 
 namespace nes::SaveStateFormat {
-  inline constexpr std::array<uint8_t, 4> MAGIC{'N', 'E', 'S', 'S'};
-  inline constexpr uint16_t VERSION = 1;
+inline constexpr std::array<uint8_t, 4> MAGIC{'N', 'E', 'S', 'S'};
+inline constexpr uint16_t VERSION = 1;
 } // namespace nes::SaveStateFormat
 
 namespace nes {

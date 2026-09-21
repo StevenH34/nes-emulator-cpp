@@ -19,10 +19,10 @@ public:
   Window(Window&& other) noexcept;
   Window& operator=(Window&& other) noexcept;
 
-  explicit operator SDL_Window *() const { return ptr_; }
+  explicit operator SDL_Window*() const { return ptr_; }
 
 private:
-  SDL_Window *ptr_ = nullptr;
+  SDL_Window* ptr_ = nullptr;
 };
 
 } // namespace nes

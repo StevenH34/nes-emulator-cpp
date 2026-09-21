@@ -4,7 +4,7 @@
 #include <cstdlib>
 #include <exception>
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
   if (argc < 2) {
     std::fprintf(stderr, "Usage: %s <rom_path>\n", argv[0]);
     return EXIT_FAILURE;
