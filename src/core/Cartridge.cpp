@@ -26,7 +26,7 @@ std::vector<uint8_t> Cartridge::ReadFileBytes(const std::string& path) {
   }
 
   std::vector<uint8_t> data(size);
-  if (!file.read(reinterpret_cast<char *>(data.data()), static_cast<std::streamsize>(size))) {
+  if (!file.read(reinterpret_cast<char*>(data.data()), static_cast<std::streamsize>(size))) {
     throw std::runtime_error(std::format("Failed to read file: {}", path));
   }
 
@@ -110,10 +110,24 @@ void Cartridge::Parse(std::span<const uint8_t> data) {
   }
 
   mapper_ = Mapper::Create(mapper_id_, prg_rom_, chr_rom_);
+  rom_checksum_ = ComputeRomChecksum(prg_rom_, chr_rom_);
 }
 
 void Cartridge::Serialize(StateWriter& writer) const { mapper_->Serialize(writer); }
 
 void Cartridge::Deserialize(StateReader& reader) { mapper_->Deserialize(reader); }
+
+uint32_t Cartridge::ComputeRomChecksum(const std::span<const uint8_t> prg_rom, const std::span<const uint8_t> chr_rom) {
+  uint32_t hash = HASH;
+  const auto fold = [&hash](const std::span<const uint8_t> data) {
+    for (const uint8_t byte : data) {
+      hash ^= byte;
+      hash *= FNV_PRIME;
+    }
+  };
+  fold(prg_rom);
+  fold(chr_rom);
+  return hash;
+}
 
 } // namespace nes

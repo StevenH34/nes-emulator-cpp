@@ -51,6 +51,10 @@ public:
   static constexpr uint8_t MAPPER_LOW_MASK = 0b1111'0000; // Mapper number bits 0-3
   // Flags 7 masks
   static constexpr uint8_t MAPPER_HIGH_MASK = 0b1111'0000; // Mapper number bits 4-7
+  // FNV-1a 32-bit offset basis used for computing a checksum of the ROM data
+  static constexpr uint32_t HASH = 0x811C9DC5u;
+  // FNV-1a 32-bit prime used for computing a checksum of the ROM data
+  static constexpr uint32_t FNV_PRIME = 0x01000193u;
 
   enum class Mirroring : uint8_t { Horizontal, Vertical, FourScreen };
 
@@ -61,6 +65,7 @@ public:
   [[nodiscard]] uint8_t GetMapperId() const { return mapper_id_; }
   [[nodiscard]] bool HasBatteryBackedRam() const { return battery_; }
   [[nodiscard]] Mapper& GetMapper() const { return *mapper_; }
+  [[nodiscard]] uint32_t GetRomChecksum() const { return rom_checksum_; }
 
   static std::vector<uint8_t> ReadFileBytes(const std::string& path);
   static void ValidateHeader(std::span<const uint8_t> data);
@@ -71,6 +76,7 @@ public:
   // Save and load state
   void Serialize(StateWriter& writer) const;
   void Deserialize(StateReader& reader);
+  static uint32_t ComputeRomChecksum(std::span<const uint8_t> prg_rom, std::span<const uint8_t> chr_rom);
 
 private:
   std::string path_;
@@ -80,6 +86,7 @@ private:
   bool battery_{false};
   uint8_t mapper_id_{0};
   std::unique_ptr<Mapper> mapper_;
+  uint32_t rom_checksum_{0};
 };
 
 } // namespace nes
