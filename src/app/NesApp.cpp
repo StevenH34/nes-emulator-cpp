@@ -1,10 +1,10 @@
 #include "NesApp.h"
 
+#include <SDL3/SDL.h>
+#include <iostream>
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
-#include <SDL3/SDL.h>
-#include <iostream>
 
 namespace nes_app {
 
@@ -32,7 +32,7 @@ NesApp::SdlLifetime::SdlLifetime() {
 NesApp::SdlLifetime::~SdlLifetime() { SDL_Quit(); }
 
 NesApp::NesApp(const std::string& rom_path)
-  : emulator_(rom_path), window_("NES Emulator", WINDOW_WIDTH, WINDOW_HEIGHT), save_state_path_(rom_path + ".state") {
+    : emulator_(rom_path), window_("NES Emulator", WINDOW_WIDTH, WINDOW_HEIGHT), save_state_path_(rom_path + ".state") {
   try {
     renderer_ = SDL_CreateRenderer(static_cast<SDL_Window*>(window_), nullptr);
     if (renderer_ == nullptr) {

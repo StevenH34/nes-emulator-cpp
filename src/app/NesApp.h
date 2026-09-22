@@ -1,8 +1,8 @@
 #pragma once
 
+#include <SDL3/SDL.h>
 #include <string>
 #include <unordered_map>
-#include <SDL3/SDL.h>
 
 #include "Emulator.h"
 #include "Window.h"
