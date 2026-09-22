@@ -1,6 +1,8 @@
 #pragma once
 
 #include <string>
+#include <unordered_map>
+#include <SDL3/SDL.h>
 
 #include "Emulator.h"
 #include "Window.h"
@@ -34,6 +36,8 @@ private:
 
   void HandleEvents();
   void Cleanup();
+  void SaveState();
+  void LoadState();
 
   nes::Emulator emulator_;
   bool running_{true};
@@ -42,6 +46,7 @@ private:
   SDL_Renderer* renderer_{nullptr};
   SDL_Texture* texture_{nullptr};
   SDL_AudioStream* audio_stream_{nullptr};
+  std::string save_state_path_;
 };
 
 } // namespace nes_app
