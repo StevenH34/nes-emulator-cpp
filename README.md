@@ -14,7 +14,7 @@
   - Compatible with most [Mapper000](https://nesdir.github.io/mapper0.html) ROMs (including Super Mario Bros.).
 - ✅ Add APU (Pulse, Triangle, and Noise channels).
   - TODO: Add DMC channel.
-- TODO: Add save states.
+- ✅ Add save states.
 
 <p style="text-align: center;">
   <img src="./images/img.png" alt="emulator picture" width="300" />
