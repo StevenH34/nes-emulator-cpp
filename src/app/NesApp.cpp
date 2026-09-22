@@ -1,6 +1,10 @@
 #include "NesApp.h"
 
+#include <SDL3/SDL.h>
+#include <iostream>
 #include <stdexcept>
+#include <string>
+#include <unordered_map>
 
 namespace nes_app {
 
@@ -28,7 +32,7 @@ NesApp::SdlLifetime::SdlLifetime() {
 NesApp::SdlLifetime::~SdlLifetime() { SDL_Quit(); }
 
 NesApp::NesApp(const std::string& rom_path)
-    : emulator_(rom_path), window_("NES Emulator", WINDOW_WIDTH, WINDOW_HEIGHT) {
+    : emulator_(rom_path), window_("NES Emulator", WINDOW_WIDTH, WINDOW_HEIGHT), save_state_path_(rom_path + ".state") {
   try {
     renderer_ = SDL_CreateRenderer(static_cast<SDL_Window*>(window_), nullptr);
     if (renderer_ == nullptr) {
@@ -102,6 +106,22 @@ void NesApp::Run() {
   }
 }
 
+void NesApp::SaveState() {
+  try {
+    emulator_.SaveStateToFile(save_state_path_);
+  } catch (const std::exception& e) {
+    std::cerr << "Failed to save state: " << e.what() << '\n';
+  }
+}
+
+void NesApp::LoadState() {
+  try {
+    emulator_.LoadStateFromFile(save_state_path_);
+  } catch (const std::exception& e) {
+    std::cerr << "Failed to load state: " << e.what() << '\n';
+  }
+}
+
 const std::unordered_map<SDL_Scancode, uint8_t>& NesApp::KeyMap() {
   static const std::unordered_map<SDL_Scancode, uint8_t> key_map = {{
       {SDL_SCANCODE_Z, nes::Controller::BUTTON_A},
@@ -124,6 +144,15 @@ void NesApp::HandleEvents() {
         (event.type == SDL_EVENT_KEY_DOWN && event.key.scancode == SDL_SCANCODE_ESCAPE)) {
       running_ = false;
     }
+
+    if (event.type == SDL_EVENT_KEY_DOWN) {
+      if (event.key.scancode == SDL_SCANCODE_F5) {
+        SaveState();
+      } else if (event.key.scancode == SDL_SCANCODE_F9) {
+        LoadState();
+      }
+    }
+
     if (event.type == SDL_EVENT_KEY_DOWN || event.type == SDL_EVENT_KEY_UP) {
       const auto& key_map = KeyMap();
       if (auto it = key_map.find(event.key.scancode); it != key_map.end()) {
