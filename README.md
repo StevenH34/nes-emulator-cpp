@@ -32,6 +32,8 @@
 | Down       | Down Arrow        |
 | Left       | Left Arrow        |
 | Right      | Right Arrow       |
+| Save State | F5                |
+| Load State | F9                |
 
 Press `ESC` to exit the emulator.
 
