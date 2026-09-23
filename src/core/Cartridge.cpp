@@ -13,6 +13,8 @@ Cartridge::Cartridge(std::string path) : path_(std::move(path)) {
   Parse(data);
 }
 
+Cartridge::Cartridge(const std::span<const uint8_t> data) { Parse(data); }
+
 std::vector<uint8_t> Cartridge::ReadFileBytes(const std::string& path) {
   std::error_code ec;
   const auto size = std::filesystem::file_size(path, ec);
@@ -119,7 +121,11 @@ void Cartridge::Deserialize(StateReader& reader) { mapper_->Deserialize(reader);
 
 uint32_t Cartridge::ComputeRomChecksum(const std::span<const uint8_t> prg_rom, const std::span<const uint8_t> chr_rom) {
   uint32_t hash = HASH;
-  const auto fold = [&hash](const std::span<const uint8_t> data) {
+  // FNV-1a's multiply is meant to wrap on overflow (modular arithmetic); tell
+  // UBSan's Clang-only integer-overflow check not to flag it. The attribute
+  // must go on the lambda itself, not the enclosing function, since a lambda
+  // compiles to its own call operator that attributes don't propagate into.
+  const auto fold = [&hash](const std::span<const uint8_t> data) __attribute__((no_sanitize("unsigned-integer-overflow"))) {
     for (const uint8_t byte : data) {
       hash ^= byte;
       hash *= FNV_PRIME;
