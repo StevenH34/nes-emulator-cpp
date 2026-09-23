@@ -28,6 +28,7 @@ class StateWriter;
 class Cartridge {
 public:
   explicit Cartridge(std::string path);
+  explicit Cartridge(std::span<const uint8_t> data);
   ~Cartridge() = default;
 
   // iNES Header

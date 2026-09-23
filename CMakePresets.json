@@ -1,6 +1,10 @@
 {
   "version": 6,
-  "cmakeMinimumRequired": { "major": 3, "minor": 25, "patch": 0 },
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 25,
+    "patch": 0
+  },
   "configurePresets": [
     {
       "name": "default",
@@ -9,7 +13,9 @@
       "binaryDir": "${sourceDir}/build-debug",
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
-        "CMAKE_BUILD_TYPE": "Debug"
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_C_COMPILER": "clang",
+        "CMAKE_CXX_COMPILER": "clang++"
       }
     },
     {
@@ -18,7 +24,8 @@
       "inherits": "default",
       "binaryDir": "${sourceDir}/build-asan",
       "cacheVariables": {
-        "NES_ENABLE_SANITIZERS": "ON"
+        "NES_ENABLE_SANITIZERS": "ON",
+        "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreadedDLL"
       }
     },
     {
@@ -28,6 +35,18 @@
       "binaryDir": "${sourceDir}/build-release",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "wasm",
+      "displayName": "Emscripten (Ninja)",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build-wasm",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "$env{EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake",
+        "CMAKE_BUILD_TYPE": "Release",
+        "NES_BUILD_DESKTOP": "OFF",
+        "NES_BUILD_WASM": "ON"
       }
     }
   ],
@@ -46,28 +65,64 @@
       "name": "release",
       "configurePreset": "release",
       "targets": "nes_emulator"
+    },
+    {
+      "name": "wasm",
+      "configurePreset": "wasm",
+      "targets": "nes_emulator_wasm"
     }
   ],
   "workflowPresets": [
     {
       "name": "default",
       "steps": [
-        { "type": "configure", "name": "default" },
-        { "type": "build", "name": "default" }
+        {
+          "type": "configure",
+          "name": "default"
+        },
+        {
+          "type": "build",
+          "name": "default"
+        }
       ]
     },
     {
       "name": "asan",
       "steps": [
-        { "type": "configure", "name": "asan" },
-        { "type": "build", "name": "asan" }
+        {
+          "type": "configure",
+          "name": "asan"
+        },
+        {
+          "type": "build",
+          "name": "asan"
+        }
       ]
     },
     {
       "name": "release",
       "steps": [
-        { "type": "configure", "name": "release" },
-        { "type": "build", "name": "release" }
+        {
+          "type": "configure",
+          "name": "release"
+        },
+        {
+          "type": "build",
+          "name": "release"
+        }
+      ]
+    },
+    {
+      "name": "wasm",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "wasm"
+        },
+        {
+          "type": "build",
+          "name": "wasm"
+        }
       ]
     }
   ]

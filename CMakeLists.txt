@@ -6,6 +6,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 option(NES_ENABLE_SANITIZERS "Build with AddressSanitizer + UndefinedBehaviorSanitizer instrumentation" OFF)
+option(NES_BUILD_DESKTOP "Build the SDL3 desktop app (nes_emulator)" ON)
+option(NES_BUILD_WASM "Build the Emscripten browser app (nes_emulator_wasm)" OFF)
 
 add_library(nes_sanitizers INTERFACE)
 if(NES_ENABLE_SANITIZERS)
@@ -26,8 +28,50 @@ if(NES_ENABLE_SANITIZERS)
             target_compile_options(nes_sanitizers INTERFACE -fsanitize=implicit-conversion,integer)
             target_link_options(nes_sanitizers INTERFACE -fsanitize=implicit-conversion,integer)
         endif()
+
+        if(WIN32)
+            target_compile_definitions(nes_sanitizers INTERFACE _DISABLE_STL_ANNOTATION)
+        endif()
     endif()
 endif()
+
+# On Windows, Clang links the ASan/UBSan runtime as a DLL that it never
+# registers as a CMake IMPORTED target.
+# Not needed on the CI asan preset, which builds with gcc/libasan on Linux.
+set(NES_ASAN_DYNAMIC_DLL "")
+if(WIN32 AND NES_ENABLE_SANITIZERS AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    execute_process(
+            COMMAND ${CMAKE_CXX_COMPILER} -print-file-name=clang_rt.asan_dynamic-x86_64.dll
+            OUTPUT_VARIABLE NES_ASAN_DYNAMIC_DLL
+            OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if(NOT EXISTS "${NES_ASAN_DYNAMIC_DLL}")
+        message(WARNING "Could not locate clang_rt.asan_dynamic-x86_64.dll; ASan/UBSan executables may fail to run")
+        set(NES_ASAN_DYNAMIC_DLL "")
+    endif()
+endif()
+
+# Copies a target's imported runtime DLLs, plus the Clang ASan/UBSan
+# runtime DLL on Windows when sanitizers are enabled.
+function(nes_copy_win32_runtime_dlls target)
+    if(NOT WIN32)
+        return()
+    endif()
+
+    # TARGET_RUNTIME_DLLS expands to nothing when a target has no imported
+    # runtime DLLs; fall back to a no-op ("true") in that case.
+    add_custom_command(TARGET ${target} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E $<IF:$<BOOL:$<TARGET_RUNTIME_DLLS:${target}>>,copy_if_different,true>
+            "$<TARGET_RUNTIME_DLLS:${target}>"
+            "$<TARGET_FILE_DIR:${target}>"
+            COMMAND_EXPAND_LISTS)
+
+    if(NES_ASAN_DYNAMIC_DLL)
+        add_custom_command(TARGET ${target} POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                "${NES_ASAN_DYNAMIC_DLL}"
+                "$<TARGET_FILE_DIR:${target}>")
+    endif()
+endfunction()
 
 add_library(nes_warnings INTERFACE)
 if(MSVC)
@@ -57,10 +101,6 @@ set(NES_CORE_SOURCES
         src/core/ppu/Ppu.cpp
         src/core/ppu/Ppu.h
         src/core/ppu/Ppu_Addresses.h
-        src/app/Window.cpp
-        src/app/Window.h
-        src/app/NesApp.cpp
-        src/app/NesApp.h
         src/core/Controller.cpp
         src/core/Controller.h
         src/core/apu/Apu.cpp
@@ -79,21 +119,33 @@ add_library(nes_core STATIC ${NES_CORE_SOURCES})
 
 target_include_directories(nes_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/core)
 
-find_package(SDL3 CONFIG REQUIRED)
-
-target_link_libraries(nes_core PUBLIC SDL3::SDL3 nes_sanitizers)
+target_link_libraries(nes_core PUBLIC nes_sanitizers)
 target_link_libraries(nes_core PRIVATE nes_warnings)
 
-add_executable(nes_emulator src/app/main.cpp)
+if(NES_BUILD_DESKTOP)
+    find_package(SDL3 CONFIG REQUIRED)
 
-target_link_libraries(nes_emulator PRIVATE nes_core)
+    set(NES_PLATFORM_SDL_SOURCES
+            src/app/Window.cpp
+            src/app/Window.h
+            src/app/NesApp.cpp
+            src/app/NesApp.h)
 
-if(WIN32)
-    add_custom_command(TARGET nes_emulator POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "$<TARGET_RUNTIME_DLLS:nes_emulator>"
-            "$<TARGET_FILE_DIR:nes_emulator>"
-            COMMAND_EXPAND_LISTS)
+    add_library(nes_platform_sdl STATIC ${NES_PLATFORM_SDL_SOURCES})
+
+    target_include_directories(nes_platform_sdl PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/app)
+    target_link_libraries(nes_platform_sdl PUBLIC nes_core SDL3::SDL3)
+    target_link_libraries(nes_platform_sdl PRIVATE nes_warnings)
+
+    add_executable(nes_emulator src/app/main.cpp)
+
+    target_link_libraries(nes_emulator PRIVATE nes_platform_sdl)
+
+    nes_copy_win32_runtime_dlls(nes_emulator)
+endif()
+
+if(NES_BUILD_WASM)
+    add_subdirectory(src/wasm)
 endif()
 
 enable_testing()
@@ -154,13 +206,7 @@ target_include_directories(nes_emulator_tests PRIVATE
 target_compile_definitions(nes_emulator_tests PRIVATE
         TEST_ROMS_DIR="${CMAKE_CURRENT_SOURCE_DIR}/tests/roms/")
 
-if(WIN32)
-    add_custom_command(TARGET nes_emulator_tests POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "$<TARGET_RUNTIME_DLLS:nes_emulator_tests>"
-            "$<TARGET_FILE_DIR:nes_emulator_tests>"
-            COMMAND_EXPAND_LISTS)
-endif()
+nes_copy_win32_runtime_dlls(nes_emulator_tests)
 
 add_test(NAME nes_emulator_tests COMMAND nes_emulator_tests)
 
@@ -178,6 +224,9 @@ find_program(CLANG_TIDY_EXE
 
 if(CLANG_TIDY_EXE)
     set(NES_TIDY_SOURCES ${NES_CORE_SOURCES})
+    if(NES_BUILD_DESKTOP)
+        list(APPEND NES_TIDY_SOURCES ${NES_PLATFORM_SDL_SOURCES})
+    endif()
     list(FILTER NES_TIDY_SOURCES INCLUDE REGEX "\\.cpp$")
 
     set(NES_TIDY_EXTRA_ARGS "")

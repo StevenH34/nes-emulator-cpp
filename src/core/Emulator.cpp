@@ -21,6 +21,12 @@ Emulator::Emulator(std::string path)
   cpu_.Reset();
 }
 
+Emulator::Emulator(const std::span<const uint8_t> rom_bytes)
+    : cartridge_(rom_bytes), ppu_(cartridge_), bus_(cartridge_, ppu_, apu_), cpu_(bus_) {
+  ppu_.SetNmiCallback([this] { cpu_.Nmi(); });
+  cpu_.Reset();
+}
+
 int Emulator::Step() {
   // Ticks the CPU forward
   const int cycles = cpu_.Step();
