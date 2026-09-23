@@ -125,12 +125,13 @@ uint32_t Cartridge::ComputeRomChecksum(const std::span<const uint8_t> prg_rom, c
   // UBSan's Clang-only integer-overflow check not to flag it. The attribute
   // must go on the lambda itself, not the enclosing function, since a lambda
   // compiles to its own call operator that attributes don't propagate into.
-  const auto fold = [&hash](const std::span<const uint8_t> data) __attribute__((no_sanitize("unsigned-integer-overflow"))) {
-    for (const uint8_t byte : data) {
-      hash ^= byte;
-      hash *= FNV_PRIME;
-    }
-  };
+  const auto fold = [&hash](const std::span<const uint8_t> data)
+                        __attribute__((no_sanitize("unsigned-integer-overflow"))) {
+                          for (const uint8_t byte : data) {
+                            hash ^= byte;
+                            hash *= FNV_PRIME;
+                          }
+                        };
   fold(prg_rom);
   fold(chr_rom);
   return hash;
