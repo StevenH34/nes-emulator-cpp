@@ -4,6 +4,7 @@
 #include "apu/Apu.h"
 #include "cpu/Cpu.h"
 
+#include <span>
 #include <vector>
 
 namespace nes {
@@ -14,6 +15,7 @@ class StateWriter;
 class Emulator {
 public:
   explicit Emulator(std::string path);
+  explicit Emulator(std::span<const uint8_t> rom_bytes);
   ~Emulator() = default;
   // Disable copy and move operations
   Emulator(const Emulator&) = delete;
