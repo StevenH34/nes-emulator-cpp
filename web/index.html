@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NES Emulator</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      box-sizing: border-box;
+      background: #1e1e1e;
+      color: #ddd;
+      font-family: system-ui, sans-serif;
+    }
+    #canvas {
+      background: #000;
+      max-width: 100%;
+      height: auto;
+      image-rendering: pixelated;
+    }
+    #status.error {
+      color: #f66;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="canvas" width="768" height="720" oncontextmenu="event.preventDefault()"></canvas>
+  <label>
+    Load ROM: <input type="file" id="rom-input" accept=".nes" disabled>
+  </label>
+  <div id="status">Loading emulator…</div>
+
+  <script src="nes_emulator_wasm.js"></script>
+  <script type="module" src="main.js"></script>
+</body>
+</html>

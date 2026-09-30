@@ -3,6 +3,7 @@
 #include <filesystem>
 #include <format>
 #include <fstream>
+#include <limits>
 #include <sstream>
 #include <stdexcept>
 
@@ -22,12 +23,18 @@ std::vector<uint8_t> Cartridge::ReadFileBytes(const std::string& path) {
     throw std::runtime_error(std::format("Could not stat file '{}': {}", path, ec.message()));
   }
 
+  // file_size is 64-bit, but size_t and streamsize are 32-bit on wasm32.
+  // streamsize is the smaller of the two on every platform, so one check covers both casts below.
+  if (size > static_cast<std::uintmax_t>(std::numeric_limits<std::streamsize>::max())) {
+    throw std::runtime_error(std::format("File too large: {} ({} bytes)", path, size));
+  }
+
   std::ifstream file(path, std::ios::binary);
   if (!file) {
     throw std::runtime_error(std::format("Could not open file: {}", path));
   }
 
-  std::vector<uint8_t> data(size);
+  std::vector<uint8_t> data(static_cast<std::size_t>(size));
   if (!file.read(reinterpret_cast<char*>(data.data()), static_cast<std::streamsize>(size))) {
     throw std::runtime_error(std::format("Failed to read file: {}", path));
   }
@@ -102,11 +109,13 @@ void Cartridge::Parse(std::span<const uint8_t> data) {
   }
 
   // Extract PRG-ROM and CHR-ROM data
-  prg_rom_.assign(data.begin() + prg_rom_start, data.begin() + prg_rom_start + prg_rom_size);
+  const auto prg_rom = data.subspan(prg_rom_start, prg_rom_size);
+  prg_rom_.assign(prg_rom.begin(), prg_rom.end());
   // If CHR-ROM is size 0, the cartridge has no CHR-ROM and uses CHR-RAM instead
   // We create 8KB of zeros (empty RAM). The PPU will write graphics at runtime
   if (chr_rom_size > 0) {
-    chr_rom_.assign(data.begin() + chr_rom_start, data.begin() + chr_rom_start + chr_rom_size);
+    const auto chr_rom = data.subspan(chr_rom_start, chr_rom_size);
+    chr_rom_.assign(chr_rom.begin(), chr_rom.end());
   } else {
     chr_rom_.assign(CHR_BLOCK_SIZE, 0u);
   }

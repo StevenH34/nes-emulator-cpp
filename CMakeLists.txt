@@ -122,6 +122,11 @@ target_include_directories(nes_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/core)
 target_link_libraries(nes_core PUBLIC nes_sanitizers)
 target_link_libraries(nes_core PRIVATE nes_warnings)
 
+if(EMSCRIPTEN)
+    target_compile_options(nes_core PUBLIC -fwasm-exceptions)
+    target_link_options(nes_core PUBLIC -fwasm-exceptions)
+endif()
+
 if(NES_BUILD_DESKTOP)
     find_package(SDL3 CONFIG REQUIRED)
 
