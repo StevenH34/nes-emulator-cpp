@@ -32,7 +32,7 @@ BraceWrapping:
 BreakBeforeBraces: Attach
 BreakConstructorInitializers: BeforeColon
 ColumnLimit: 120
-ContinuationIndentWidth: 2
+ContinuationIndentWidth: 4
 PackConstructorInitializers: BinPack
 IncludeCategories: 
   - Regex: '^<.*'
