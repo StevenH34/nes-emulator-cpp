@@ -179,7 +179,7 @@ TEST_CASE("Php pushes the status register with the Break and Unused flags "
   CHECK(cpu.Step() == 3);
 
   const uint8_t expected =
-      status_before | static_cast<uint8_t>(nes::Cpu::StatusFlag::B) | static_cast<uint8_t>(nes::Cpu::StatusFlag::U);
+    status_before | static_cast<uint8_t>(nes::Cpu::StatusFlag::B) | static_cast<uint8_t>(nes::Cpu::StatusFlag::U);
   CHECK(bus.ReadCpu(0x01FD) == expected);
   CHECK(cpu.GetStatusRegister() == status_before); // Php does not modify the live status register
 

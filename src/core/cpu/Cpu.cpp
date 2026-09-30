@@ -94,8 +94,8 @@ uint16_t Cpu::AddressIndirect() {
 
   // Emulate the 6502-page-boundary bug
   const uint16_t high_byte_address = (pointer_address & 0xFF) == 0xFF
-                                         ? pointer_address & 0xFF00 // Wrap around to the start of the page $xx00
-                                         : pointer_address + 1; // Normal case
+                                       ? pointer_address & 0xFF00 // Wrap around to the start of the page $xx00
+                                       : pointer_address + 1; // Normal case
 
   const uint8_t high_byte = ReadByte(high_byte_address);
   return static_cast<uint16_t>(high_byte << 8) | static_cast<uint16_t>(low_byte);
