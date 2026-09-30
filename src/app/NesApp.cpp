@@ -124,15 +124,15 @@ void NesApp::LoadState() {
 
 const std::unordered_map<SDL_Scancode, uint8_t>& NesApp::KeyMap() {
   static const std::unordered_map<SDL_Scancode, uint8_t> key_map = {{
-      {SDL_SCANCODE_Z, nes::Controller::BUTTON_A},
-      {SDL_SCANCODE_X, nes::Controller::BUTTON_B},
-      {SDL_SCANCODE_LSHIFT, nes::Controller::BUTTON_SELECT},
-      {SDL_SCANCODE_RSHIFT, nes::Controller::BUTTON_SELECT},
-      {SDL_SCANCODE_RETURN, nes::Controller::BUTTON_START},
-      {SDL_SCANCODE_UP, nes::Controller::BUTTON_UP},
-      {SDL_SCANCODE_DOWN, nes::Controller::BUTTON_DOWN},
-      {SDL_SCANCODE_LEFT, nes::Controller::BUTTON_LEFT},
-      {SDL_SCANCODE_RIGHT, nes::Controller::BUTTON_RIGHT},
+    {SDL_SCANCODE_Z, nes::Controller::BUTTON_A},
+    {SDL_SCANCODE_X, nes::Controller::BUTTON_B},
+    {SDL_SCANCODE_LSHIFT, nes::Controller::BUTTON_SELECT},
+    {SDL_SCANCODE_RSHIFT, nes::Controller::BUTTON_SELECT},
+    {SDL_SCANCODE_RETURN, nes::Controller::BUTTON_START},
+    {SDL_SCANCODE_UP, nes::Controller::BUTTON_UP},
+    {SDL_SCANCODE_DOWN, nes::Controller::BUTTON_DOWN},
+    {SDL_SCANCODE_LEFT, nes::Controller::BUTTON_LEFT},
+    {SDL_SCANCODE_RIGHT, nes::Controller::BUTTON_RIGHT},
   }};
   return key_map;
 }

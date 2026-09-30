@@ -533,7 +533,7 @@ Ppu::Pixel Ppu::ExtractBackgroundPixel(const BackgroundTile& tile, const int pix
 
 int32_t Ppu::SpriteTilePixel(const uint8_t tile_index, const int32_t tile_row, const int32_t pixel_in_tile) const {
   const auto bitplane_address =
-      static_cast<int32_t>(SpritePatternTable()) + static_cast<int32_t>(tile_index) * BYTES_PER_TILE + tile_row;
+    static_cast<int32_t>(SpritePatternTable()) + static_cast<int32_t>(tile_index) * BYTES_PER_TILE + tile_row;
   const auto low_bitplane = ReadVram(static_cast<uint16_t>(bitplane_address));
   const auto high_bitplane = ReadVram(static_cast<uint16_t>(bitplane_address + BITPLANE_OFFSET));
 
@@ -590,7 +590,7 @@ int32_t Ppu::TilePalette(const int32_t nametable_address, const int32_t tile_col
   const int attribute_column = tile_column / 4;
   const int attribute_row = tile_row / 4;
   const int attribute_address =
-      nametable_address + ATTRIBUTE_TABLE_OFFSET + attribute_row * (TILES_PER_ROW / 4) + attribute_column;
+    nametable_address + ATTRIBUTE_TABLE_OFFSET + attribute_row * (TILES_PER_ROW / 4) + attribute_column;
   const uint8_t attribute_byte = ReadVram(static_cast<uint16_t>(attribute_address));
 
   const int right = (tile_column / 2) & 1;
@@ -615,8 +615,8 @@ uint8_t Ppu::ResolvePaletteColor(const int32_t palette_group_offset, const int32
   if (color == 0) {
     return ReadVram(PpuAddresses::PALETTE_START);
   }
-  return ReadVram(static_cast<uint16_t>(PpuAddresses::PALETTE_START +
-                                        (palette_group_offset + palette) * COLORS_PER_PALETTE + color));
+  return ReadVram(
+    static_cast<uint16_t>(PpuAddresses::PALETTE_START + (palette_group_offset + palette) * COLORS_PER_PALETTE + color));
 }
 
 // Set pixel to the frame buffer.

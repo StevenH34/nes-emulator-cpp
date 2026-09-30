@@ -250,11 +250,11 @@ TEST_CASE("StateWriter mixed-type writes produce the exact concatenated wire for
   writer.WriteU32(0x0A0B0C0D);
 
   const std::vector<uint8_t> expected{
-      0x7F, // WriteU8
-      0x01, // WriteBool(true)
-      0x02, 0x01, // WriteU16, little-endian
-      0x00, // WriteBool(false)
-      0x0D, 0x0C, 0x0B, 0x0A, // WriteU32, little-endian
+    0x7F, // WriteU8
+    0x01, // WriteBool(true)
+    0x02, 0x01, // WriteU16, little-endian
+    0x00, // WriteBool(false)
+    0x0D, 0x0C, 0x0B, 0x0A, // WriteU32, little-endian
   };
   CHECK(buffer == expected);
 }
@@ -359,10 +359,10 @@ TEST_CASE("StateReader ReadBool throws std::out_of_range when no bytes remain") 
 TEST_CASE("StateReader ReadFloat reads back the original IEEE-754 bit pattern") {
   const auto bits = std::bit_cast<uint32_t>(1.5f);
   const std::vector<uint8_t> data{
-      static_cast<uint8_t>(bits & 0xFF),
-      static_cast<uint8_t>((bits >> 8) & 0xFF),
-      static_cast<uint8_t>((bits >> 16) & 0xFF),
-      static_cast<uint8_t>((bits >> 24) & 0xFF),
+    static_cast<uint8_t>(bits & 0xFF),
+    static_cast<uint8_t>((bits >> 8) & 0xFF),
+    static_cast<uint8_t>((bits >> 16) & 0xFF),
+    static_cast<uint8_t>((bits >> 24) & 0xFF),
   };
   nes::StateReader reader(data);
 
@@ -373,10 +373,10 @@ TEST_CASE("StateReader ReadFloat reads back the original IEEE-754 bit pattern") 
 TEST_CASE("StateReader ReadFloat handles negative values") {
   const auto bits = std::bit_cast<uint32_t>(-735.0f);
   const std::vector<uint8_t> data{
-      static_cast<uint8_t>(bits & 0xFF),
-      static_cast<uint8_t>((bits >> 8) & 0xFF),
-      static_cast<uint8_t>((bits >> 16) & 0xFF),
-      static_cast<uint8_t>((bits >> 24) & 0xFF),
+    static_cast<uint8_t>(bits & 0xFF),
+    static_cast<uint8_t>((bits >> 8) & 0xFF),
+    static_cast<uint8_t>((bits >> 16) & 0xFF),
+    static_cast<uint8_t>((bits >> 24) & 0xFF),
   };
   nes::StateReader reader(data);
 
@@ -453,11 +453,11 @@ TEST_CASE("StateReader a failed read does not advance the cursor") {
 TEST_CASE("StateReader mixed-type reads consume a hand-built buffer in the exact order "
           "it was written") {
   const std::vector<uint8_t> data{
-      0x7F, // ReadU8
-      0x01, // ReadBool -> true
-      0x02, 0x01, // ReadU16, little-endian -> 0x0102
-      0x00, // ReadBool -> false
-      0x0D, 0x0C, 0x0B, 0x0A, // ReadU32, little-endian -> 0x0A0B0C0D
+    0x7F, // ReadU8
+    0x01, // ReadBool -> true
+    0x02, 0x01, // ReadU16, little-endian -> 0x0102
+    0x00, // ReadBool -> false
+    0x0D, 0x0C, 0x0B, 0x0A, // ReadU32, little-endian -> 0x0A0B0C0D
   };
   nes::StateReader reader(data);
 
