@@ -3,6 +3,7 @@
 #include <filesystem>
 #include <format>
 #include <fstream>
+#include <limits>
 #include <sstream>
 #include <stdexcept>
 
@@ -22,12 +23,18 @@ std::vector<uint8_t> Cartridge::ReadFileBytes(const std::string& path) {
     throw std::runtime_error(std::format("Could not stat file '{}': {}", path, ec.message()));
   }
 
+  // file_size is 64-bit, but size_t and streamsize are 32-bit on wasm32.
+  // streamsize is the smaller of the two on every platform, so one check covers both casts below.
+  if (size > static_cast<std::uintmax_t>(std::numeric_limits<std::streamsize>::max())) {
+    throw std::runtime_error(std::format("File too large: {} ({} bytes)", path, size));
+  }
+
   std::ifstream file(path, std::ios::binary);
   if (!file) {
     throw std::runtime_error(std::format("Could not open file: {}", path));
   }
 
-  std::vector<uint8_t> data(size);
+  std::vector<uint8_t> data(static_cast<std::size_t>(size));
   if (!file.read(reinterpret_cast<char*>(data.data()), static_cast<std::streamsize>(size))) {
     throw std::runtime_error(std::format("Failed to read file: {}", path));
   }
