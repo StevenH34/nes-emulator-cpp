@@ -109,11 +109,13 @@ void Cartridge::Parse(std::span<const uint8_t> data) {
   }
 
   // Extract PRG-ROM and CHR-ROM data
-  prg_rom_.assign(data.begin() + prg_rom_start, data.begin() + prg_rom_start + prg_rom_size);
+  const auto prg_rom = data.subspan(prg_rom_start, prg_rom_size);
+  prg_rom_.assign(prg_rom.begin(), prg_rom.end());
   // If CHR-ROM is size 0, the cartridge has no CHR-ROM and uses CHR-RAM instead
   // We create 8KB of zeros (empty RAM). The PPU will write graphics at runtime
   if (chr_rom_size > 0) {
-    chr_rom_.assign(data.begin() + chr_rom_start, data.begin() + chr_rom_start + chr_rom_size);
+    const auto chr_rom = data.subspan(chr_rom_start, chr_rom_size);
+    chr_rom_.assign(chr_rom.begin(), chr_rom.end());
   } else {
     chr_rom_.assign(CHR_BLOCK_SIZE, 0u);
   }
