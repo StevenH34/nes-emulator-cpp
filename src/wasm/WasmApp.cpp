@@ -42,6 +42,13 @@ WasmApp::WasmApp() {
     }
 
     SDL_SetTextureScaleMode(texture_, SDL_SCALEMODE_NEAREST);
+
+    const SDL_AudioSpec audio_spec{SDL_AUDIO_F32, 1, 44100}; // mono float32 @ 44.1kHz, matching Apu's SAMPLE_RATE
+    audio_stream_ = SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &audio_spec, nullptr, nullptr);
+    if (audio_stream_ == nullptr) {
+      throw std::runtime_error("SDL_OpenAudioDeviceStream failed: " + std::string(SDL_GetError()));
+    }
+    SDL_ResumeAudioStreamDevice(audio_stream_);
   } catch (...) {
     Cleanup();
     throw;
@@ -52,6 +59,10 @@ WasmApp::WasmApp() {
 WasmApp::~WasmApp() { Cleanup(); }
 
 void WasmApp::Cleanup() {
+  if (audio_stream_ != nullptr) {
+    SDL_DestroyAudioStream(audio_stream_); // also closes the device it's bound to
+    audio_stream_ = nullptr;
+  }
   if (texture_ != nullptr) {
     SDL_DestroyTexture(texture_);
     texture_ = nullptr;
