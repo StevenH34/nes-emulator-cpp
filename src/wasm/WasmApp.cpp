@@ -4,6 +4,8 @@
 #include <stdexcept>
 #include <string>
 
+#include "AudioPacing.h"
+
 namespace nes_wasm {
 
 namespace {
@@ -20,15 +22,11 @@ constexpr double kMaxAccumulatedMs = 3 * kFrameTimeMs;
 
 constexpr double kNsPerMs = 1'000'000.0;
 
-// Audio buffer pacing: keep roughly 2 frames of audio queued in the SDL
-// audio stream, nudging playback speed up/down to correct drift.
-constexpr int kBytesPerSample = sizeof(float);
-constexpr int kSamplesPerFrameEstimate = 735; // ~44100 / 60
-constexpr int kTargetQueuedBytes = 2 * kSamplesPerFrameEstimate * kBytesPerSample;
-constexpr int kQueuedMarginBytes = kSamplesPerFrameEstimate * kBytesPerSample;
-constexpr float kFastPlaybackRatio = 1.005f;
-constexpr float kSlowPlaybackRatio = 0.995f;
-constexpr float kNormalPlaybackRatio = 1.0f;
+using nes_frontend::kFastPlaybackRatio;
+using nes_frontend::kNormalPlaybackRatio;
+using nes_frontend::kQueuedMarginBytes;
+using nes_frontend::kSlowPlaybackRatio;
+using nes_frontend::kTargetQueuedBytes;
 } // namespace
 
 WasmApp::SdlLifetime::SdlLifetime() {
