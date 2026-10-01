@@ -44,6 +44,7 @@ private:
   SDL_Window* window_{nullptr};
   SDL_Renderer* renderer_{nullptr};
   SDL_Texture* texture_{nullptr};
+  SDL_AudioStream* audio_stream_{nullptr};
   uint64_t last_tick_ns_{0};
   double accumulated_ms_{0.0};
 };

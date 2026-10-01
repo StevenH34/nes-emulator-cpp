@@ -4,6 +4,8 @@
 #include <stdexcept>
 #include <string>
 
+#include "AudioPacing.h"
+
 namespace nes_wasm {
 
 namespace {
@@ -19,10 +21,16 @@ constexpr double kFrameSlackMs = 2.0;
 constexpr double kMaxAccumulatedMs = 3 * kFrameTimeMs;
 
 constexpr double kNsPerMs = 1'000'000.0;
+
+using nes_frontend::kFastPlaybackRatio;
+using nes_frontend::kNormalPlaybackRatio;
+using nes_frontend::kQueuedMarginBytes;
+using nes_frontend::kSlowPlaybackRatio;
+using nes_frontend::kTargetQueuedBytes;
 } // namespace
 
 WasmApp::SdlLifetime::SdlLifetime() {
-  if (!SDL_Init(SDL_INIT_VIDEO)) {
+  if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
     throw std::runtime_error("SDL_Init failed: " + std::string(SDL_GetError()));
   }
 }
@@ -42,6 +50,13 @@ WasmApp::WasmApp() {
     }
 
     SDL_SetTextureScaleMode(texture_, SDL_SCALEMODE_NEAREST);
+
+    const SDL_AudioSpec audio_spec{SDL_AUDIO_F32, 1, 44100}; // mono float32 @ 44.1kHz, matching Apu's SAMPLE_RATE
+    audio_stream_ = SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &audio_spec, nullptr, nullptr);
+    if (audio_stream_ == nullptr) {
+      throw std::runtime_error("SDL_OpenAudioDeviceStream failed: " + std::string(SDL_GetError()));
+    }
+    SDL_ResumeAudioStreamDevice(audio_stream_);
   } catch (...) {
     Cleanup();
     throw;
@@ -52,6 +67,10 @@ WasmApp::WasmApp() {
 WasmApp::~WasmApp() { Cleanup(); }
 
 void WasmApp::Cleanup() {
+  if (audio_stream_ != nullptr) {
+    SDL_DestroyAudioStream(audio_stream_); // also closes the device it's bound to
+    audio_stream_ = nullptr;
+  }
   if (texture_ != nullptr) {
     SDL_DestroyTexture(texture_);
     texture_ = nullptr;
@@ -70,6 +89,7 @@ void WasmApp::LoadRom(const std::span<const uint8_t> rom_bytes) {
   auto emulator = std::make_unique<nes::Emulator>(rom_bytes);
   emulator_ = std::move(emulator);
   accumulated_ms_ = 0.0;
+  SDL_ClearAudioStream(audio_stream_); // drop the previous game's queued audio
 }
 
 void WasmApp::Tick() {
@@ -84,6 +104,17 @@ void WasmApp::Tick() {
     while (accumulated_ms_ >= kFrameTimeMs - kFrameSlackMs) {
       emulator_->RunFrame();
       accumulated_ms_ -= kFrameTimeMs;
+    }
+
+    const auto samples = emulator_->GetApu().DrainSamples();
+    SDL_PutAudioStreamData(audio_stream_, samples.data(), static_cast<int>(samples.size() * sizeof(float)));
+
+    if (const int queued = SDL_GetAudioStreamQueued(audio_stream_); queued > kTargetQueuedBytes + kQueuedMarginBytes) {
+      SDL_SetAudioStreamFrequencyRatio(audio_stream_, kFastPlaybackRatio);
+    } else if (queued < kTargetQueuedBytes - kQueuedMarginBytes) {
+      SDL_SetAudioStreamFrequencyRatio(audio_stream_, kSlowPlaybackRatio);
+    } else {
+      SDL_SetAudioStreamFrequencyRatio(audio_stream_, kNormalPlaybackRatio);
     }
   } else {
     accumulated_ms_ = 0.0;
