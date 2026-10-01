@@ -19,6 +19,16 @@ constexpr double kFrameSlackMs = 2.0;
 constexpr double kMaxAccumulatedMs = 3 * kFrameTimeMs;
 
 constexpr double kNsPerMs = 1'000'000.0;
+
+// Audio buffer pacing: keep roughly 2 frames of audio queued in the SDL
+// audio stream, nudging playback speed up/down to correct drift.
+constexpr int kBytesPerSample = sizeof(float);
+constexpr int kSamplesPerFrameEstimate = 735; // ~44100 / 60
+constexpr int kTargetQueuedBytes = 2 * kSamplesPerFrameEstimate * kBytesPerSample;
+constexpr int kQueuedMarginBytes = kSamplesPerFrameEstimate * kBytesPerSample;
+constexpr float kFastPlaybackRatio = 1.005f;
+constexpr float kSlowPlaybackRatio = 0.995f;
+constexpr float kNormalPlaybackRatio = 1.0f;
 } // namespace
 
 WasmApp::SdlLifetime::SdlLifetime() {
@@ -95,6 +105,17 @@ void WasmApp::Tick() {
     while (accumulated_ms_ >= kFrameTimeMs - kFrameSlackMs) {
       emulator_->RunFrame();
       accumulated_ms_ -= kFrameTimeMs;
+    }
+
+    const auto samples = emulator_->GetApu().DrainSamples();
+    SDL_PutAudioStreamData(audio_stream_, samples.data(), static_cast<int>(samples.size() * sizeof(float)));
+
+    if (const int queued = SDL_GetAudioStreamQueued(audio_stream_); queued > kTargetQueuedBytes + kQueuedMarginBytes) {
+      SDL_SetAudioStreamFrequencyRatio(audio_stream_, kFastPlaybackRatio);
+    } else if (queued < kTargetQueuedBytes - kQueuedMarginBytes) {
+      SDL_SetAudioStreamFrequencyRatio(audio_stream_, kSlowPlaybackRatio);
+    } else {
+      SDL_SetAudioStreamFrequencyRatio(audio_stream_, kNormalPlaybackRatio);
     }
   } else {
     accumulated_ms_ = 0.0;
