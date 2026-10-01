@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [master]
+    branches: [ master ]
   pull_request:
 
 env:
@@ -27,6 +27,38 @@ jobs:
         run: |
           find src tests \( -name '*.cpp' -o -name '*.h' -o -name '*.hpp' \) \
             | xargs clang-format-19 --dry-run --Werror
+
+  wasm:
+    name: WebAssembly build and tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Keep in sync with the emsdk version used locally.
+      # Exports EMSDK, which the wasm preset's toolchain path depends on.
+      - name: Setup Emscripten
+        uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: 6.0.5
+          actions-cache-folder: emsdk-cache
+
+      - name: Install Ninja
+        run: sudo apt-get update && sudo apt-get install -y ninja-build
+
+      - name: Configure and build (wasm preset)
+        run: cmake --workflow --preset wasm
+
+      - name: Build tests
+        run: cmake --build build-wasm --target nes_emulator_tests
+
+      - name: Run tests under Node
+        run: node build-wasm/nes_emulator_tests.js
+
+      # Servable site (index.html, main.js, nes_emulator_wasm.js/.wasm) for the Pages deploy.
+      - name: Upload web build
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build-wasm/web
 
   sanitizers:
     name: ASan/UBSan tests
