@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <memory>
 #include <span>
+#include <unordered_map>
 
 #include "Emulator.h"
 
@@ -26,6 +27,8 @@ public:
 
   // Called once per browser animation frame.
   void Tick();
+
+  static const std::unordered_map<SDL_Scancode, uint8_t>& KeyMap();
 
 private:
   // Owns the SDL library lifetime. Must be constructed before any SDL objects.

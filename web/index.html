@@ -27,6 +27,27 @@
     #status.error {
       color: #f66;
     }
+    #controls {
+      display: grid;
+      grid-template-columns: auto auto;
+      gap: 4px 16px;
+      margin: 0;
+      font-size: 14px;
+    }
+    #controls dt {
+      text-align: right;
+    }
+    #controls dd {
+      margin: 0;
+      color: #999;
+    }
+    kbd {
+      padding: 1px 6px;
+      border: 1px solid #555;
+      border-radius: 4px;
+      background: #2a2a2a;
+      font-family: inherit;
+    }
   </style>
 </head>
 <body>
@@ -35,6 +56,14 @@
     Load ROM: <input type="file" id="rom-input" accept=".nes" disabled>
   </label>
   <div id="status">Loading emulator…</div>
+  <!-- Mirrors WasmApp::KeyMap(). -->
+  <dl id="controls">
+    <dt><kbd>↑</kbd> <kbd>↓</kbd> <kbd>←</kbd> <kbd>→</kbd></dt><dd>D-pad</dd>
+    <dt><kbd>Z</kbd></dt><dd>A</dd>
+    <dt><kbd>X</kbd></dt><dd>B</dd>
+    <dt><kbd>Enter</kbd></dt><dd>Start</dd>
+    <dt><kbd>Shift</kbd></dt><dd>Select</dd>
+  </dl>
 
   <script src="nes_emulator_wasm.js"></script>
   <script type="module" src="main.js"></script>
