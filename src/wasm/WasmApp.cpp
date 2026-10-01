@@ -22,7 +22,7 @@ constexpr double kNsPerMs = 1'000'000.0;
 } // namespace
 
 WasmApp::SdlLifetime::SdlLifetime() {
-  if (!SDL_Init(SDL_INIT_VIDEO)) {
+  if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
     throw std::runtime_error("SDL_Init failed: " + std::string(SDL_GetError()));
   }
 }
