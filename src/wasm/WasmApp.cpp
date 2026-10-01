@@ -89,6 +89,7 @@ void WasmApp::LoadRom(const std::span<const uint8_t> rom_bytes) {
   auto emulator = std::make_unique<nes::Emulator>(rom_bytes);
   emulator_ = std::move(emulator);
   accumulated_ms_ = 0.0;
+  SDL_ClearAudioStream(audio_stream_); // drop the previous game's queued audio
 }
 
 void WasmApp::Tick() {
