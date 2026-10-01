@@ -6,7 +6,7 @@ add_executable(nes_emulator_wasm
 
 # Emscripten's own SDL3 port (vcpkg's SDL3::SDL3 has no Emscripten triplet).
 target_compile_options(nes_emulator_wasm PRIVATE -sUSE_SDL=3)
-target_link_libraries(nes_emulator_wasm PRIVATE nes_core nes_warnings)
+target_link_libraries(nes_emulator_wasm PRIVATE nes_core nes_frontend nes_warnings)
 target_link_options(nes_emulator_wasm PRIVATE
         -sUSE_SDL=3
         -sALLOW_MEMORY_GROWTH=1

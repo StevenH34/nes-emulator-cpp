@@ -127,6 +127,10 @@ if(EMSCRIPTEN)
     target_link_options(nes_core PUBLIC -fwasm-exceptions)
 endif()
 
+# Header-only code shared by the desktop and browser frontends.
+add_library(nes_frontend INTERFACE)
+target_include_directories(nes_frontend INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/src/frontend)
+
 if(NES_BUILD_DESKTOP)
     find_package(SDL3 CONFIG REQUIRED)
 
@@ -140,7 +144,7 @@ if(NES_BUILD_DESKTOP)
 
     target_include_directories(nes_platform_sdl PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/app)
     target_link_libraries(nes_platform_sdl PUBLIC nes_core SDL3::SDL3)
-    target_link_libraries(nes_platform_sdl PRIVATE nes_warnings)
+    target_link_libraries(nes_platform_sdl PRIVATE nes_frontend nes_warnings)
 
     add_executable(nes_emulator src/app/main.cpp)
 
