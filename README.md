@@ -1,9 +1,14 @@
 ### NES Emulator (in C++)
 
+[![CI](https://github.com/StevenH34/nes-emulator-cpp/actions/workflows/ci.yml/badge.svg)](https://github.com/StevenH34/nes-emulator-cpp/actions/workflows/ci.yml)
+
+▶️ **[Play in your browser](https://stevenh34.github.io/nes-emulator-cpp/)**. Load your own `.nes` ROM with the file
+picker or by dragging it onto the page.
+
 - ✅ Added All 151 official opcodes with instructions.
-  - TODO: add unofficial opcodes.
+    - TODO: add unofficial opcodes.
 - ✅ Added Cartridge and Mapper000 support.
-  - TODO: Add Mapper001 support.
+    - TODO: Add Mapper001 support.
 - ✅ Added nestest to verify all 151 opcodes are working correctly.
 - ✅ Added PPU registers.
 - ✅ Added an SDL3 window and app loop.
@@ -11,10 +16,11 @@
 - ✅ Added controls.
 - ✅ Added PPU sprite rendering.
 - 🚀 First playable build!
-  - Compatible with most [Mapper000](https://nesdir.github.io/mapper0.html) ROMs (including Super Mario Bros.).
+    - Compatible with most [Mapper000](https://nesdir.github.io/mapper0.html) ROMs (including Super Mario Bros.).
 - ✅ Add APU (Pulse, Triangle, and Noise channels).
-  - TODO: Add DMC channel.
+    - TODO: Add DMC channel.
 - ✅ Add save states.
+- ✅ Added a WebAssembly build, deployed to [GitHub Pages](https://stevenh34.github.io/nes-emulator-cpp/).
 
 <p style="text-align: center;">
   <img src="./images/img.png" alt="emulator picture" width="300" />
@@ -22,32 +28,35 @@
 
 ### Controls
 
-| NES Button | Keyboard          |
-|------------|-------------------|
-| A          | Z                 |
-| B          | X                 |
-| Select     | Left/Right Shift  |
-| Start      | Enter             |
-| Up         | Up Arrow          |
-| Down       | Down Arrow        |
-| Left       | Left Arrow        |
-| Right      | Right Arrow       |
-| Save State | F5                |
-| Load State | F9                |
+| NES Button | Keyboard         |
+|------------|------------------|
+| A          | Z                |
+| B          | X                |
+| Select     | Left/Right Shift |
+| Start      | Enter            |
+| Up         | Up Arrow         |
+| Down       | Down Arrow       |
+| Left       | Left Arrow       |
+| Right      | Right Arrow      |
+| Save State | F5               |
+| Load State | F9               |
 
 Press `ESC` to exit the emulator.
+
+The browser version uses the same controls, except save states (F5/F9) and `ESC` are desktop-only.
 
 ### Building and Running
 
 Rendering uses SDL3, installed via [vcpkg](https://github.com/microsoft/vcpkg).
 
 **Prerequisites**
+
 - A C++23 compiler:
-  - Windows: MSVC / Visual Studio Build Tools with the "Desktop development with C++" workload
-  - macOS: Xcode Command Line Tools (`xcode-select --install`), Xcode 16+ for full C++23 support
+    - Windows: MSVC / Visual Studio Build Tools with the "Desktop development with C++" workload
+    - macOS: Xcode Command Line Tools (`xcode-select --install`), Xcode 16+ for full C++23 support
 - CMake and Ninja
-  - macOS: `brew install cmake ninja`
-  - Windows PowerShell: `winget install -e --id Ninja-build.Ninja` and `winget install cmake`
+    - macOS: `brew install cmake ninja`
+    - Windows PowerShell: `winget install -e --id Ninja-build.Ninja` and `winget install cmake`
 - [vcpkg](https://github.com/microsoft/vcpkg), cloned and bootstrapped:
   ```
   git clone https://github.com/microsoft/vcpkg
@@ -55,7 +64,8 @@ Rendering uses SDL3, installed via [vcpkg](https://github.com/microsoft/vcpkg).
   ```
 - The `VCPKG_ROOT` environment variable set to that clone's path
 
-SDL3 itself does **not** need to be installed manually — it's declared in `vcpkg.json` and vcpkg installs it automatically on first configure.
+SDL3 itself does **not** need to be installed manually — it's declared in `vcpkg.json` and vcpkg installs it
+automatically on first configure.
 
 Configure and build in one step: `cmake --workflow --preset default` \
 Run Emulator: `./build-debug/nes_emulator <rom_path>`
@@ -65,12 +75,40 @@ For an optimized Release build, use the `release` preset instead:
 Configure and build in one step: `cmake --workflow --preset release` \
 Run Emulator: `./build-release/nes_emulator <rom_path>`
 
+### Building for WebAssembly
+
+The browser build uses [Emscripten](https://emscripten.org/) and its own SDL3 port, so vcpkg isn't needed.
+
+**Prerequisites**
+
+- CMake and Ninja
+- [emsdk](https://github.com/emscripten-core/emsdk), with Emscripten 6.0.5 (the version CI uses) installed and
+  activated:
+  ```
+  git clone https://github.com/emscripten-core/emsdk
+  cd emsdk
+  ./emsdk install 6.0.5
+  ./emsdk activate 6.0.5
+  ```
+- The `EMSDK` environment variable set to that clone's path (`emsdk_env.bat` / `source ./emsdk_env.sh` sets it for the
+  current shell)
+
+Configure and build in one step: `cmake --workflow --preset wasm` \
+Serve it: `python -m http.server -d build-wasm/web`, then open http://localhost:8000
+
+The page has to be served over HTTP; opening `index.html` directly from disk won't load the `.wasm`.
+
+Pushes to `master` that pass CI are deployed to GitHub Pages automatically.
+
 ### Testing
 
 Using `doctest.h`.
 
 Build tests only: `cmake --build build-debug --target nes_emulator_tests` \
 Build and run tests: `cmake --build build-debug --target run_tests`
+
+The tests also run as WebAssembly under Node (CI does this on every push): \
+`cmake --build build-wasm --target nes_emulator_tests` then `node build-wasm/nes_emulator_tests.js`
 
 ### Resources
 
