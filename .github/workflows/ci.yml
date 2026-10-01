@@ -14,7 +14,7 @@ jobs:
     name: clang-format
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # Pull from the official LLVM apt repo instead of the distro's.
       - name: Install clang-format
         run: |
@@ -32,12 +32,12 @@ jobs:
     name: WebAssembly build and tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # Keep in sync with the emsdk version used locally.
       # Exports EMSDK, which the wasm preset's toolchain path depends on.
       - name: Setup Emscripten
-        uses: mymindstorm/setup-emsdk@v14
+        uses: emscripten-core/setup-emsdk@v16
         with:
           version: 6.0.5
           actions-cache-folder: emsdk-cache
@@ -56,7 +56,7 @@ jobs:
 
       # Servable site (index.html, main.js, nes_emulator_wasm.js/.wasm) for the Pages deploy.
       - name: Upload web build
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: build-wasm/web
 
@@ -68,7 +68,7 @@ jobs:
       # Needed to push/pull vcpkg binary packages to/from this repo's GitHub Packages NuGet feed.
       packages: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # Package list below is SDL's own documented Linux build-dependency list (https://wiki.libsdl.org/SDL3/README-linux),
       # plus autotools for the vcpkg-built pieces, plus mono-complete to run nuget.exe for the
@@ -92,7 +92,7 @@ jobs:
       # Caches the vcpkg tool itself (its git clone + bootstrapped binary), separate from the
       # nuget binary cache above which handles the packages vcpkg builds.
       - name: Cache vcpkg tool
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             ${{ env.VCPKG_ROOT }}
@@ -156,4 +156,4 @@ jobs:
     steps:
       - name: Deploy
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
