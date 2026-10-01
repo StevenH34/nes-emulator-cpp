@@ -1,0 +1,4 @@
+# em++ hides its wasm32 target from compile_commands.json, so clangd assumes the host target and
+# rejects -fwasm-exceptions ("Invalid exception model 'wasm'"). The flag doesn't affect analysis.
+CompileFlags:
+  Remove: [-fwasm-exceptions]
