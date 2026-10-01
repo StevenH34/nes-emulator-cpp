@@ -3,8 +3,8 @@
 #include <SDL3/SDL.h>
 #include <cstdint>
 #include <memory>
-#include <unordered_map>
 #include <span>
+#include <unordered_map>
 
 #include "Emulator.h"
 
