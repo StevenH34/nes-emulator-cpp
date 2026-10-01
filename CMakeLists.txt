@@ -10,10 +10,10 @@ option(NES_BUILD_DESKTOP "Build the SDL3 desktop app (nes_emulator)" ON)
 option(NES_BUILD_WASM "Build the Emscripten browser app (nes_emulator_wasm)" OFF)
 
 add_library(nes_sanitizers INTERFACE)
-if(NES_ENABLE_SANITIZERS)
-    if(MSVC)
+if (NES_ENABLE_SANITIZERS)
+    if (MSVC)
         message(WARNING "NES_ENABLE_SANITIZERS is not supported with MSVC; ignoring")
-    else()
+    else ()
         target_compile_options(nes_sanitizers INTERFACE
                 -fsanitize=address,undefined
                 -fno-sanitize-recover=all
@@ -24,38 +24,38 @@ if(NES_ENABLE_SANITIZERS)
 
         # implicit-conversion/integer are Clang-specific sanitizer groups; GCC
         # (used by the CI asan preset) doesn't recognize them.
-        if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
             target_compile_options(nes_sanitizers INTERFACE -fsanitize=implicit-conversion,integer)
             target_link_options(nes_sanitizers INTERFACE -fsanitize=implicit-conversion,integer)
-        endif()
+        endif ()
 
-        if(WIN32)
+        if (WIN32)
             target_compile_definitions(nes_sanitizers INTERFACE _DISABLE_STL_ANNOTATION)
-        endif()
-    endif()
-endif()
+        endif ()
+    endif ()
+endif ()
 
 # On Windows, Clang links the ASan/UBSan runtime as a DLL that it never
 # registers as a CMake IMPORTED target.
 # Not needed on the CI asan preset, which builds with gcc/libasan on Linux.
 set(NES_ASAN_DYNAMIC_DLL "")
-if(WIN32 AND NES_ENABLE_SANITIZERS AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+if (WIN32 AND NES_ENABLE_SANITIZERS AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     execute_process(
             COMMAND ${CMAKE_CXX_COMPILER} -print-file-name=clang_rt.asan_dynamic-x86_64.dll
             OUTPUT_VARIABLE NES_ASAN_DYNAMIC_DLL
             OUTPUT_STRIP_TRAILING_WHITESPACE)
-    if(NOT EXISTS "${NES_ASAN_DYNAMIC_DLL}")
+    if (NOT EXISTS "${NES_ASAN_DYNAMIC_DLL}")
         message(WARNING "Could not locate clang_rt.asan_dynamic-x86_64.dll; ASan/UBSan executables may fail to run")
         set(NES_ASAN_DYNAMIC_DLL "")
-    endif()
-endif()
+    endif ()
+endif ()
 
 # Copies a target's imported runtime DLLs, plus the Clang ASan/UBSan
 # runtime DLL on Windows when sanitizers are enabled.
 function(nes_copy_win32_runtime_dlls target)
-    if(NOT WIN32)
+    if (NOT WIN32)
         return()
-    endif()
+    endif ()
 
     # TARGET_RUNTIME_DLLS expands to nothing when a target has no imported
     # runtime DLLs; fall back to a no-op ("true") in that case.
@@ -65,23 +65,23 @@ function(nes_copy_win32_runtime_dlls target)
             "$<TARGET_FILE_DIR:${target}>"
             COMMAND_EXPAND_LISTS)
 
-    if(NES_ASAN_DYNAMIC_DLL)
+    if (NES_ASAN_DYNAMIC_DLL)
         add_custom_command(TARGET ${target} POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E copy_if_different
                 "${NES_ASAN_DYNAMIC_DLL}"
                 "$<TARGET_FILE_DIR:${target}>")
-    endif()
+    endif ()
 endfunction()
 
 add_library(nes_warnings INTERFACE)
-if(MSVC)
+if (MSVC)
     target_compile_options(nes_warnings INTERFACE /W4)
-else()
+else ()
     target_compile_options(nes_warnings INTERFACE -Wall -Wextra -Wsign-compare -Wsign-conversion -Wconversion)
-    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         target_compile_options(nes_warnings INTERFACE -Wshorten-64-to-32)
-    endif()
-endif()
+    endif ()
+endif ()
 
 set(NES_CORE_SOURCES
         src/core/Emulator.cpp
@@ -122,16 +122,16 @@ target_include_directories(nes_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/core)
 target_link_libraries(nes_core PUBLIC nes_sanitizers)
 target_link_libraries(nes_core PRIVATE nes_warnings)
 
-if(EMSCRIPTEN)
+if (EMSCRIPTEN)
     target_compile_options(nes_core PUBLIC -fwasm-exceptions)
     target_link_options(nes_core PUBLIC -fwasm-exceptions)
-endif()
+endif ()
 
 # Header-only code shared by the desktop and browser frontends.
 add_library(nes_frontend INTERFACE)
 target_include_directories(nes_frontend INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/src/frontend)
 
-if(NES_BUILD_DESKTOP)
+if (NES_BUILD_DESKTOP)
     find_package(SDL3 CONFIG REQUIRED)
 
     set(NES_PLATFORM_SDL_SOURCES
@@ -151,11 +151,11 @@ if(NES_BUILD_DESKTOP)
     target_link_libraries(nes_emulator PRIVATE nes_platform_sdl)
 
     nes_copy_win32_runtime_dlls(nes_emulator)
-endif()
+endif ()
 
-if(NES_BUILD_WASM)
+if (NES_BUILD_WASM)
     add_subdirectory(src/wasm)
-endif()
+endif ()
 
 enable_testing()
 
@@ -208,6 +208,11 @@ add_executable(nes_emulator_tests
 
 target_link_libraries(nes_emulator_tests PRIVATE nes_core nes_warnings)
 
+# Under Node, give the tests direct access to the host filesystem so TEST_ROMS_DIR resolves
+if (EMSCRIPTEN)
+    target_link_options(nes_emulator_tests PRIVATE -sNODERAWFS=1)
+endif ()
+
 target_include_directories(nes_emulator_tests PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/external
         ${CMAKE_CURRENT_SOURCE_DIR}/tests)
@@ -231,26 +236,26 @@ find_program(CLANG_TIDY_EXE
         NAMES clang-tidy
         HINTS /opt/homebrew/opt/llvm/bin /usr/local/opt/llvm/bin)
 
-if(CLANG_TIDY_EXE)
+if (CLANG_TIDY_EXE)
     set(NES_TIDY_SOURCES ${NES_CORE_SOURCES})
-    if(NES_BUILD_DESKTOP)
+    if (NES_BUILD_DESKTOP)
         list(APPEND NES_TIDY_SOURCES ${NES_PLATFORM_SDL_SOURCES})
-    endif()
+    endif ()
     list(FILTER NES_TIDY_SOURCES INCLUDE REGEX "\\.cpp$")
 
     set(NES_TIDY_EXTRA_ARGS "")
-    if(APPLE)
+    if (APPLE)
         # Homebrew's clang-tidy doesn't discover the Xcode SDK on its own.
         execute_process(COMMAND xcrun --show-sdk-path
                 OUTPUT_VARIABLE NES_APPLE_SDK_PATH
                 OUTPUT_STRIP_TRAILING_WHITESPACE)
         list(APPEND NES_TIDY_EXTRA_ARGS "--extra-arg=-isysroot${NES_APPLE_SDK_PATH}")
-    endif()
+    endif ()
 
     add_custom_target(clang-tidy
             COMMAND ${CLANG_TIDY_EXE} -p ${CMAKE_BINARY_DIR} ${NES_TIDY_EXTRA_ARGS} ${NES_TIDY_SOURCES}
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
             COMMENT "Running clang-tidy over nes_core sources")
-else()
+else ()
     message(STATUS "clang-tidy not found; 'clang-tidy' target will be unavailable")
-endif()
+endif ()
