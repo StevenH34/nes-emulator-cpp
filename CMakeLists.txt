@@ -8,6 +8,13 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 option(NES_ENABLE_SANITIZERS "Build with AddressSanitizer + UndefinedBehaviorSanitizer instrumentation" OFF)
 option(NES_BUILD_DESKTOP "Build the SDL3 desktop app (nes_emulator)" ON)
 option(NES_BUILD_WASM "Build the Emscripten browser app (nes_emulator_wasm)" OFF)
+option(NES_BUILD_PYTHON "Build the nanobind Python module (nes_py)" OFF)
+
+# An ASan-instrumented extension module can't be imported into an
+# uninstrumented python executable.
+if (NES_BUILD_PYTHON AND NES_ENABLE_SANITIZERS)
+    message(FATAL_ERROR "NES_BUILD_PYTHON cannot be combined with NES_ENABLE_SANITIZERS")
+endif ()
 
 add_library(nes_sanitizers INTERFACE)
 if (NES_ENABLE_SANITIZERS)
@@ -113,9 +120,16 @@ set(NES_CORE_SOURCES
         src/core/apu/Noise.cpp
         src/core/apu/Noise.h
         src/core/save_state/StateWriter.h
-        src/core/save_state/StateReader.h)
+        src/core/save_state/StateReader.h
+        src/core/ai/Preprocess.cpp
+        src/core/ai/Preprocess.h)
 
 add_library(nes_core STATIC ${NES_CORE_SOURCES})
+
+# nes_core is linked into the nes_py shared library, which needs -fPIC on Linux/macOS
+if (NES_BUILD_PYTHON)
+    set_target_properties(nes_core PROPERTIES POSITION_INDEPENDENT_CODE ON)
+endif ()
 
 target_include_directories(nes_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/core)
 
@@ -155,6 +169,25 @@ endif ()
 
 if (NES_BUILD_WASM)
     add_subdirectory(src/wasm)
+endif ()
+
+if (NES_BUILD_PYTHON)
+    find_package(Python 3.10 COMPONENTS Interpreter Development.Module REQUIRED)
+
+    # Under pip/scikit-build-core nanobind is found automatically; for a plain
+    # CMake build, ask the Python we just found where nanobind is installed.
+    if (NOT nanobind_ROOT AND NOT SKBUILD)
+        execute_process(
+                COMMAND "${Python_EXECUTABLE}" -m nanobind --cmake_dir
+                OUTPUT_VARIABLE nanobind_ROOT
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
+    endif ()
+    find_package(nanobind CONFIG REQUIRED)
+
+    nanobind_add_module(nes_py src/python/Bindings.cpp)
+    target_link_libraries(nes_py PRIVATE nes_core nes_warnings)
+
+    install(TARGETS nes_py LIBRARY DESTINATION .)
 endif ()
 
 enable_testing()
@@ -204,6 +237,7 @@ add_executable(nes_emulator_tests
         tests/ppu/Ppu_tests.cpp
         tests/mappers/Mapper000_tests.cpp
         tests/SaveState_tests.cpp
+        tests/Preprocess_tests.cpp
 )
 
 target_link_libraries(nes_emulator_tests PRIVATE nes_core nes_warnings)

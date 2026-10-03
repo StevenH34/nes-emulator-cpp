@@ -161,7 +161,7 @@ void WasmApp::Render() {
   SDL_RenderClear(renderer_);
   if (emulator_ != nullptr) {
     const auto& frame_buffer = emulator_->GetPpu().GetFrameBuffer();
-    SDL_UpdateTexture(texture_, nullptr, frame_buffer.data(), nes::Ppu::WIDTH * 4);
+    SDL_UpdateTexture(texture_, nullptr, frame_buffer.data(), nes::Ppu::WIDTH * nes::Ppu::BYTES_PER_PIXEL);
     SDL_RenderTexture(renderer_, texture_, nullptr, nullptr);
   }
   SDL_RenderPresent(renderer_);

@@ -245,6 +245,108 @@ TEST_CASE("Controller save/load round-trip preserves the untouched default state
   }
 }
 
+TEST_CASE("Controller GetButtons returns 0 on a fresh controller") {
+  nes::Controller controller;
+
+  CHECK(controller.GetButtons() == 0);
+}
+
+TEST_CASE("Controller GetButtons reflects Press and Release") {
+  nes::Controller controller;
+  controller.Press(nes::Controller::BUTTON_A);
+  controller.Press(nes::Controller::BUTTON_START);
+
+  CHECK(controller.GetButtons() == (nes::Controller::BUTTON_A | nes::Controller::BUTTON_START));
+
+  controller.Release(nes::Controller::BUTTON_A);
+
+  CHECK(controller.GetButtons() == nes::Controller::BUTTON_START);
+}
+
+TEST_CASE("Controller SetButtons replaces the whole button state") {
+  nes::Controller controller;
+  controller.Press(nes::Controller::BUTTON_B);
+
+  // Unlike Press, SetButtons overwrites rather than ORs, so B must be cleared.
+  controller.SetButtons(nes::Controller::BUTTON_A | nes::Controller::BUTTON_RIGHT);
+
+  CHECK(controller.GetButtons() == (nes::Controller::BUTTON_A | nes::Controller::BUTTON_RIGHT));
+}
+
+TEST_CASE("Controller SetButtons with 0 clears every button") {
+  nes::Controller controller;
+  controller.SetButtons(0xFF);
+
+  controller.SetButtons(0);
+
+  CHECK(controller.GetButtons() == 0);
+}
+
+TEST_CASE("Controller SetButtons state is latched by the strobe") {
+  nes::Controller controller;
+  controller.SetButtons(nes::Controller::BUTTON_A | nes::Controller::BUTTON_START);
+
+  controller.Write(1);
+  controller.Write(0);
+
+  const uint8_t expected[8] = {1, 0, 0, 1, 0, 0, 0, 0};
+  for (const uint8_t bit : expected) {
+    CHECK(controller.Read() == bit);
+  }
+}
+
+TEST_CASE("Controller SetButtons after latching does not affect the current "
+          "read-out") {
+  nes::Controller controller;
+  controller.SetButtons(nes::Controller::BUTTON_A);
+
+  controller.Write(1);
+  controller.Write(0);
+
+  controller.SetButtons(nes::Controller::BUTTON_B);
+
+  CHECK(controller.Read() == 1); // A, latched before SetButtons changed state
+  CHECK(controller.Read() == 0); // B was not part of the latched snapshot
+}
+
+TEST_CASE("Controller SetButtons is read live while strobe stays high") {
+  nes::Controller controller;
+  controller.Write(1);
+
+  controller.SetButtons(nes::Controller::BUTTON_A);
+  CHECK(controller.Read() == 1);
+
+  controller.SetButtons(0);
+  CHECK(controller.Read() == 0);
+}
+
+TEST_CASE("Controller latches buttons on the strobe falling edge") {
+  nes::Controller controller;
+  controller.SetButtons(nes::Controller::BUTTON_B);
+  controller.Write(1);
+
+  controller.SetButtons(nes::Controller::BUTTON_A); // changes while strobe is high
+  controller.Write(0);
+
+  CHECK(controller.Read() == 1); // A, latched on the falling edge
+  CHECK(controller.Read() == 0); // B was not kept from the rising write
+}
+
+TEST_CASE("Controller GetButtons survives a save/load round-trip") {
+  nes::Controller controller;
+  controller.SetButtons(0x5A);
+
+  std::vector<uint8_t> buffer;
+  nes::StateWriter writer(buffer);
+  controller.Serialize(writer);
+
+  nes::Controller restored;
+  nes::StateReader reader(buffer);
+  restored.Deserialize(reader);
+
+  CHECK(restored.GetButtons() == 0x5A);
+}
+
 TEST_CASE("Bus strobes and reads controller 1 through $4016") {
   nes_test::TestBus bus;
   bus.GetController1().Press(nes::Controller::BUTTON_START);

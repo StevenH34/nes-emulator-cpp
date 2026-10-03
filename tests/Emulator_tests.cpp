@@ -267,3 +267,66 @@ TEST_CASE("LoadStateFromFile throws when the save state file does not exist") {
 
   CHECK_THROWS_AS(emulator.LoadStateFromFile("/no/such/file/definitely_missing.state"), std::runtime_error);
 }
+
+// --- SaveStateToBytes / LoadStateFromBytes ---
+
+TEST_CASE("SaveStateToBytes produces exactly the bytes SaveStateToFile writes") {
+  const nes_test::TempRomFile rom(nes_test::MakeMinimalRom());
+  nes::Emulator emulator(rom.path());
+  const nes_test::TempRomFile state_file(std::vector<uint8_t>{});
+
+  emulator.SaveStateToFile(state_file.path());
+
+  CHECK(emulator.SaveStateToBytes() == nes::Cartridge::ReadFileBytes(state_file.path()));
+}
+
+TEST_CASE("SaveStateToBytes then LoadStateFromBytes restores CPU state into a fresh Emulator for the same ROM") {
+  const auto rom_data = nes_test::MakeMinimalRom(0x0200);
+  const nes_test::TempRomFile rom_a(rom_data);
+  const nes_test::TempRomFile rom_b(rom_data); // byte-identical ROM, separate Cartridge instance
+
+  nes::Emulator source(rom_a.path());
+  source.LoadProgram({0xA9, 0x42, 0xE8, 0xE8}, 0x0200); // LDA #0x42, INX, INX
+  source.Step();
+  source.Step();
+  source.Step();
+  const auto state = source.SaveStateToBytes();
+
+  nes::Emulator target(rom_b.path());
+  target.LoadStateFromBytes(state);
+
+  CHECK(target.GetCpu().GetAccumulator() == source.GetCpu().GetAccumulator());
+  CHECK(target.GetCpu().GetXRegister() == source.GetCpu().GetXRegister());
+  CHECK(target.GetCpu().GetProgramCounter() == source.GetCpu().GetProgramCounter());
+}
+
+TEST_CASE("LoadStateFromBytes throws when the ROM checksum does not match the currently loaded cartridge") {
+  const nes_test::TempRomFile rom_a(nes_test::MakeMinimalRom(0x0200));
+  const nes_test::TempRomFile rom_b(nes_test::MakeMinimalRom(0x0300)); // different reset vector -> different checksum
+
+  nes::Emulator source(rom_a.path());
+  const auto state = source.SaveStateToBytes();
+
+  nes::Emulator target(rom_b.path());
+  CHECK_THROWS_AS(target.LoadStateFromBytes(state), std::runtime_error);
+}
+
+TEST_CASE("LoadStateFromBytes throws std::runtime_error when the bytes are truncated or empty") {
+  const nes_test::TempRomFile rom(nes_test::MakeMinimalRom());
+  nes::Emulator emulator(rom.path());
+
+  auto state = emulator.SaveStateToBytes();
+  state.resize(state.size() - 1); // header stays intact, but the payload is short by one byte
+  CHECK_THROWS_AS(emulator.LoadStateFromBytes(state), std::runtime_error);
+
+  CHECK_THROWS_AS(emulator.LoadStateFromBytes({}), std::runtime_error);
+}
+
+TEST_CASE("LoadStateFromBytes throws std::runtime_error when the payload has trailing bytes") {
+  const nes_test::TempRomFile rom(nes_test::MakeMinimalRom());
+  nes::Emulator emulator(rom.path());
+
+  auto state = emulator.SaveStateToBytes();
+  state.push_back(0x00);
+  CHECK_THROWS_AS(emulator.LoadStateFromBytes(state), std::runtime_error);
+}

@@ -22,13 +22,14 @@ uint8_t Controller::Read() {
  * Looks at bit 0 first.
  * If it's 1, the strobe is active and the current button state is captured
  * into the shift register. If 0, the strobe is deactivated and the state is
- * frozen.
+ * frozen. Real hardware reloads the register continuously while the strobe is
+ * high, so a 0 write that ends a high strobe also captures the current button
+ * state before freezing it.
  */
 void Controller::Write(const uint8_t value) {
-  strobe_ = (value & 1) != 0;
-  if (strobe_) {
+  if (strobe_ || (value & 1))
     shift_register_ = buttons_;
-  }
+  strobe_ = (value & 1) != 0;
 }
 
 // Save and load state
