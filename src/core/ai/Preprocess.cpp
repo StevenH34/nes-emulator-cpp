@@ -10,9 +10,9 @@ namespace nes::ai {
 namespace {
 
 // For the input frame taken from the PPU
-constexpr std::size_t SRC_WIDTH = Ppu::WIDTH; // 256
-constexpr std::size_t SRC_HEIGHT = Ppu::HEIGHT; // 240
-constexpr std::size_t BYTES_PER_PIXEL = Ppu::BYTES_PER_PIXEL; // 4 (RGBA)
+constexpr std::size_t SRC_WIDTH = static_cast<std::size_t>(Ppu::WIDTH); // 256
+constexpr std::size_t SRC_HEIGHT = static_cast<std::size_t>(Ppu::HEIGHT); // 240
+constexpr std::size_t BYTES_PER_PIXEL = static_cast<std::size_t>(Ppu::BYTES_PER_PIXEL); // 4 (RGBA)
 
 /*
  * Color to brightness conversion.

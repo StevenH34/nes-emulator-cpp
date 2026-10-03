@@ -10,9 +10,9 @@
 
 namespace {
 
-constexpr std::size_t FRAME_WIDTH = nes::Ppu::WIDTH;
-constexpr std::size_t FRAME_HEIGHT = nes::Ppu::HEIGHT;
-constexpr std::size_t FRAME_BYTES_PER_PIXEL = nes::Ppu::BYTES_PER_PIXEL;
+constexpr std::size_t FRAME_WIDTH = static_cast<std::size_t>(nes::Ppu::WIDTH);
+constexpr std::size_t FRAME_HEIGHT = static_cast<std::size_t>(nes::Ppu::HEIGHT);
+constexpr std::size_t FRAME_BYTES_PER_PIXEL = static_cast<std::size_t>(nes::Ppu::BYTES_PER_PIXEL);
 
 // Builds a 256x240 RGBA frame filled with a single opaque color.
 std::vector<uint8_t> MakeFrame(const uint8_t r, const uint8_t g, const uint8_t b) {
