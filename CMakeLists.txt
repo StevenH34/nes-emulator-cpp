@@ -113,7 +113,9 @@ set(NES_CORE_SOURCES
         src/core/apu/Noise.cpp
         src/core/apu/Noise.h
         src/core/save_state/StateWriter.h
-        src/core/save_state/StateReader.h)
+        src/core/save_state/StateReader.h
+        src/core/ai/Preprocess.cpp
+        src/core/ai/Preprocess.h)
 
 add_library(nes_core STATIC ${NES_CORE_SOURCES})
 
@@ -204,6 +206,7 @@ add_executable(nes_emulator_tests
         tests/ppu/Ppu_tests.cpp
         tests/mappers/Mapper000_tests.cpp
         tests/SaveState_tests.cpp
+        tests/Preprocess_tests.cpp
 )
 
 target_link_libraries(nes_emulator_tests PRIVATE nes_core nes_warnings)
