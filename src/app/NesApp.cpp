@@ -92,7 +92,7 @@ void NesApp::Run() {
       SDL_SetAudioStreamFrequencyRatio(audio_stream_, kNormalPlaybackRatio);
     }
 
-    SDL_UpdateTexture(texture_, nullptr, frame_buffer.data(), nes::Ppu::WIDTH * 4);
+    SDL_UpdateTexture(texture_, nullptr, frame_buffer.data(), nes::Ppu::WIDTH * nes::Ppu::BYTES_PER_PIXEL);
     SDL_RenderClear(renderer_);
     SDL_RenderTexture(renderer_, texture_, nullptr, nullptr);
     SDL_RenderPresent(renderer_);

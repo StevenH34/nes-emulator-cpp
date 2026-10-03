@@ -12,11 +12,12 @@ namespace {
 
 constexpr std::size_t FRAME_WIDTH = nes::Ppu::WIDTH;
 constexpr std::size_t FRAME_HEIGHT = nes::Ppu::HEIGHT;
+constexpr std::size_t FRAME_BYTES_PER_PIXEL = nes::Ppu::BYTES_PER_PIXEL;
 
 // Builds a 256x240 RGBA frame filled with a single opaque color.
 std::vector<uint8_t> MakeFrame(const uint8_t r, const uint8_t g, const uint8_t b) {
-  std::vector<uint8_t> frame(FRAME_WIDTH * FRAME_HEIGHT * 4);
-  for (std::size_t i = 0; i < frame.size(); i += 4) {
+  std::vector<uint8_t> frame(FRAME_WIDTH * FRAME_HEIGHT * FRAME_BYTES_PER_PIXEL);
+  for (std::size_t i = 0; i < frame.size(); i += FRAME_BYTES_PER_PIXEL) {
     frame[i] = r;
     frame[i + 1] = g;
     frame[i + 2] = b;
@@ -26,7 +27,7 @@ std::vector<uint8_t> MakeFrame(const uint8_t r, const uint8_t g, const uint8_t b
 }
 
 void SetPixel(std::vector<uint8_t>& frame, const std::size_t x, const std::size_t y, const uint8_t value) {
-  const std::size_t offset = (y * FRAME_WIDTH + x) * 4;
+  const std::size_t offset = (y * FRAME_WIDTH + x) * FRAME_BYTES_PER_PIXEL;
   frame[offset] = value;
   frame[offset + 1] = value;
   frame[offset + 2] = value;
