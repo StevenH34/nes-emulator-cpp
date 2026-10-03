@@ -128,6 +128,7 @@ std::vector<uint8_t> Emulator::SaveStateToBytes() const {
   return data;
 }
 
+// Validate save state header against currently loaded ROM before restoring.
 void Emulator::LoadStateFromBytes(const std::span<const uint8_t> bytes) {
   StateReader reader(bytes);
 
