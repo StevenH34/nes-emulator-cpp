@@ -322,6 +322,18 @@ TEST_CASE("Controller SetButtons is read live while strobe stays high") {
   CHECK(controller.Read() == 0);
 }
 
+TEST_CASE("Controller latches buttons on the strobe falling edge") {
+  nes::Controller controller;
+  controller.SetButtons(nes::Controller::BUTTON_B);
+  controller.Write(1);
+
+  controller.SetButtons(nes::Controller::BUTTON_A); // changes while strobe is high
+  controller.Write(0);
+
+  CHECK(controller.Read() == 1); // A, latched on the falling edge
+  CHECK(controller.Read() == 0); // B was not kept from the rising write
+}
+
 TEST_CASE("Controller GetButtons survives a save/load round-trip") {
   nes::Controller controller;
   controller.SetButtons(0x5A);
