@@ -33,6 +33,10 @@ public:
   void Serialize(StateWriter& writer) const;
   void Deserialize(StateReader& reader);
 
+  // For Python binding
+  void SetButtons(const uint8_t buttons) { buttons_ = buttons; }
+  uint8_t GetButtons() const { return buttons_; }
+
 private:
   // Current button state
   uint8_t buttons_{0x00};
