@@ -149,7 +149,11 @@ void Emulator::LoadStateFromBytes(const std::span<const uint8_t> bytes) {
         chr_rom_size != cartridge_.GetChrRom().size() || rom_checksum != cartridge_.GetRomChecksum()) {
       throw std::runtime_error("Save state data does not match the current game");
     }
-    reader.ReadU32(); // payload size for future format changes
+    // Reject truncated or padded payloads before any component state is touched
+    const uint32_t payload_size = reader.ReadU32();
+    if (payload_size != reader.BytesRemaining()) {
+      throw std::runtime_error("Save state data is corrupt or truncated: payload size mismatch");
+    }
     Deserialize(reader);
   } catch (const std::out_of_range& e) {
     throw std::runtime_error(std::format("Save state data is corrupt or truncated: {}", e.what()));

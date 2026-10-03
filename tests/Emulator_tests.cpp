@@ -321,3 +321,12 @@ TEST_CASE("LoadStateFromBytes throws std::runtime_error when the bytes are trunc
 
   CHECK_THROWS_AS(emulator.LoadStateFromBytes({}), std::runtime_error);
 }
+
+TEST_CASE("LoadStateFromBytes throws std::runtime_error when the payload has trailing bytes") {
+  const nes_test::TempRomFile rom(nes_test::MakeMinimalRom());
+  nes::Emulator emulator(rom.path());
+
+  auto state = emulator.SaveStateToBytes();
+  state.push_back(0x00);
+  CHECK_THROWS_AS(emulator.LoadStateFromBytes(state), std::runtime_error);
+}
