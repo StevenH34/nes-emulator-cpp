@@ -27,7 +27,8 @@ uint8_t Controller::Read() {
  * state before freezing it.
  */
 void Controller::Write(const uint8_t value) {
-  if (strobe_ || (value & 1)) shift_register_ = buttons_;
+  if (strobe_ || (value & 1))
+    shift_register_ = buttons_;
   strobe_ = (value & 1) != 0;
 }
 

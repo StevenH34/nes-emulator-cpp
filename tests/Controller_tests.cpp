@@ -256,8 +256,7 @@ TEST_CASE("Controller GetButtons reflects Press and Release") {
   controller.Press(nes::Controller::BUTTON_A);
   controller.Press(nes::Controller::BUTTON_START);
 
-  CHECK(controller.GetButtons() ==
-        (nes::Controller::BUTTON_A | nes::Controller::BUTTON_START));
+  CHECK(controller.GetButtons() == (nes::Controller::BUTTON_A | nes::Controller::BUTTON_START));
 
   controller.Release(nes::Controller::BUTTON_A);
 
@@ -271,8 +270,7 @@ TEST_CASE("Controller SetButtons replaces the whole button state") {
   // Unlike Press, SetButtons overwrites rather than ORs, so B must be cleared.
   controller.SetButtons(nes::Controller::BUTTON_A | nes::Controller::BUTTON_RIGHT);
 
-  CHECK(controller.GetButtons() ==
-        (nes::Controller::BUTTON_A | nes::Controller::BUTTON_RIGHT));
+  CHECK(controller.GetButtons() == (nes::Controller::BUTTON_A | nes::Controller::BUTTON_RIGHT));
 }
 
 TEST_CASE("Controller SetButtons with 0 clears every button") {
