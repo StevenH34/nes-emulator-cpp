@@ -42,6 +42,9 @@ public:
   void Deserialize(StateReader& reader);
   void SaveStateToFile(const std::string& path) const;
   void LoadStateFromFile(const std::string& path);
+  // Save and load state kept in memory for Python bindings
+  [[nodiscard]] std::vector<uint8_t> SaveStateToBytes() const;
+  void LoadStateFromBytes(std::span<const uint8_t> bytes);
 
 private:
   Cartridge cartridge_;

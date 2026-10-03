@@ -90,32 +90,14 @@ void Emulator::Deserialize(StateReader& reader) {
   apu_.GetSampleBuffer().clear();
 }
 
-// Uses Cartridge::ReadFileBytes to read save state file and validate
-// against currently loaded ROM
 void Emulator::SaveStateToFile(const std::string& path) const {
-  std::vector<uint8_t> payload;
-  StateWriter payload_writer(payload);
-  Serialize(payload_writer);
-
-  // Only the small, fixed-size header is built in its own buffer; the
-  // payload is written straight from its own vector below instead of being
-  // copied into a second buffer first.
-  std::vector<uint8_t> header;
-  StateWriter header_writer(header);
-  header_writer.WriteBytes(SaveStateFormat::MAGIC);
-  header_writer.WriteU16(SaveStateFormat::VERSION);
-  header_writer.WriteU8(cartridge_.GetMapperId());
-  header_writer.WriteU32(static_cast<uint32_t>(cartridge_.GetPrgRom().size()));
-  header_writer.WriteU32(static_cast<uint32_t>(cartridge_.GetChrRom().size()));
-  header_writer.WriteU32(cartridge_.GetRomChecksum());
-  header_writer.WriteU32(static_cast<uint32_t>(payload.size()));
+  const std::vector<uint8_t> data = SaveStateToBytes();
 
   std::ofstream file_stream(path, std::ios::binary);
   if (!file_stream) {
     throw std::runtime_error(std::format("Failed to open file for writing: {}", path));
   }
-  file_stream.write(reinterpret_cast<const char*>(header.data()), static_cast<std::streamsize>(header.size()));
-  file_stream.write(reinterpret_cast<const char*>(payload.data()), static_cast<std::streamsize>(payload.size()));
+  file_stream.write(reinterpret_cast<const char*>(data.data()), static_cast<std::streamsize>(data.size()));
   if (!file_stream) {
     throw std::runtime_error(std::format("Failed to write to file: {}", path));
   }
@@ -123,16 +105,40 @@ void Emulator::SaveStateToFile(const std::string& path) const {
 
 void Emulator::LoadStateFromFile(const std::string& path) {
   const std::vector<uint8_t> data = Cartridge::ReadFileBytes(path);
-  StateReader reader(data);
+  LoadStateFromBytes(data);
+}
+
+// Build save state in memory with header + payload.
+std::vector<uint8_t> Emulator::SaveStateToBytes() const {
+  std::vector<uint8_t> payload;
+  StateWriter payload_writer(payload);
+  Serialize(payload_writer);
+
+  std::vector<uint8_t> data;
+  StateWriter writer(data);
+  writer.WriteBytes(SaveStateFormat::MAGIC);
+  writer.WriteU16(SaveStateFormat::VERSION);
+  writer.WriteU8(cartridge_.GetMapperId());
+  writer.WriteU32(static_cast<uint32_t>(cartridge_.GetPrgRom().size()));
+  writer.WriteU32(static_cast<uint32_t>(cartridge_.GetChrRom().size()));
+  writer.WriteU32(cartridge_.GetRomChecksum());
+  writer.WriteU32(static_cast<uint32_t>(payload.size()));
+  writer.WriteBytes(payload);
+
+  return data;
+}
+
+void Emulator::LoadStateFromBytes(const std::span<const uint8_t> bytes) {
+  StateReader reader(bytes);
 
   try {
     std::array<uint8_t, 4> magic{};
     reader.ReadBytes(magic);
     if (magic != SaveStateFormat::MAGIC) {
-      throw std::runtime_error("Invalid save state file: incorrect magic number");
+      throw std::runtime_error("Invalid save state data: incorrect magic number");
     }
     if (reader.ReadU16() != SaveStateFormat::VERSION) {
-      throw std::runtime_error("Invalid save state file: unsupported version");
+      throw std::runtime_error("Invalid save state data: unsupported version");
     }
 
     const uint8_t mapper_id = reader.ReadU8();
@@ -141,12 +147,12 @@ void Emulator::LoadStateFromFile(const std::string& path) {
     const uint32_t rom_checksum = reader.ReadU32();
     if (mapper_id != cartridge_.GetMapperId() || prg_rom_size != cartridge_.GetPrgRom().size() ||
         chr_rom_size != cartridge_.GetChrRom().size() || rom_checksum != cartridge_.GetRomChecksum()) {
-      throw std::runtime_error("Save state file does not match the current game");
+      throw std::runtime_error("Save state data does not match the current game");
     }
     reader.ReadU32(); // payload size for future format changes
     Deserialize(reader);
   } catch (const std::out_of_range& e) {
-    throw std::runtime_error(std::format("Save state file is corrupt or truncated: {}", e.what()));
+    throw std::runtime_error(std::format("Save state data is corrupt or truncated: {}", e.what()));
   }
 }
 
