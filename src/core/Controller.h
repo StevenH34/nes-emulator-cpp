@@ -33,9 +33,10 @@ public:
   void Serialize(StateWriter& writer) const;
   void Deserialize(StateReader& reader);
 
-  // For Python binding
+  // Replace or read the full button bitmask at once
+  // (unlike Press/Release, which touch a single bit)
   void SetButtons(const uint8_t buttons) { buttons_ = buttons; }
-  uint8_t GetButtons() const { return buttons_; }
+  [[nodiscard]] uint8_t GetButtons() const { return buttons_; }
 
 private:
   // Current button state
