@@ -21,6 +21,7 @@ picker or by dragging it onto the page.
     - TODO: Add DMC channel.
 - ✅ Add save states.
 - ✅ Added a WebAssembly build, deployed to [GitHub Pages](https://stevenh34.github.io/nes-emulator-cpp/).
+- ✅ Added Python bindings (`nes_py`) — groundwork for AI agent training.
 
 <p style="text-align: center;">
   <img src="./images/img.png" alt="emulator picture" width="300" />
@@ -52,7 +53,8 @@ Rendering uses SDL3, installed via [vcpkg](https://github.com/microsoft/vcpkg).
 **Prerequisites**
 
 - A C++23 compiler:
-    - Windows: MSVC / Visual Studio Build Tools with the "Desktop development with C++" workload
+    - Windows: Visual Studio Build Tools with the "Desktop development with C++" workload and the
+      "C++ Clang tools for Windows" component
     - macOS: Xcode Command Line Tools (`xcode-select --install`), Xcode 16+ for full C++23 support
 - CMake and Ninja
     - macOS: `brew install cmake ninja`
@@ -100,6 +102,30 @@ The page has to be served over HTTP; opening `index.html` directly from disk won
 
 Pushes to `master` that pass CI are deployed to GitHub Pages automatically.
 
+### Python Bindings
+
+The `nes_py` module exposes the emulator core to Python via [nanobind](https://github.com/wjakob/nanobind),
+built with [scikit-build-core](https://github.com/scikit-build/scikit-build-core).
+
+**Prerequisites**
+
+- Python 3.14+
+- A C++23 compiler, CMake, Ninja (as above).
+
+Build and install (re-run after C++ changes): `python -m pip install -e ".[test]"`
+
+```python
+import nes_py
+
+core = nes_py.NesCore("roms/smb.nes")
+core.step(nes_py.BUTTON_RIGHT | nes_py.BUTTON_A, frames=4)
+obs = core.obs84()  # (84, 84) uint8 grayscale
+state = core.save_state()  # same format as F5 save files
+core.load_state(state)
+```
+
+For IDE code insight on `src/python/Bindings.cpp`, use the `python` CMake preset (`build-python/`).
+
 ### Testing
 
 Using `doctest.h`.
@@ -109,6 +135,8 @@ Build and run tests: `cmake --build build-debug --target run_tests`
 
 The tests also run as WebAssembly under Node (CI does this on every push): \
 `cmake --build build-wasm --target nes_emulator_tests` then `node build-wasm/nes_emulator_tests.js`
+
+Python binding tests (pytest, run in CI): `python -m pytest`
 
 ### Resources
 
