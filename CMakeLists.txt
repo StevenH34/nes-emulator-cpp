@@ -172,7 +172,7 @@ if (NES_BUILD_WASM)
 endif ()
 
 if (NES_BUILD_PYTHON)
-    find_package(Python 3.10 COMPONENTS Interpreter Development.Module REQUIRED)
+    find_package(Python 3.14 COMPONENTS Interpreter Development.Module REQUIRED)
 
     # Under pip/scikit-build-core nanobind is found automatically; for a plain
     # CMake build, ask the Python we just found where nanobind is installed.
