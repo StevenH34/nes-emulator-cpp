@@ -1,0 +1,35 @@
+[build-system]
+requires = ["scikit-build-core>=0.10", "nanobind>=2.0"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "nes-emulator-cpp"
+version = "0.1.0"
+description = "Python bindings for the nes-emulator-cpp core"
+requires-python = ">=3.14"
+dependencies = ["numpy"]
+
+[project.optional-dependencies]
+test = ["pytest"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests/python"]
+
+[tool.scikit-build]
+minimum-version = "build-system.requires"
+build-dir = "build-pip/{wheel_tag}"
+cmake.build-type = "Release"
+# Only the Python module; skips the C++ test executable
+build.targets = ["nes_py"]
+
+[tool.scikit-build.cmake.define]
+NES_BUILD_PYTHON = "ON"
+NES_BUILD_DESKTOP = "OFF"
+
+# The core only builds with Clang/GCC; on Windows CMake would otherwise pick
+# MSVC with the Visual Studio generator, which can't drive clang++.
+# Compilers go in cmake.args, not cmake.define: an override replaces the whole
+# cmake.define table above instead of merging into it.
+[[tool.scikit-build.overrides]]
+if.platform-system = "win32"
+cmake.args = ["-G", "Ninja", "-DCMAKE_C_COMPILER=clang", "-DCMAKE_CXX_COMPILER=clang++"]
