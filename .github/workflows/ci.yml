@@ -137,11 +137,36 @@ jobs:
           UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
         run: ./nes_emulator_tests
 
+  python:
+    name: Python bindings and tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # Keep in sync with the Python version used locally.
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+
+      # Same compiler as the sanitizers job; the core needs C++23.
+      - name: Install GCC 14 and Ninja
+        run: sudo apt-get update && sudo apt-get install -y g++-14 ninja-build
+
+      # Builds nes_py through pyproject.toml (scikit-build-core + nanobind); no SDL or vcpkg needed.
+      - name: Build and install nes_py
+        env:
+          CC: gcc-14
+          CXX: g++-14
+        run: python -m pip install .[test]
+
+      - name: Run Python tests
+        run: python -m pytest
+
   deploy-pages:
     name: Deploy to GitHub Pages
     # Only publish from master.
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-    needs: [ format, wasm, sanitizers ]
+    needs: [ format, wasm, sanitizers, python ]
     runs-on: ubuntu-latest
     permissions:
       pages: write
