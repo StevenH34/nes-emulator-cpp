@@ -48,6 +48,19 @@
         "NES_BUILD_DESKTOP": "OFF",
         "NES_BUILD_WASM": "ON"
       }
+    },
+    {
+      "name": "python",
+      "displayName": "Python module (Ninja) Release",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build-python",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_C_COMPILER": "clang",
+        "CMAKE_CXX_COMPILER": "clang++",
+        "NES_BUILD_DESKTOP": "OFF",
+        "NES_BUILD_PYTHON": "ON"
+      }
     }
   ],
   "buildPresets": [
@@ -70,6 +83,11 @@
       "name": "wasm",
       "configurePreset": "wasm",
       "targets": "nes_emulator_wasm"
+    },
+    {
+      "name": "python",
+      "configurePreset": "python",
+      "targets": "nes_py"
     }
   ],
   "workflowPresets": [
@@ -122,6 +140,19 @@
         {
           "type": "build",
           "name": "wasm"
+        }
+      ]
+    },
+    {
+      "name": "python",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "python"
+        },
+        {
+          "type": "build",
+          "name": "python"
         }
       ]
     }
