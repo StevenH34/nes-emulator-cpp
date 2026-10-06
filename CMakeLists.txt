@@ -122,7 +122,9 @@ set(NES_CORE_SOURCES
         src/core/save_state/StateWriter.h
         src/core/save_state/StateReader.h
         src/core/ai/Preprocess.cpp
-        src/core/ai/Preprocess.h)
+        src/core/ai/Preprocess.h
+        src/core/recording/InputRecording.cpp
+        src/core/recording/InputRecording.h)
 
 add_library(nes_core STATIC ${NES_CORE_SOURCES})
 
