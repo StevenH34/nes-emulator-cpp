@@ -4,9 +4,9 @@
 
 namespace nes {
 
-Window::Window(const std::string& title, const int width, const int height) {
+Window::Window(const std::string& title, const int width, const int height, const SDL_WindowFlags flags) {
   // SDL_CreateWindow(title, width, height, SDL_WindowFlag)
-  ptr_ = SDL_CreateWindow(title.c_str(), width, height, 0);
+  ptr_ = SDL_CreateWindow(title.c_str(), width, height, flags);
   if (ptr_ == nullptr) {
     throw std::runtime_error("Window creation failed: " + std::string(SDL_GetError()));
   }
