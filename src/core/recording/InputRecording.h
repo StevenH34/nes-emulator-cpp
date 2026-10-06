@@ -38,6 +38,8 @@ public:
   void RecordFrame(uint8_t buttons);
   // Writes the file and returns to idle. If writing throws, the recording is kept.
   void Finish(const std::string& path);
+  // Drops the recording without saving it. Does nothing when idle.
+  void Discard() { recording_.reset(); }
 
   [[nodiscard]] bool IsRecording() const { return recording_.has_value(); }
   [[nodiscard]] std::size_t FrameCount() const { return recording_ ? recording_->buttons.size() : 0; }
