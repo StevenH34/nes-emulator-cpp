@@ -82,9 +82,7 @@ NesApp::NesApp(const std::optional<std::string>& rom_path)
       scale_(StartupScale(content_scale_, menu_bar_height_)),
       window_(kWindowTitle, WindowWidth(), WindowHeight(), SDL_WINDOW_RESIZABLE) {
   try {
-    // Never let the picture shrink below 1x.
-    SDL_SetWindowMinimumSize(static_cast<SDL_Window*>(window_), nes::Ppu::WIDTH,
-                             nes::Ppu::HEIGHT + static_cast<int>(menu_bar_height_));
+    UpdateMinimumWindowSize();
 
     renderer_ = SDL_CreateRenderer(static_cast<SDL_Window*>(window_), nullptr);
     if (renderer_ == nullptr) {
@@ -195,6 +193,8 @@ void NesApp::Run() {
 
 void NesApp::DrawMenuBar() {
   if (!ImGui::BeginMainMenuBar()) {
+    menu_open_ = false;
+    close_menus_ = false;
     return;
   }
 
@@ -204,11 +204,17 @@ void NesApp::DrawMenuBar() {
   if (const float height = std::ceil(ImGui::GetWindowHeight()); height != menu_bar_height_) {
     menu_bar_height_ = height;
     SDL_SetWindowSize(static_cast<SDL_Window*>(window_), WindowWidth(), WindowHeight());
+    UpdateMinimumWindowSize();
   }
 
   const bool has_rom = emulator_ != nullptr;
+  bool any_menu_open = false;
 
   if (ImGui::BeginMenu("File")) {
+    any_menu_open = true;
+    if (close_menus_) {
+      ImGui::CloseCurrentPopup();
+    }
     if (ImGui::MenuItem("Open ROM", "Ctrl+O")) {
       ShowOpenRomDialog();
     }
@@ -223,6 +229,10 @@ void NesApp::DrawMenuBar() {
   }
 
   if (ImGui::BeginMenu("State")) {
+    any_menu_open = true;
+    if (close_menus_) {
+      ImGui::CloseCurrentPopup();
+    }
     if (ImGui::MenuItem("Save State", "F5", false, has_rom)) {
       SaveState();
     }
@@ -231,6 +241,9 @@ void NesApp::DrawMenuBar() {
     }
     ImGui::EndMenu();
   }
+
+  menu_open_ = any_menu_open && !close_menus_;
+  close_menus_ = false;
 
   ImGui::EndMainMenuBar();
 }
@@ -265,6 +278,11 @@ int NesApp::WindowWidth() const { return nes::Ppu::WIDTH * scale_; }
 
 int NesApp::WindowHeight() const { return nes::Ppu::HEIGHT * scale_ + static_cast<int>(menu_bar_height_); }
 
+void NesApp::UpdateMinimumWindowSize() {
+  SDL_SetWindowMinimumSize(static_cast<SDL_Window*>(window_), nes::Ppu::WIDTH,
+                           nes::Ppu::HEIGHT + static_cast<int>(menu_bar_height_));
+}
+
 void NesApp::LoadRom(const std::string& rom_path) {
   emulator_ = std::make_unique<nes::Emulator>(rom_path);
   rom_path_ = rom_path;
@@ -284,11 +302,26 @@ void NesApp::OpenRom(const std::string& rom_path) {
 }
 
 void NesApp::ShowOpenRomDialog() {
-  SDL_ShowOpenFileDialog(OnOpenRomDialogResult, this, static_cast<SDL_Window*>(window_), kRomFilters,
+  {
+    const std::lock_guard lock(rom_dialog_->mutex);
+    if (rom_dialog_->open) {
+      return; // only one dialog at a time
+    }
+    rom_dialog_->open = true;
+  }
+  // SDL calls the callback exactly once, which takes ownership of this extra reference.
+  // The lock is released first in case SDL calls it right away on this thread.
+  auto* mailbox = std::make_unique<std::shared_ptr<RomDialogMailbox>>(rom_dialog_).release();
+  SDL_ShowOpenFileDialog(OnOpenRomDialogResult, mailbox, static_cast<SDL_Window*>(window_), kRomFilters,
                          static_cast<int>(std::size(kRomFilters)), nullptr, false);
 }
 
 void SDLCALL NesApp::OnOpenRomDialogResult(void* userdata, const char* const* filelist, int /*filter*/) {
+  const std::unique_ptr<std::shared_ptr<RomDialogMailbox>> mailbox(
+      static_cast<std::shared_ptr<RomDialogMailbox>*>(userdata));
+  const std::lock_guard lock((*mailbox)->mutex);
+  (*mailbox)->open = false;
+
   if (filelist == nullptr) {
     std::cerr << "Open Rom Dialog failed: " << SDL_GetError() << '\n';
     return;
@@ -296,17 +329,14 @@ void SDLCALL NesApp::OnOpenRomDialogResult(void* userdata, const char* const* fi
   if (*filelist == nullptr) {
     return; // user canceled
   }
-
-  auto* app = static_cast<NesApp*>(userdata);
-  const std::lock_guard lock(app->pending_rom_mutex_);
-  app->pending_rom_path_ = *filelist;
+  (*mailbox)->path = *filelist;
 }
 
 void NesApp::ApplyPendingRom() {
   std::optional<std::string> rom_path;
   {
-    const std::lock_guard lock(pending_rom_mutex_);
-    rom_path = std::exchange(pending_rom_path_, std::nullopt);
+    const std::lock_guard lock(rom_dialog_->mutex);
+    rom_path = std::exchange(rom_dialog_->path, std::nullopt);
   }
   // Load outside the lock so the dialog thread is never blocked on file I/O.
   if (rom_path.has_value()) {
@@ -377,9 +407,16 @@ void NesApp::HandleEvents() {
     }
 
     const bool is_down = event.type == SDL_EVENT_KEY_DOWN;
-    const bool ui_has_keyboard = ImGui::GetIO().WantCaptureKeyboard;
+    // ImGui doesn't report wanting the keyboard for an open menu (keyboard
+    // navigation is off), so check menu_open_ as well.
+    const bool ui_has_keyboard = ImGui::GetIO().WantCaptureKeyboard || menu_open_;
 
-    if (is_down && !event.key.repeat && !ui_has_keyboard) {
+    if (is_down && !event.key.repeat && menu_open_) {
+      // Esc closes the open menu instead of quitting.
+      if (event.key.scancode == SDL_SCANCODE_ESCAPE) {
+        close_menus_ = true;
+      }
+    } else if (is_down && !event.key.repeat && !ui_has_keyboard) {
       const bool ctrl = (event.key.mod & SDL_KMOD_CTRL) != 0;
       switch (event.key.scancode) {
       case SDL_SCANCODE_ESCAPE:

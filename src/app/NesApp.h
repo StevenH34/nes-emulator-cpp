@@ -60,6 +60,18 @@ private:
 
   [[nodiscard]] int WindowWidth() const;
   [[nodiscard]] int WindowHeight() const;
+  // Keeps the picture from being shrunk below 1x.
+  void UpdateMinimumWindowSize();
+
+  // Passes the Open ROM dialog's result to the main loop. The dialog callback
+  // holds its own shared_ptr to this, so it stays valid even if NesApp is
+  // destroyed while the dialog is still open. It may be called on another
+  // thread, so access is guarded by mutex.
+  struct RomDialogMailbox {
+    std::mutex mutex;
+    bool open{false};
+    std::optional<std::string> path;
+  };
 
   std::unique_ptr<nes::Emulator> emulator_;
   bool running_{true};
@@ -75,9 +87,11 @@ private:
   SDL_AudioStream* audio_stream_{nullptr};
   std::string save_state_path_;
   std::string rom_path_;
-  // File dialog callback may run on a separate thread, so we need to synchronize access to pending_rom_path_.
-  std::mutex pending_rom_mutex_;
-  std::optional<std::string> pending_rom_path_;
+  std::shared_ptr<RomDialogMailbox> rom_dialog_{std::make_shared<RomDialogMailbox>()};
+  // Whether a menu was open last frame; while one is, the keyboard belongs to
+  // the menus, and Esc sets close_menus_ instead of quitting.
+  bool menu_open_{false};
+  bool close_menus_{false};
 };
 
 } // namespace nes_app
