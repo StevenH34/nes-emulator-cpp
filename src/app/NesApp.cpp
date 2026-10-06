@@ -54,8 +54,7 @@ int StartupScale(const float content_scale, const float menu_bar_height) {
     return scale;
   }
   const int reserved_height = static_cast<int>(std::ceil(menu_bar_height + kWindowFrameMargin * content_scale));
-  while (scale > 1 &&
-         (nes::Ppu::WIDTH * scale > usable.w || nes::Ppu::HEIGHT * scale + reserved_height > usable.h)) {
+  while (scale > 1 && (nes::Ppu::WIDTH * scale > usable.w || nes::Ppu::HEIGHT * scale + reserved_height > usable.h)) {
     --scale;
   }
   return scale;
@@ -77,8 +76,7 @@ NesApp::SdlLifetime::SdlLifetime() {
 NesApp::SdlLifetime::~SdlLifetime() { SDL_Quit(); }
 
 NesApp::NesApp(const std::optional<std::string>& rom_path)
-    : content_scale_(PrimaryContentScale()),
-      menu_bar_height_(std::ceil(DEFAULT_MENU_BAR_HEIGHT * content_scale_)),
+    : content_scale_(PrimaryContentScale()), menu_bar_height_(std::ceil(DEFAULT_MENU_BAR_HEIGHT * content_scale_)),
       scale_(StartupScale(content_scale_, menu_bar_height_)),
       window_(kWindowTitle, WindowWidth(), WindowHeight(), SDL_WINDOW_RESIZABLE) {
   try {
@@ -261,8 +259,8 @@ void NesApp::Render(const std::vector<uint8_t>* frame_buffer) {
     SDL_GetCurrentRenderOutputSize(renderer_, &output_width, &output_height);
     const float area_width = static_cast<float>(output_width);
     const float area_height = std::max(0.0f, static_cast<float>(output_height) - menu_bar_height_);
-    const float fit = std::min(area_width / static_cast<float>(nes::Ppu::WIDTH),
-                               area_height / static_cast<float>(nes::Ppu::HEIGHT));
+    const float fit =
+      std::min(area_width / static_cast<float>(nes::Ppu::WIDTH), area_height / static_cast<float>(nes::Ppu::HEIGHT));
     const float width = static_cast<float>(nes::Ppu::WIDTH) * fit;
     const float height = static_cast<float>(nes::Ppu::HEIGHT) * fit;
     const SDL_FRect dest{(area_width - width) / 2.0f, menu_bar_height_ + (area_height - height) / 2.0f, width, height};
@@ -318,7 +316,7 @@ void NesApp::ShowOpenRomDialog() {
 
 void SDLCALL NesApp::OnOpenRomDialogResult(void* userdata, const char* const* filelist, int /*filter*/) {
   const std::unique_ptr<std::shared_ptr<RomDialogMailbox>> mailbox(
-      static_cast<std::shared_ptr<RomDialogMailbox>*>(userdata));
+    static_cast<std::shared_ptr<RomDialogMailbox>*>(userdata));
   const std::lock_guard lock((*mailbox)->mutex);
   (*mailbox)->open = false;
 
