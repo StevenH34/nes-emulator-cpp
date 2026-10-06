@@ -22,6 +22,8 @@ picker or by dragging it onto the page.
 - ✅ Add save states.
 - ✅ Added a WebAssembly build, deployed to [GitHub Pages](https://stevenh34.github.io/nes-emulator-cpp/).
 - ✅ Added Python bindings (`nes_py`) — groundwork for AI agent training.
+- ✅ Added a desktop menu bar ([Dear ImGui](https://github.com/ocornut/imgui)) with a resizable window that scales to the
+  display.
 
 <p style="text-align: center;">
   <img src="./images/img.png" alt="emulator picture" width="300" />
@@ -42,13 +44,27 @@ picker or by dragging it onto the page.
 | Save State | F5               |
 | Load State | F9               |
 
-Press `ESC` to exit the emulator.
+The desktop app also has keyboard shortcuts for its menus:
 
-The browser version uses the same controls, except save states (F5/F9) and `ESC` are desktop-only.
+| Action   | Keyboard |
+|----------|----------|
+| Open ROM | Ctrl+O   |
+| Reset    | Ctrl+R   |
+| Exit     | Esc      |
+
+The browser version uses the same NES controls; save states, the menus and their shortcuts are desktop-only.
+
+### Desktop Menus
+
+- **File**: Open ROM… (`.nes` file picker), Reset (restarts the current ROM from power-on), Exit
+- **State**: Save State / Load State, stored as `<rom_path>.state` next to the ROM
+
+The window opens at a size that suits your display scaling and can be resized; the picture keeps the NES aspect ratio
+and stays pixel-sharp.
 
 ### Building and Running
 
-Rendering uses SDL3, installed via [vcpkg](https://github.com/microsoft/vcpkg).
+Rendering uses SDL3 and the menus use Dear ImGui, both installed via [vcpkg](https://github.com/microsoft/vcpkg).
 
 **Prerequisites**
 
@@ -66,16 +82,25 @@ Rendering uses SDL3, installed via [vcpkg](https://github.com/microsoft/vcpkg).
   ```
 - The `VCPKG_ROOT` environment variable set to that clone's path
 
-SDL3 itself does **not** need to be installed manually — it's declared in `vcpkg.json` and vcpkg installs it
-automatically on first configure.
+SDL3 and Dear ImGui do **not** need to be installed manually — they're declared in `vcpkg.json` and vcpkg installs
+them automatically on first configure.
 
 Configure and build in one step: `cmake --workflow --preset default` \
-Run Emulator: `./build-debug/nes_emulator <rom_path>`
+Run Emulator: `./build-debug/nes_emulator [rom_path]`
+
+The ROM path is optional; without it the emulator opens empty and you can pick a ROM from **File > Open ROM**.
 
 For an optimized Release build, use the `release` preset instead:
 
 Configure and build in one step: `cmake --workflow --preset release` \
-Run Emulator: `./build-release/nes_emulator <rom_path>`
+Run Emulator: `./build-release/nes_emulator [rom_path]`
+
+**Windows note:** if `clang++` isn't on your `PATH`, run CMake from a shell set up by Visual Studio's `vcvars64.bat`.
+That script points `VCPKG_ROOT` at Visual Studio's bundled vcpkg, so set it back to your own clone afterwards:
+
+```
+cmd /c "\"C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\Auxiliary\Build\vcvars64.bat\" && set VCPKG_ROOT=C:\vcpkg&& cmake --workflow --preset default"
+```
 
 ### Building for WebAssembly
 
