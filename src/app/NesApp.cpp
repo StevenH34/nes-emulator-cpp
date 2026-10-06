@@ -127,7 +127,16 @@ NesApp::NesApp(const std::optional<std::string>& rom_path)
   }
 }
 
-NesApp::~NesApp() { Cleanup(); }
+NesApp::~NesApp() {
+  // Saves the clip on every way out, including an exception escaping Run().
+  // Destructors must not throw; StopRecording's own error handling could still
+  // fail (e.g. out of memory), so swallow anything left.
+  try {
+    StopRecording(true);
+  } catch (...) {
+  }
+  Cleanup();
+}
 
 void NesApp::Cleanup() {
   // Destroy ImGui before destroying the renderer, since it uses the renderer.
@@ -168,11 +177,13 @@ void NesApp::Run() {
 
     const std::vector<uint8_t>* frame_buffer = nullptr;
     if (emulator_ != nullptr) {
-      // Captured after HandleEvents, so each mask is exactly what this frame sees.
-      if (recorder_.IsRecording()) {
-        recorder_.RecordFrame(emulator_->GetBus().GetController1().GetButtons());
-      }
+      // Read after HandleEvents, so the mask is exactly what this frame sees. It is
+      // only recorded once the frame succeeds, so a frame that throws isn't saved.
+      const uint8_t buttons = emulator_->GetBus().GetController1().GetButtons();
       frame_buffer = &emulator_->RunFrame();
+      if (recorder_.IsRecording()) {
+        recorder_.RecordFrame(buttons);
+      }
 
       const auto samples = emulator_->GetApu().DrainSamples();
       SDL_PutAudioStreamData(audio_stream_, samples.data(), static_cast<int>(samples.size() * sizeof(float)));
@@ -194,7 +205,6 @@ void NesApp::Run() {
       SDL_Delay(static_cast<uint32_t>(kFrameTimeMs - elapsed_time));
     }
   }
-  StopRecording(true);
 }
 
 void NesApp::DrawMenuBar() {
@@ -402,7 +412,11 @@ void NesApp::ToggleRecording() {
   if (recorder_.IsRecording()) {
     StopRecording(false);
   } else {
-    recorder_.Start(*emulator_);
+    try {
+      recorder_.Start(*emulator_);
+    } catch (const std::exception& e) {
+      ShowError("Failed to start recording: " + std::string(e.what()));
+    }
   }
 }
 
