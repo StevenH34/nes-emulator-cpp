@@ -1,11 +1,11 @@
 #include "InputRecording.h"
 #include "Emulator.h"
+#include "FileIo.h"
 #include "save_state/StateReader.h"
 #include "save_state/StateWriter.h"
 
 #include <array>
 #include <format>
-#include <fstream>
 #include <stdexcept>
 
 namespace nes::RecordingFormat {
@@ -64,17 +64,8 @@ Recording RecordingFromBytes(const std::span<const uint8_t> bytes) {
 }
 
 void SaveRecording(const Recording& recording, const std::string& path) {
-  const std::vector<uint8_t> data = RecordingToBytes(recording);
-  std::ofstream file_stream(path, std::ios::binary);
-  if (!file_stream) {
-    throw std::runtime_error(std::format("Failed to open file for writing: {}", path));
-  }
-  file_stream.write(reinterpret_cast<const char*>(data.data()), static_cast<std::streamsize>(data.size()));
-  // Close explicitly so a failed final flush is reported instead of ignored by the destructor
-  file_stream.close();
-  if (!file_stream) {
-    throw std::runtime_error(std::format("Failed to write to file: {}", path));
-  }
+  // A failed save leaves no partial file behind
+  WriteFileAtomically(path, RecordingToBytes(recording));
 }
 
 Recording LoadRecording(const std::string& path) { return RecordingFromBytes(Cartridge::ReadFileBytes(path)); }
