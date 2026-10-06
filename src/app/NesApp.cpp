@@ -3,6 +3,8 @@
 #include <SDL3/SDL.h>
 #include <algorithm>
 #include <cmath>
+#include <filesystem>
+#include <format>
 #include <imgui.h>
 #include <imgui_impl_sdl3.h>
 #include <imgui_impl_sdlrenderer3.h>
@@ -22,7 +24,8 @@ namespace nes_app {
 
 namespace {
 // NTSC NES PPU runs at ~60.0988 Hz.
-constexpr double kFrameTimeMs = 1000.0 / 60.0988;
+constexpr double kFramesPerSecond = 60.0988;
+constexpr double kFrameTimeMs = 1000.0 / kFramesPerSecond;
 constexpr const char* kWindowTitle = "NES Emulator";
 // SDL requires filter to stay valid until dialog callback runs.
 constexpr SDL_DialogFileFilter kRomFilters[] = {
@@ -165,6 +168,10 @@ void NesApp::Run() {
 
     const std::vector<uint8_t>* frame_buffer = nullptr;
     if (emulator_ != nullptr) {
+      // Captured after HandleEvents, so each mask is exactly what this frame sees.
+      if (recorder_.IsRecording()) {
+        recorder_.RecordFrame(emulator_->GetBus().GetController1().GetButtons());
+      }
       frame_buffer = &emulator_->RunFrame();
 
       const auto samples = emulator_->GetApu().DrainSamples();
@@ -187,6 +194,7 @@ void NesApp::Run() {
       SDL_Delay(static_cast<uint32_t>(kFrameTimeMs - elapsed_time));
     }
   }
+  StopRecording(true);
 }
 
 void NesApp::DrawMenuBar() {
@@ -237,7 +245,16 @@ void NesApp::DrawMenuBar() {
     if (ImGui::MenuItem("Load State", "F9", false, has_rom)) {
       LoadState();
     }
+    ImGui::Separator();
+    if (ImGui::MenuItem(recorder_.IsRecording() ? "Stop Recording" : "Start Recording", "F10", false, has_rom)) {
+      ToggleRecording();
+    }
     ImGui::EndMenu();
+  }
+
+  if (recorder_.IsRecording()) {
+    const auto seconds = static_cast<int>(static_cast<double>(recorder_.FrameCount()) / kFramesPerSecond);
+    ImGui::TextColored(ImVec4(1.0f, 0.3f, 0.3f, 1.0f), "REC %02d:%02d", seconds / 60, seconds % 60);
   }
 
   menu_open_ = any_menu_open && !close_menus_;
@@ -282,7 +299,11 @@ void NesApp::UpdateMinimumWindowSize() {
 }
 
 void NesApp::LoadRom(const std::string& rom_path) {
-  emulator_ = std::make_unique<nes::Emulator>(rom_path);
+  auto emulator = std::make_unique<nes::Emulator>(rom_path);
+  // The game is about to be replaced, so end any recording of it. This runs
+  // before rom_path_ changes, so the file is named after the recorded ROM.
+  StopRecording(true);
+  emulator_ = std::move(emulator);
   rom_path_ = rom_path;
   save_state_path_ = rom_path + ".state";
   SDL_ClearAudioStream(audio_stream_);
@@ -368,7 +389,54 @@ void NesApp::LoadState() {
     emulator_->LoadStateFromFile(save_state_path_);
   } catch (const std::exception& e) {
     ShowError("Failed to load state: " + std::string(e.what()));
+    return;
   }
+  // The game state jumped, so a recording can't continue past this point.
+  StopRecording(true);
+}
+
+void NesApp::ToggleRecording() {
+  if (emulator_ == nullptr) {
+    return;
+  }
+  if (recorder_.IsRecording()) {
+    StopRecording(false);
+  } else {
+    recorder_.Start(*emulator_);
+  }
+}
+
+void NesApp::StopRecording(const bool discard_on_failure) {
+  if (!recorder_.IsRecording()) {
+    return;
+  }
+  try {
+    recorder_.Finish(NewRecordingPath());
+  } catch (const std::exception& e) {
+    if (discard_on_failure) {
+      recorder_.Discard();
+      ShowError("Failed to save recording, so it was discarded: " + std::string(e.what()));
+    } else {
+      ShowError("Failed to save recording: " + std::string(e.what()) + "\nPress F10 to try again.");
+    }
+  }
+}
+
+std::string NesApp::NewRecordingPath() const {
+  SDL_Time now = 0;
+  SDL_DateTime time{};
+  if (!SDL_GetCurrentTime(&now) || !SDL_TimeToDateTime(now, &time, true)) {
+    throw std::runtime_error("Failed to get the current time: " + std::string(SDL_GetError()));
+  }
+
+  const std::filesystem::path rom(rom_path_);
+  const std::filesystem::path folder = rom.parent_path() / "recordings";
+  std::filesystem::create_directories(folder);
+  // Milliseconds keep two clips saved in the same second from overwriting each other.
+  const std::string name =
+    std::format("{}-{:04}{:02}{:02}-{:02}{:02}{:02}-{:03}.nesdemo", rom.stem().string(), time.year, time.month,
+                time.day, time.hour, time.minute, time.second, time.nanosecond / 1'000'000);
+  return (folder / name).string();
 }
 
 void NesApp::ShowError(const std::string& message) const {
@@ -425,6 +493,9 @@ void NesApp::HandleEvents() {
         break;
       case SDL_SCANCODE_F9:
         LoadState();
+        break;
+      case SDL_SCANCODE_F10:
+        ToggleRecording();
         break;
       case SDL_SCANCODE_O:
         if (ctrl) {
