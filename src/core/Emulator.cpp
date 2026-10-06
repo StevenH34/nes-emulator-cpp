@@ -3,10 +3,12 @@
 #include "save_state/StateWriter.h"
 
 #include <array>
+#include <filesystem>
 #include <format>
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
+#include <system_error>
 
 namespace nes::SaveStateFormat {
 inline constexpr std::array<uint8_t, 4> MAGIC{'N', 'E', 'S', 'S'};
@@ -93,13 +95,29 @@ void Emulator::Deserialize(StateReader& reader) {
 void Emulator::SaveStateToFile(const std::string& path) const {
   const std::vector<uint8_t> data = SaveStateToBytes();
 
-  std::ofstream file_stream(path, std::ios::binary);
-  if (!file_stream) {
-    throw std::runtime_error(std::format("Failed to open file for writing: {}", path));
+  // Write to a temp file and rename it over the target, so a failed save leaves the old file intact
+  const std::string temp_path = path + ".tmp";
+  {
+    std::ofstream file_stream(temp_path, std::ios::binary);
+    if (!file_stream) {
+      throw std::runtime_error(std::format("Failed to open file for writing: {}", path));
+    }
+    file_stream.write(reinterpret_cast<const char*>(data.data()), static_cast<std::streamsize>(data.size()));
+    // Close explicitly so a failed final flush is reported instead of ignored by the destructor
+    file_stream.close();
+    if (!file_stream) {
+      std::error_code ignored;
+      std::filesystem::remove(temp_path, ignored);
+      throw std::runtime_error(std::format("Failed to write to file: {}", path));
+    }
   }
-  file_stream.write(reinterpret_cast<const char*>(data.data()), static_cast<std::streamsize>(data.size()));
-  if (!file_stream) {
-    throw std::runtime_error(std::format("Failed to write to file: {}", path));
+
+  std::error_code ec;
+  std::filesystem::rename(temp_path, path, ec);
+  if (ec) {
+    std::error_code ignored;
+    std::filesystem::remove(temp_path, ignored);
+    throw std::runtime_error(std::format("Failed to replace {}: {}", path, ec.message()));
   }
 }
 
