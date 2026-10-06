@@ -8,7 +8,7 @@ namespace nes {
 
 class Window {
 public:
-  Window(const std::string& title, int width, int height);
+  Window(const std::string& title, int width, int height, SDL_WindowFlags flags = 0);
   ~Window();
 
   // Disable copying
