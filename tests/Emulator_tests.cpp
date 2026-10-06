@@ -22,26 +22,6 @@ void OverwriteFile(const std::string& path, const std::vector<uint8_t>& data) {
   file.write(reinterpret_cast<const char*>(data.data()), static_cast<std::streamsize>(data.size()));
 }
 
-// A fresh directory under the system temp directory, removed with its contents on destruction.
-class TempDir {
-public:
-  explicit TempDir(const std::string& name) : path_(std::filesystem::temp_directory_path() / name) {
-    std::filesystem::remove_all(path_);
-    std::filesystem::create_directory(path_);
-  }
-  ~TempDir() {
-    std::error_code ec;
-    std::filesystem::remove_all(path_, ec);
-  }
-  TempDir(const TempDir&) = delete;
-  TempDir& operator=(const TempDir&) = delete;
-
-  [[nodiscard]] const std::filesystem::path& path() const { return path_; }
-
-private:
-  std::filesystem::path path_;
-};
-
 } // namespace
 
 TEST_CASE("Emulator::LoadProgram copies bytes into RAM") {
@@ -290,25 +270,26 @@ TEST_CASE("LoadStateFromFile throws when the save state file does not exist") {
   CHECK_THROWS_AS(emulator.LoadStateFromFile("/no/such/file/definitely_missing.state"), std::runtime_error);
 }
 
-TEST_CASE("SaveStateToFile replaces an existing file and leaves no .tmp file behind") {
+TEST_CASE("SaveStateToFile replaces an existing file and leaves no temp file behind") {
   const nes_test::TempRomFile rom(nes_test::MakeMinimalRom(0x0200));
   nes::Emulator emulator(rom.path());
-  const nes_test::TempRomFile state_file(std::vector<uint8_t>{});
+  const nes_test::TempDir dir("nes_test_save_state");
+  const std::string target = (dir.path() / "game.state").string();
 
   emulator.LoadProgram({0xA9, 0x42, 0xE8}, 0x0200); // LDA #0x42, INX
-  emulator.SaveStateToFile(state_file.path());
+  emulator.SaveStateToFile(target);
   emulator.Step();
   emulator.Step(); // the second save differs from the first
-  emulator.SaveStateToFile(state_file.path());
+  emulator.SaveStateToFile(target);
 
-  CHECK(nes::Cartridge::ReadFileBytes(state_file.path()) == emulator.SaveStateToBytes());
-  CHECK_FALSE(std::filesystem::exists(state_file.path() + ".tmp"));
+  CHECK(nes::Cartridge::ReadFileBytes(target) == emulator.SaveStateToBytes());
+  CHECK(nes_test::EntryNames(dir.path()) == std::vector<std::string>{"game.state"});
 }
 
 TEST_CASE("SaveStateToFile throws and removes its temp file when the target can't be replaced") {
   const nes_test::TempRomFile rom(nes_test::MakeMinimalRom());
   nes::Emulator emulator(rom.path());
-  const TempDir dir("nes_test_save_state_replace");
+  const nes_test::TempDir dir("nes_test_save_state");
 
   // A non-empty directory at the target path: the temp file is written, but the rename over it fails
   const auto target = dir.path() / "game.state";
@@ -316,7 +297,7 @@ TEST_CASE("SaveStateToFile throws and removes its temp file when the target can'
   OverwriteFile((target / "keep.bin").string(), {0x01, 0x02, 0x03});
 
   CHECK_THROWS_AS(emulator.SaveStateToFile(target.string()), std::runtime_error);
-  CHECK_FALSE(std::filesystem::exists(target.string() + ".tmp"));
+  CHECK(nes_test::EntryNames(dir.path()) == std::vector<std::string>{"game.state"});
   CHECK(std::filesystem::is_directory(target));
   CHECK(nes::Cartridge::ReadFileBytes((target / "keep.bin").string()) == std::vector<uint8_t>{0x01, 0x02, 0x03});
 }
@@ -324,11 +305,11 @@ TEST_CASE("SaveStateToFile throws and removes its temp file when the target can'
 TEST_CASE("SaveStateToFile throws when the target directory does not exist") {
   const nes_test::TempRomFile rom(nes_test::MakeMinimalRom());
   nes::Emulator emulator(rom.path());
-  const TempDir dir("nes_test_save_state_missing_dir");
+  const nes_test::TempDir dir("nes_test_save_state");
   const auto target = dir.path() / "missing" / "game.state";
 
   CHECK_THROWS_AS(emulator.SaveStateToFile(target.string()), std::runtime_error);
-  CHECK_FALSE(std::filesystem::exists(target.string() + ".tmp"));
+  CHECK(nes_test::EntryNames(dir.path()).empty());
 }
 
 // --- SaveStateToBytes / LoadStateFromBytes ---
