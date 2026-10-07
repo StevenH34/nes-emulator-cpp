@@ -18,7 +18,7 @@ class Emulator;
 struct Recording {
   uint32_t rom_checksum{};
   std::vector<uint8_t> start_state; // Emulator::SaveStateToBytes() output
-  std::vector<uint8_t> buttons;     // one controller-1 mask per frame
+  std::vector<uint8_t> buttons; // one controller-1 mask per frame
 };
 
 // .nesdemo file format (little-endian):
