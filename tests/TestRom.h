@@ -2,6 +2,7 @@
 #define NES_EMULATOR_CPP_TEST_ROM_H
 
 #include <cstdint>
+#include <filesystem>
 #include <string>
 #include <vector>
 
@@ -25,6 +26,25 @@ public:
 private:
   std::string path_;
 };
+
+// A new, uniquely-named directory under the system temp directory, removed
+// with its contents on destruction.
+class TempDir {
+public:
+  explicit TempDir(const std::string& prefix);
+  ~TempDir();
+
+  TempDir(const TempDir&) = delete;
+  TempDir& operator=(const TempDir&) = delete;
+
+  [[nodiscard]] const std::filesystem::path& path() const { return path_; }
+
+private:
+  std::filesystem::path path_;
+};
+
+// Names of the entries directly inside dir, sorted; used to check that no temp files were left behind.
+std::vector<std::string> EntryNames(const std::filesystem::path& dir);
 
 // Builds a minimal mapper-0 (NROM) ROM: one 16 KB PRG bank, one 8 KB CHR bank,
 // no trainer, all zeroed except for the reset vector (mirrored at CPU

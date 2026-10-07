@@ -122,7 +122,11 @@ set(NES_CORE_SOURCES
         src/core/save_state/StateWriter.h
         src/core/save_state/StateReader.h
         src/core/ai/Preprocess.cpp
-        src/core/ai/Preprocess.h)
+        src/core/ai/Preprocess.h
+        src/core/FileIo.cpp
+        src/core/FileIo.h
+        src/core/recording/InputRecording.cpp
+        src/core/recording/InputRecording.h)
 
 add_library(nes_core STATIC ${NES_CORE_SOURCES})
 
@@ -206,6 +210,7 @@ add_executable(nes_emulator_tests
         tests/Noise_tests.cpp
         tests/Apu_tests.cpp
         tests/Emulator_tests.cpp
+        tests/InputRecording_tests.cpp
         tests/Cartridge_tests.cpp
         tests/test_nestest.cpp
         tests/cpu/Cpu_tests.cpp

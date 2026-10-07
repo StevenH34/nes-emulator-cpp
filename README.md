@@ -31,18 +31,19 @@ picker or by dragging it onto the page.
 
 ### Controls
 
-| NES Button | Keyboard         |
-|------------|------------------|
-| A          | Z                |
-| B          | X                |
-| Select     | Left/Right Shift |
-| Start      | Enter            |
-| Up         | Up Arrow         |
-| Down       | Down Arrow       |
-| Left       | Left Arrow       |
-| Right      | Right Arrow      |
-| Save State | F5               |
-| Load State | F9               |
+| NES Button           | Keyboard         |
+|----------------------|------------------|
+| A                    | Z                |
+| B                    | X                |
+| Select               | Left/Right Shift |
+| Start                | Enter            |
+| Up                   | Up Arrow         |
+| Down                 | Down Arrow       |
+| Left                 | Left Arrow       |
+| Right                | Right Arrow      |
+| Save State           | F5               |
+| Load State           | F9               |
+| Start/Stop Recording | F10              |
 
 The desktop app also has keyboard shortcuts for its menus:
 
@@ -147,6 +148,12 @@ core.step(nes_py.BUTTON_RIGHT | nes_py.BUTTON_A, frames=4)
 obs = core.obs84()  # (84, 84) uint8 grayscale
 state = core.save_state()  # same format as F5 save files
 core.load_state(state)
+
+# Replay a gameplay recording made with F10 (saved in recordings/ next to the ROM)
+rec = nes_py.load_recording("roms/recordings/smb-20261006-150349-123.nesdemo")
+core.load_state(rec.start_state)  # rec.rom_checksum must match core.rom_checksum()
+for buttons in rec.buttons:  # (N,) uint8, one controller mask per frame
+    core.step(int(buttons))
 ```
 
 For IDE code insight on `src/python/Bindings.cpp`, use the `python` CMake preset (`build-python/`).

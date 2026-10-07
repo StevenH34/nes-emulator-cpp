@@ -1,8 +1,10 @@
 #include "doctest.h"
 
 #include <array>
+#include <filesystem>
 #include <fstream>
 #include <stdexcept>
+#include <string>
 #include <vector>
 
 #include "../src/core/Cartridge.h"
@@ -266,6 +268,48 @@ TEST_CASE("LoadStateFromFile throws when the save state file does not exist") {
   nes::Emulator emulator(rom.path());
 
   CHECK_THROWS_AS(emulator.LoadStateFromFile("/no/such/file/definitely_missing.state"), std::runtime_error);
+}
+
+TEST_CASE("SaveStateToFile replaces an existing file and leaves no temp file behind") {
+  const nes_test::TempRomFile rom(nes_test::MakeMinimalRom(0x0200));
+  nes::Emulator emulator(rom.path());
+  const nes_test::TempDir dir("nes_test_save_state");
+  const std::string target = (dir.path() / "game.state").string();
+
+  emulator.LoadProgram({0xA9, 0x42, 0xE8}, 0x0200); // LDA #0x42, INX
+  emulator.SaveStateToFile(target);
+  emulator.Step();
+  emulator.Step(); // the second save differs from the first
+  emulator.SaveStateToFile(target);
+
+  CHECK(nes::Cartridge::ReadFileBytes(target) == emulator.SaveStateToBytes());
+  CHECK(nes_test::EntryNames(dir.path()) == std::vector<std::string>{"game.state"});
+}
+
+TEST_CASE("SaveStateToFile throws and removes its temp file when the target can't be replaced") {
+  const nes_test::TempRomFile rom(nes_test::MakeMinimalRom());
+  nes::Emulator emulator(rom.path());
+  const nes_test::TempDir dir("nes_test_save_state");
+
+  // A non-empty directory at the target path: the temp file is written, but the rename over it fails
+  const auto target = dir.path() / "game.state";
+  std::filesystem::create_directory(target);
+  OverwriteFile((target / "keep.bin").string(), {0x01, 0x02, 0x03});
+
+  CHECK_THROWS_AS(emulator.SaveStateToFile(target.string()), std::runtime_error);
+  CHECK(nes_test::EntryNames(dir.path()) == std::vector<std::string>{"game.state"});
+  CHECK(std::filesystem::is_directory(target));
+  CHECK(nes::Cartridge::ReadFileBytes((target / "keep.bin").string()) == std::vector<uint8_t>{0x01, 0x02, 0x03});
+}
+
+TEST_CASE("SaveStateToFile throws when the target directory does not exist") {
+  const nes_test::TempRomFile rom(nes_test::MakeMinimalRom());
+  nes::Emulator emulator(rom.path());
+  const nes_test::TempDir dir("nes_test_save_state");
+  const auto target = dir.path() / "missing" / "game.state";
+
+  CHECK_THROWS_AS(emulator.SaveStateToFile(target.string()), std::runtime_error);
+  CHECK(nes_test::EntryNames(dir.path()).empty());
 }
 
 // --- SaveStateToBytes / LoadStateFromBytes ---

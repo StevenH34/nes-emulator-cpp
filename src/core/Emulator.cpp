@@ -1,10 +1,10 @@
 #include "Emulator.h"
+#include "FileIo.h"
 #include "save_state/StateReader.h"
 #include "save_state/StateWriter.h"
 
 #include <array>
 #include <format>
-#include <fstream>
 #include <iostream>
 #include <stdexcept>
 
@@ -91,16 +91,8 @@ void Emulator::Deserialize(StateReader& reader) {
 }
 
 void Emulator::SaveStateToFile(const std::string& path) const {
-  const std::vector<uint8_t> data = SaveStateToBytes();
-
-  std::ofstream file_stream(path, std::ios::binary);
-  if (!file_stream) {
-    throw std::runtime_error(std::format("Failed to open file for writing: {}", path));
-  }
-  file_stream.write(reinterpret_cast<const char*>(data.data()), static_cast<std::streamsize>(data.size()));
-  if (!file_stream) {
-    throw std::runtime_error(std::format("Failed to write to file: {}", path));
-  }
+  // A failed save leaves the old file intact
+  WriteFileAtomically(path, SaveStateToBytes());
 }
 
 void Emulator::LoadStateFromFile(const std::string& path) {

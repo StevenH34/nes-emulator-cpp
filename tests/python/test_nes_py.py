@@ -1,9 +1,10 @@
 """Smoke tests for the nes_py bindings (src/python/Bindings.cpp).
 
 The emulator itself is covered by the C++ tests; these check the binding
-layer: shapes and dtypes, copies vs views, error mapping, and save/load
-determinism. They run against the committed nestest ROM, and also against
-the ROM in $NES_ROM when it is set.
+layer: shapes and dtypes, copies vs views, error mapping, save/load
+determinism, and .nesdemo recordings (including replay determinism). They
+run against the committed nestest ROM, and also against the ROM in $NES_ROM
+when it is set.
 """
 
 import os
@@ -20,6 +21,10 @@ NESTEST_ROM = Path(__file__).resolve().parents[1] / "roms" / "nestest.nes"
 # Save state header: magic(4) version(2) mapper(1) prg_size(4) chr_size(4) checksum(4) payload_size(4)
 HEADER_SIZE = 23
 CHECKSUM_OFFSET = 15
+
+# Recording header: magic(4) version(2) rom_checksum(4), then state_size(4) + state, frame_count(4) + buttons
+RECORDING_VERSION_OFFSET = 4
+RECORDING_CHECKSUM_OFFSET = 6
 
 ROMS = [pytest.param(NESTEST_ROM, id="nestest")]
 if os.environ.get("NES_ROM"):
@@ -42,6 +47,21 @@ def play(core):
     core.step(nes_py.BUTTON_START, frames=5)
     core.step(nes_py.BUTTON_RIGHT | nes_py.BUTTON_A, frames=30)
     core.step(0, frames=15)
+
+
+# The same inputs as play(), one mask per frame
+PLAY_BUTTONS = np.array(
+    [0] * 10 + [nes_py.BUTTON_START] * 5 + [nes_py.BUTTON_RIGHT | nes_py.BUTTON_A] * 30 + [0] * 15,
+    dtype=np.uint8,
+)
+
+
+def record(core, buttons):
+    """Play buttons one frame at a time from the current state and return the Recording."""
+    start_state = core.save_state()
+    for mask in buttons:
+        core.step(int(mask))
+    return nes_py.Recording(core.rom_checksum(), start_state, buttons)
 
 
 def reference_obs84(frame):
@@ -200,3 +220,126 @@ def test_rom_checksum_is_stable_and_matches_save_state_header(core, rom_path):
     assert checksum == nes_py.NesCore(rom_path).rom_checksum()
     (header_checksum,) = struct.unpack_from("<I", core.save_state(), CHECKSUM_OFFSET)
     assert header_checksum == checksum
+
+
+# --- Recordings ---
+
+
+def test_recording_properties(core):
+    start_state = core.save_state()
+    recording = nes_py.Recording(core.rom_checksum(), start_state, PLAY_BUTTONS)
+
+    assert len(recording) == len(PLAY_BUTTONS)
+    assert recording.rom_checksum == core.rom_checksum()
+    assert isinstance(recording.start_state, bytes)
+    assert recording.start_state == start_state
+    buttons = recording.buttons
+    assert buttons.shape == (len(PLAY_BUTTONS),)
+    assert buttons.dtype == np.uint8
+    assert buttons.flags.c_contiguous
+    np.testing.assert_array_equal(buttons, PLAY_BUTTONS)
+
+
+def test_recording_with_no_frames():
+    recording = nes_py.Recording(0, b"", np.array([], dtype=np.uint8))
+    assert len(recording) == 0
+    assert recording.buttons.shape == (0,)
+    assert recording.start_state == b""
+
+
+def test_recording_buttons_are_copies():
+    source = np.array([1, 2, 3], dtype=np.uint8)
+    recording = nes_py.Recording(0, b"", source)
+
+    source[:] = 0  # changing the input after construction doesn't reach the recording
+    first = recording.buttons
+    first[:] = 0xAA  # writing to a returned array doesn't either
+    np.testing.assert_array_equal(recording.buttons, [1, 2, 3])
+    assert recording.buttons is not recording.buttons
+
+
+@pytest.mark.parametrize(
+    "buttons",
+    [
+        pytest.param(np.array([1, 2], dtype=np.int64), id="int64"),
+        pytest.param(np.zeros((2, 2), dtype=np.uint8), id="2-D"),
+        pytest.param([1, 2], id="list"),
+        pytest.param(np.zeros(8, dtype=np.uint8)[::2], id="strided"),
+    ],
+)
+def test_recording_rejects_buttons_that_are_not_a_contiguous_1d_uint8_array(buttons):
+    with pytest.raises(TypeError):
+        nes_py.Recording(0, b"", buttons)
+
+
+def test_save_and_load_recording_round_trip(core, tmp_path):
+    original = record(core, PLAY_BUTTONS)
+    path = tmp_path / "clip.nesdemo"
+
+    nes_py.save_recording(original, str(path))
+    loaded = nes_py.load_recording(str(path))
+
+    assert loaded.rom_checksum == original.rom_checksum
+    assert loaded.start_state == original.start_state
+    np.testing.assert_array_equal(loaded.buttons, original.buttons)
+    assert [p.name for p in tmp_path.iterdir()] == ["clip.nesdemo"]  # no temp file left behind
+
+
+def test_save_recording_uses_the_file_format(core, tmp_path):
+    path = tmp_path / "clip.nesdemo"
+    nes_py.save_recording(record(core, PLAY_BUTTONS), str(path))
+
+    data = path.read_bytes()
+    assert data[:4] == b"NESR"
+    assert struct.unpack_from("<H", data, RECORDING_VERSION_OFFSET) == (1,)
+    assert struct.unpack_from("<I", data, RECORDING_CHECKSUM_OFFSET) == (core.rom_checksum(),)
+    assert data[-len(PLAY_BUTTONS):] == PLAY_BUTTONS.tobytes()
+
+
+def test_save_recording_to_a_missing_directory_raises_runtime_error(core, tmp_path):
+    with pytest.raises(RuntimeError):
+        nes_py.save_recording(record(core, PLAY_BUTTONS), str(tmp_path / "missing" / "clip.nesdemo"))
+
+
+def test_replaying_a_recording_reproduces_the_session(core, rom_path, tmp_path):
+    core.step(0, frames=5)
+    recording = record(core, PLAY_BUTTONS)
+    final_ram, final_frame = core.ram(), core.frame()
+    path = tmp_path / "clip.nesdemo"
+    nes_py.save_recording(recording, str(path))
+
+    # Replay in a fresh emulator, one frame at a time, as the training data conversion will
+    replay = nes_py.NesCore(rom_path)
+    loaded = nes_py.load_recording(str(path))
+    assert loaded.rom_checksum == replay.rom_checksum()
+    replay.load_state(loaded.start_state)
+    for mask in loaded.buttons:
+        replay.step(int(mask))
+
+    np.testing.assert_array_equal(replay.ram(), final_ram)
+    np.testing.assert_array_equal(replay.frame(), final_frame)
+
+
+def test_load_recording_missing_file_raises_runtime_error(tmp_path):
+    with pytest.raises(RuntimeError):
+        nes_py.load_recording(str(tmp_path / "missing.nesdemo"))
+
+
+@pytest.mark.parametrize(
+    "corrupt",
+    [
+        pytest.param(lambda data: b"junk", id="junk"),
+        pytest.param(lambda data: b"", id="empty"),
+        pytest.param(lambda data: data[:5], id="truncated-header"),
+        pytest.param(lambda data: data[:-1], id="missing-button"),
+        pytest.param(lambda data: data + b"\x00", id="extra-byte"),
+        pytest.param(lambda data: data[:4] + b"\x02\x00" + data[6:], id="unsupported-version"),
+    ],
+)
+def test_load_recording_rejects_corrupt_files(core, tmp_path, corrupt):
+    path = tmp_path / "clip.nesdemo"
+    nes_py.save_recording(record(core, PLAY_BUTTONS), str(path))
+    path.write_bytes(corrupt(path.read_bytes()))
+
+    with pytest.raises(RuntimeError):
+        nes_py.load_recording(str(path))
