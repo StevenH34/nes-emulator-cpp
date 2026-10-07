@@ -9,6 +9,7 @@
 #include "ai/Preprocess.h"
 #include "apu/Apu.h"
 #include "ppu/Ppu.h"
+#include "recording/InputRecording.h"
 
 #include <cstddef> // IWYU pragma: keep (std::size_t)
 #include <cstdint>
@@ -25,6 +26,8 @@ namespace nb = nanobind;
 namespace {
 
 using UInt8Array = nb::ndarray<nb::numpy, uint8_t>;
+// Input for Recording's buttons: a contiguous 1-D uint8 array on the CPU
+using ButtonsArray = nb::ndarray<const uint8_t, nb::ndim<1>, nb::c_contig, nb::device::cpu>;
 
 constexpr std::size_t SCREEN_WIDTH = nes::Ppu::WIDTH;
 constexpr std::size_t SCREEN_HEIGHT = nes::Ppu::HEIGHT;
@@ -126,4 +129,44 @@ NB_MODULE(nes_py, m) { // NOLINT(performance-unnecessary-value-param): signature
     .def(
       "rom_checksum", [](nes::Emulator& emulator) { return emulator.GetCartridge().GetRomChecksum(); },
       "Return the checksum of the loaded ROM's PRG and CHR data. Save states are tied to this value.");
+
+  nb::class_<nes::Recording>(m, "Recording",
+                             "A recorded play session: a start state plus the controller-1 buttons for each frame.")
+    .def(
+      "__init__",
+      [](nes::Recording* recording, const uint32_t rom_checksum, const nb::bytes& start_state,
+         const ButtonsArray& buttons) {
+        const auto* state = static_cast<const uint8_t*>(start_state.data());
+        new (recording) nes::Recording{
+          rom_checksum, {state, state + start_state.size()}, {buttons.data(), buttons.data() + buttons.size()}};
+      },
+      nb::arg("rom_checksum"), nb::arg("start_state"), nb::arg("buttons").noconvert(),
+      "Create a recording. buttons must be a contiguous 1-D numpy array with dtype=np.uint8 "
+      "(e.g. np.array([...], dtype=np.uint8)); anything else raises TypeError.")
+
+    .def_prop_ro(
+      "rom_checksum", [](const nes::Recording& recording) { return recording.rom_checksum; },
+      "Checksum of the ROM the recording was made with (see NesCore.rom_checksum).")
+
+    .def_prop_ro(
+      "start_state",
+      [](const nes::Recording& recording) {
+        return nb::bytes(recording.start_state.data(), recording.start_state.size());
+      },
+      "The state the recording starts from, as bytes in NesCore.save_state() format (a copy).")
+
+    .def_prop_ro(
+      "buttons", [](const nes::Recording& recording) { return ToNumpy(recording.buttons, {recording.buttons.size()}); },
+      // The array already owns its copy, which def_prop_ro's default reference_internal policy rejects.
+      // automatic returns it as-is; copy and move would copy it a second time.
+      nb::rv_policy::automatic,
+      "The controller-1 button mask for each frame, as an (N,) uint8 array. Each access returns a new copy.")
+
+    .def("__len__", [](const nes::Recording& recording) { return recording.buttons.size(); });
+
+  m.def("load_recording", &nes::LoadRecording, nb::arg("path"),
+        "Read a .nesdemo file. Raises RuntimeError if it is missing, corrupt, truncated or an unsupported version.");
+
+  m.def("save_recording", &nes::SaveRecording, nb::arg("recording"), nb::arg("path"),
+        "Write a recording to a .nesdemo file. A failed write leaves any existing file untouched.");
 }
