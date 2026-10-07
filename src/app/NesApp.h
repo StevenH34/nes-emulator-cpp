@@ -9,8 +9,8 @@
 #include <vector>
 
 #include "Emulator.h"
+#include "RecordingSession.h"
 #include "Window.h"
-#include "recording/InputRecording.h"
 
 namespace nes_app {
 
@@ -56,11 +56,11 @@ private:
   void SaveState();
   void LoadState();
   void ToggleRecording();
-  // Saves an active recording and stops. If saving fails, the recording is
-  // discarded when discard_on_failure is set (the game state is about to jump),
-  // otherwise kept and paused so the user can retry with F10.
+  // Saves an active recording and stops, showing an error if saving fails. The
+  // recording is then discarded when discard_on_failure is set (the game state
+  // is about to jump), otherwise kept and paused so the user can retry with F10.
   void StopRecording(bool discard_on_failure);
-  // <ROM folder>/recordings/<ROM name>-<local timestamp>.nesdemo; creates the folder.
+  // RecordingPath() for the current ROM and local time; creates the folder.
   [[nodiscard]] std::string NewRecordingPath() const;
   void ShowError(const std::string& message) const;
 
@@ -95,10 +95,7 @@ private:
   SDL_AudioStream* audio_stream_{nullptr};
   std::string save_state_path_;
   std::string rom_path_;
-  nes::Recorder recorder_;
-  // Set when stopping a recording failed to save: no more frames are recorded,
-  // so a retry saves the clip exactly as it was when the user stopped it.
-  bool recording_paused_{false};
+  nes_frontend::RecordingSession recording_{[this] { return NewRecordingPath(); }};
   std::shared_ptr<RomDialogMailbox> rom_dialog_{std::make_shared<RomDialogMailbox>()};
   // Whether a menu was open last frame; while one is, the keyboard belongs to
   // the menus, and Esc sets close_menus_ instead of quitting.
