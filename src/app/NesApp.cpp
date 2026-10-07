@@ -181,7 +181,7 @@ void NesApp::Run() {
       // only recorded once the frame succeeds, so a frame that throws isn't saved.
       const uint8_t buttons = emulator_->GetBus().GetController1().GetButtons();
       frame_buffer = &emulator_->RunFrame();
-      if (recorder_.IsRecording()) {
+      if (recorder_.IsRecording() && !recording_paused_) {
         recorder_.RecordFrame(buttons);
       }
 
@@ -256,15 +256,23 @@ void NesApp::DrawMenuBar() {
       LoadState();
     }
     ImGui::Separator();
-    if (ImGui::MenuItem(recorder_.IsRecording() ? "Stop Recording" : "Start Recording", "F10", false, has_rom)) {
+    const char* recording_label = !recorder_.IsRecording() ? "Start Recording"
+                                  : recording_paused_      ? "Retry Save Recording"
+                                                           : "Stop Recording";
+    if (ImGui::MenuItem(recording_label, "F10", false, has_rom)) {
       ToggleRecording();
     }
     ImGui::EndMenu();
   }
 
   if (recorder_.IsRecording()) {
-    const auto seconds = static_cast<int>(static_cast<double>(recorder_.FrameCount()) / kFramesPerSecond);
-    ImGui::TextColored(ImVec4(1.0f, 0.3f, 0.3f, 1.0f), "REC %02d:%02d", seconds / 60, seconds % 60);
+    constexpr ImVec4 kRecColor(1.0f, 0.3f, 0.3f, 1.0f);
+    if (recording_paused_) {
+      ImGui::TextColored(kRecColor, "REC - not saved, F10 to retry");
+    } else {
+      const auto seconds = static_cast<int>(static_cast<double>(recorder_.FrameCount()) / kFramesPerSecond);
+      ImGui::TextColored(kRecColor, "REC %02d:%02d", seconds / 60, seconds % 60);
+    }
   }
 
   menu_open_ = any_menu_open && !close_menus_;
@@ -426,12 +434,16 @@ void NesApp::StopRecording(const bool discard_on_failure) {
   }
   try {
     recorder_.Finish(NewRecordingPath());
+    recording_paused_ = false;
   } catch (const std::exception& e) {
     if (discard_on_failure) {
       recorder_.Discard();
+      recording_paused_ = false;
       ShowError("Failed to save recording, so it was discarded: " + std::string(e.what()));
     } else {
-      ShowError("Failed to save recording: " + std::string(e.what()) + "\nPress F10 to try again.");
+      recording_paused_ = true;
+      ShowError("Failed to save recording: " + std::string(e.what()) +
+                "\nRecording is paused. Press F10 to try saving again.");
     }
   }
 }

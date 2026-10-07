@@ -58,7 +58,7 @@ private:
   void ToggleRecording();
   // Saves an active recording and stops. If saving fails, the recording is
   // discarded when discard_on_failure is set (the game state is about to jump),
-  // otherwise kept so the user can retry with F10.
+  // otherwise kept and paused so the user can retry with F10.
   void StopRecording(bool discard_on_failure);
   // <ROM folder>/recordings/<ROM name>-<local timestamp>.nesdemo; creates the folder.
   [[nodiscard]] std::string NewRecordingPath() const;
@@ -96,6 +96,9 @@ private:
   std::string save_state_path_;
   std::string rom_path_;
   nes::Recorder recorder_;
+  // Set when stopping a recording failed to save: no more frames are recorded,
+  // so a retry saves the clip exactly as it was when the user stopped it.
+  bool recording_paused_{false};
   std::shared_ptr<RomDialogMailbox> rom_dialog_{std::make_shared<RomDialogMailbox>()};
   // Whether a menu was open last frame; while one is, the keyboard belongs to
   // the menus, and Esc sets close_menus_ instead of quitting.
