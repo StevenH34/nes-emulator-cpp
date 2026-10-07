@@ -148,6 +148,7 @@ endif ()
 # Header-only code shared by the desktop and browser frontends.
 add_library(nes_frontend INTERFACE)
 target_include_directories(nes_frontend INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/src/frontend)
+target_link_libraries(nes_frontend INTERFACE nes_core)
 
 if (NES_BUILD_DESKTOP)
     find_package(SDL3 CONFIG REQUIRED)
@@ -162,8 +163,8 @@ if (NES_BUILD_DESKTOP)
     add_library(nes_platform_sdl STATIC ${NES_PLATFORM_SDL_SOURCES})
 
     target_include_directories(nes_platform_sdl PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/app)
-    target_link_libraries(nes_platform_sdl PUBLIC nes_core SDL3::SDL3 imgui::imgui)
-    target_link_libraries(nes_platform_sdl PRIVATE nes_frontend nes_warnings)
+    target_link_libraries(nes_platform_sdl PUBLIC nes_core nes_frontend SDL3::SDL3 imgui::imgui)
+    target_link_libraries(nes_platform_sdl PRIVATE nes_warnings)
 
     add_executable(nes_emulator src/app/main.cpp)
 
@@ -211,6 +212,7 @@ add_executable(nes_emulator_tests
         tests/Apu_tests.cpp
         tests/Emulator_tests.cpp
         tests/InputRecording_tests.cpp
+        tests/RecordingSession_tests.cpp
         tests/Cartridge_tests.cpp
         tests/test_nestest.cpp
         tests/cpu/Cpu_tests.cpp
@@ -246,7 +248,7 @@ add_executable(nes_emulator_tests
         tests/Preprocess_tests.cpp
 )
 
-target_link_libraries(nes_emulator_tests PRIVATE nes_core nes_warnings)
+target_link_libraries(nes_emulator_tests PRIVATE nes_core nes_frontend nes_warnings)
 
 # Under Node, give the tests direct access to the host filesystem so TEST_ROMS_DIR resolves
 if (EMSCRIPTEN)
