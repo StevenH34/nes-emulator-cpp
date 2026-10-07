@@ -4,7 +4,6 @@
 #include <algorithm>
 #include <cmath>
 #include <filesystem>
-#include <format>
 #include <imgui.h>
 #include <imgui_impl_sdl3.h>
 #include <imgui_impl_sdlrenderer3.h>
@@ -68,6 +67,7 @@ using nes_frontend::kNormalPlaybackRatio;
 using nes_frontend::kQueuedMarginBytes;
 using nes_frontend::kSlowPlaybackRatio;
 using nes_frontend::kTargetQueuedBytes;
+using RecordingState = nes_frontend::RecordingSession::State;
 } // namespace
 
 NesApp::SdlLifetime::SdlLifetime() {
@@ -181,9 +181,7 @@ void NesApp::Run() {
       // only recorded once the frame succeeds, so a frame that throws isn't saved.
       const uint8_t buttons = emulator_->GetBus().GetController1().GetButtons();
       frame_buffer = &emulator_->RunFrame();
-      if (recorder_.IsRecording() && !recording_paused_) {
-        recorder_.RecordFrame(buttons);
-      }
+      recording_.OnFrameCompleted(buttons);
 
       const auto samples = emulator_->GetApu().DrainSamples();
       SDL_PutAudioStreamData(audio_stream_, samples.data(), static_cast<int>(samples.size() * sizeof(float)));
@@ -256,23 +254,28 @@ void NesApp::DrawMenuBar() {
       LoadState();
     }
     ImGui::Separator();
-    const char* recording_label = !recorder_.IsRecording() ? "Start Recording"
-                                  : recording_paused_      ? "Retry Save Recording"
-                                                           : "Stop Recording";
+    const auto recording_state = recording_.GetState();
+    const char* recording_label = recording_state == RecordingState::Idle     ? "Start Recording"
+                                  : recording_state == RecordingState::Paused ? "Retry Save Recording"
+                                                                              : "Stop Recording";
     if (ImGui::MenuItem(recording_label, "F10", false, has_rom)) {
       ToggleRecording();
     }
     ImGui::EndMenu();
   }
 
-  if (recorder_.IsRecording()) {
-    constexpr ImVec4 kRecColor(1.0f, 0.3f, 0.3f, 1.0f);
-    if (recording_paused_) {
-      ImGui::TextColored(kRecColor, "REC - not saved, F10 to retry");
-    } else {
-      const auto seconds = static_cast<int>(static_cast<double>(recorder_.FrameCount()) / kFramesPerSecond);
-      ImGui::TextColored(kRecColor, "REC %02d:%02d", seconds / 60, seconds % 60);
-    }
+  constexpr ImVec4 kRecColor(1.0f, 0.3f, 0.3f, 1.0f);
+  switch (recording_.GetState()) {
+  case RecordingState::Recording: {
+    const auto seconds = static_cast<int>(static_cast<double>(recording_.FrameCount()) / kFramesPerSecond);
+    ImGui::TextColored(kRecColor, "REC %02d:%02d", seconds / 60, seconds % 60);
+    break;
+  }
+  case RecordingState::Paused:
+    ImGui::TextColored(kRecColor, "REC - not saved, F10 to retry");
+    break;
+  case RecordingState::Idle:
+    break;
   }
 
   menu_open_ = any_menu_open && !close_menus_;
@@ -417,11 +420,11 @@ void NesApp::ToggleRecording() {
   if (emulator_ == nullptr) {
     return;
   }
-  if (recorder_.IsRecording()) {
+  if (recording_.GetState() != RecordingState::Idle) {
     StopRecording(false);
   } else {
     try {
-      recorder_.Start(*emulator_);
+      recording_.Start(*emulator_);
     } catch (const std::exception& e) {
       ShowError("Failed to start recording: " + std::string(e.what()));
     }
@@ -429,22 +432,12 @@ void NesApp::ToggleRecording() {
 }
 
 void NesApp::StopRecording(const bool discard_on_failure) {
-  if (!recorder_.IsRecording()) {
-    return;
-  }
-  try {
-    recorder_.Finish(NewRecordingPath());
-    recording_paused_ = false;
-  } catch (const std::exception& e) {
-    if (discard_on_failure) {
-      recorder_.Discard();
-      recording_paused_ = false;
-      ShowError("Failed to save recording, so it was discarded: " + std::string(e.what()));
-    } else {
-      recording_paused_ = true;
-      ShowError("Failed to save recording: " + std::string(e.what()) +
-                "\nRecording is paused. Press F10 to try saving again.");
+  if (discard_on_failure) {
+    if (const auto error = recording_.StopBeforeJump()) {
+      ShowError("Failed to save recording, so it was discarded: " + *error);
     }
+  } else if (const auto error = recording_.Stop()) {
+    ShowError("Failed to save recording: " + *error + "\nRecording is paused. Press F10 to try saving again.");
   }
 }
 
@@ -454,15 +447,15 @@ std::string NesApp::NewRecordingPath() const {
   if (!SDL_GetCurrentTime(&now) || !SDL_TimeToDateTime(now, &time, true)) {
     throw std::runtime_error("Failed to get the current time: " + std::string(SDL_GetError()));
   }
-
-  const std::filesystem::path rom(rom_path_);
-  const std::filesystem::path folder = rom.parent_path() / "recordings";
-  std::filesystem::create_directories(folder);
-  // Milliseconds keep two clips saved in the same second from overwriting each other.
-  const std::string name =
-    std::format("{}-{:04}{:02}{:02}-{:02}{:02}{:02}-{:03}.nesdemo", rom.stem().string(), time.year, time.month,
-                time.day, time.hour, time.minute, time.second, time.nanosecond / 1'000'000);
-  return (folder / name).string();
+  const std::string path = nes_frontend::RecordingPath(rom_path_, {.year = time.year,
+                                                                   .month = time.month,
+                                                                   .day = time.day,
+                                                                   .hour = time.hour,
+                                                                   .minute = time.minute,
+                                                                   .second = time.second,
+                                                                   .millisecond = time.nanosecond / 1'000'000});
+  std::filesystem::create_directories(std::filesystem::path(path).parent_path());
+  return path;
 }
 
 void NesApp::ShowError(const std::string& message) const {
